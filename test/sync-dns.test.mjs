@@ -12,6 +12,8 @@ import {
   removePath,
   formatApiError,
   planSweep,
+  releasedLogArgs,
+  REGISTRY_START,
   cloudflareZonePath,
   fromCloudflareRecord,
   toCloudflareRecord,
@@ -447,4 +449,11 @@ test('the Cloudflare zone id must be 32 hex characters', () => {
 
 test('Cloudflare error bodies are folded into the log line', () => {
   assert.equal(formatApiError(400, JSON.stringify({ errors: [{ code: 81053, message: 'Record already exists.' }] })), '400 Record already exists.');
+});
+
+test('released names only count deletions after this registry started', () => {
+  const args = releasedLogArgs();
+  assert.ok(args.includes(`${REGISTRY_START}..HEAD`), 'upstream deletions are excluded by range');
+  assert.ok(args.includes('--no-renames') && args.includes('--diff-filter=D'));
+  assert.deepEqual(args.slice(-2), ['--', 'domains/']);
 });

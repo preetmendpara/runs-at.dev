@@ -17,6 +17,7 @@ import {
   toCloudflareRecord,
   syncEach,
   planSweep,
+  releasedLogArgs,
 } from '../lib/dns.js';
 
 const DOMAIN = 'runs-at.dev';
@@ -268,9 +269,7 @@ for (const file of await readdir('domains')) {
 const SWEEP_LIMIT = 25;
 let released = new Set();
 try {
-  // --no-renames: the swap route moves one file to another, which rename
-  // detection would report as R rather than D, hiding the name given up.
-  const log = execFileSync('git', ['log', '--no-renames', '--diff-filter=D', '--name-only', '--format=', '--', 'domains/'], { encoding: 'utf8' });
+  const log = execFileSync('git', releasedLogArgs(), { encoding: 'utf8' });
   released = new Set(log.split('\n').map((file) => /^domains\/([a-z0-9-]+)\.json$/.exec(file)?.[1]).filter(Boolean));
 } catch (err) {
   console.log(`::warning::sweep: could not read released names from git, skipping their cleanup: ${err.message}`);
