@@ -1,0 +1,15 @@
+node_modules/
+.next/
+.env*.local
+.vercel
+.DS_Store
+tab-setup.txt
+server.log
+cr.json
+
+# Local git worktrees. These are checkouts, never repo content — and without
+# this they are also uploaded by `vercel deploy`, which reads .gitignore and
+# has no .vercelignore here. That was 383MB of other sessions' working copies
+# heading into a deployment that would then serve them for as long as the
+# deployment URL exists.
+worktrees/

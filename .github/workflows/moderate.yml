@@ -1,0 +1,95 @@
+name: moderate
+
+# Two triggers: a schedule that sweeps all existing comments, and an
+# issue_comment event that catches new spam within seconds of it landing.
+on:
+  schedule:
+    # Every 30 minutes, off the top and bottom of the hour.
+    - cron: '7,37 * * * *'
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: write
+
+# A scheduled sweep and a comment event can fire within seconds of each other,
+# and both push to .moderation/log.jsonl. Serialise them rather than letting
+# the second one lose its append to a rejected push.
+concurrency:
+  group: moderate
+  cancel-in-progress: false
+
+jobs:
+  moderate:
+    runs-on: ubuntu-latest
+    steps:
+      # ssh-key, not the default token: a push made with GITHUB_TOKEN does not
+      # re-trigger workflows, which is fine here, but the deploy key is what the
+      # other committing workflows use and branch protection is configured for
+      # it. See sync-owners.yml.
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.REGISTRY_DEPLOY_KEY }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Step 1: write tombstones. Deletes nothing.
+      - name: Archive spam comments
+        run: node scripts/moderate-spam.mjs archive
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 2: get the evidence into the repository before anything is removed.
+      # If this step fails, the job stops here and the spam stays up until the
+      # next sweep -- the deliberate trade, because a visible advertisement for
+      # thirty more minutes is cheaper than an unprovable one gone forever.
+      - name: Commit the log
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+          if [ -z "$(git status --porcelain .moderation/)" ]; then
+            echo "No new tombstones to commit."
+            exit 0
+          fi
+
+          # Same retry shape as sync-owners.yml: main can move under us between
+          # checkout and push. Re-archiving after a reset is safe because the
+          # log merge is keyed on comment id, so a refreshed log simply
+          # re-adds whatever is still missing.
+          attempt_commit() {
+            git add .moderation/
+            git commit -m 'moderation: archive spam comments'
+            git push
+          }
+
+          for attempt in 1 2 3; do
+            if attempt_commit; then
+              exit 0
+            fi
+            echo "::warning::push rejected on attempt $attempt; refreshing main and re-archiving"
+            git fetch origin main
+            git reset --hard origin/main
+            node scripts/moderate-spam.mjs archive
+            if [ -z "$(git status --porcelain .moderation/)" ]; then
+              echo "Log already current after refresh."
+              exit 0
+            fi
+          done
+
+          echo "::error::could not commit the moderation log after 3 attempts"
+          exit 1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 3: only now delete, and only what step 2 committed. Blocking needs
+      # a personal admin token; if the ADMIN_TOKEN secret is absent the comment
+      # is still deleted and the skip is logged as a warning.
+      - name: Remove archived spam
+        run: node scripts/moderate-spam.mjs enforce
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}

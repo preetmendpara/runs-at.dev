@@ -1,0 +1,15 @@
+{
+  "name": "lakshya",
+  "owner": {
+    "github": "chupkarlakshya"
+  },
+  "claimedAt": "2026-09-11T19:00:08.009Z",
+  "records": {},
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=lakshya.runs-on.dev,3dc661624c5a54cac22e"
+      ]
+    }
+  }
+}

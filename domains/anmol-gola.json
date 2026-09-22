@@ -1,0 +1,17 @@
+{
+  "name": "anmol-gola",
+  "owner": {
+    "github": "ANMOLGOLA"
+  },
+  "claimedAt": "2026-09-03T18:07:59.073Z",
+  "records": {
+    "URL": "https://launchpad-site-two.vercel.app/"
+  },
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=anmol-gola.runs-on.dev,817ac68b62d9200929a3"
+      ]
+    }
+  }
+}

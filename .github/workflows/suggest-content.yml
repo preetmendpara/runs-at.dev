@@ -1,0 +1,45 @@
+name: suggest-content
+
+on:
+  schedule:
+    # Mondays at 06:15 UTC, off the top of the hour (the deploy runs 04:00,
+    # the health check 05:00). Weekly cadence: a blog that posts more often
+    # than the registry changes would fill with filler.
+    - cron: '15 6 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: suggest-content
+  cancel-in-progress: false
+
+jobs:
+  suggest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # The script needs no dependencies beyond node itself.
+      - name: Generate content suggestions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/suggest-content.mjs
+
+      - name: Commit suggestions for human review
+        run: |
+          if git diff --quiet content/suggestions; then
+            echo "no new suggestions"
+            exit 0
+          fi
+          git config user.name "runs-on.dev content bot"
+          git config user.email "content@runs-on.dev"
+          git add content/suggestions
+          git commit -m "content: new post suggestions for review"
+          git push

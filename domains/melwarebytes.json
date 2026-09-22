@@ -1,0 +1,15 @@
+{
+  "name": "melwarebytes",
+  "owner": {
+    "github": "melwarebytes"
+  },
+  "claimedAt": "2026-09-08T05:11:09.561Z",
+  "records": {
+    "CNAME": "4ab10c27dcca6f51.vercel-dns-017.com"
+  },
+  "subdomains": {
+    "if2qw3y4utzy": {
+      "CNAME": "gv-cas6tslwl546at.dv.googlehosted.com"
+    }
+  }
+}

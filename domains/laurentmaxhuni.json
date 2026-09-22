@@ -1,0 +1,20 @@
+{
+  "name": "laurentmaxhuni",
+  "owner": {
+    "github": "LaurentMaxhuni"
+  },
+  "claimedAt": "2026-09-02T03:57:34.272Z",
+  "records": {
+    "CNAME": "86b5e1d9825fa59f.vercel-dns-017.com"
+  },
+  "subdomains": {
+    "ideator": {
+      "CNAME": "763f1689be7f24de.vercel-dns-017.com"
+    },
+    "_vercel.ideator": {
+      "TXT": [
+        "vc-domain-verify=ideator.laurentmaxhuni.runs-on.dev,c36b97adfcf0a17ae673"
+      ]
+    }
+  }
+}

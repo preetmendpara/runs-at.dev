@@ -1,0 +1,616 @@
+@import "tailwindcss";
+
+/* Hyperstudio language, from the DESIGN.md style reference: a near-black
+   canvas where type and hairline borders carve the whitespace. The site's
+   legacy token names (--paper, --card, --rule, --ink, --muted, --signal,
+   --flag) are kept and re-pointed at Hyperstudio values so every component
+   that already speaks them restyles in one move:
+
+     --paper  -> Obsidian #101010, the page canvas
+     --card   -> Carbon   #080808, the deepest surface (code, quotes)
+     --rule   -> Graphite #212121, the 1px structural hairline
+     --ink    -> Chalk    #f3f3f3, primary type
+     --muted  -> Smoke    #9c9c9c, secondary type
+     --signal -> White    #ffffff, the single action color (filled pills)
+     --flag   -> terracotta, errors on dark
+
+   Dark is the only theme. The reference is a dark system end to end, so the
+   page locks to obsidian rather than carrying a light mode it was never
+   designed for. */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-rule: var(--rule);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-signal: var(--signal);
+  --color-flag: var(--flag);
+
+  --color-obsidian: #101010;
+  --color-carbon: #080808;
+  --color-graphite: #212121;
+  --color-chalk: #f3f3f3;
+  --color-smoke: #9c9c9c;
+  --color-ash: #c1c1c1;
+  --color-iron: #474747;
+  --color-gold: #6f6759;
+  --color-pulse: #98ff38;
+  --color-blue: var(--blue);
+  --color-badge: #1a1a1a;
+}
+
+@theme {
+  /* Hyperstudio type scale. Aeonik weight 400 at every size; hierarchy comes
+     from scale and negative tracking, never from bold. Satoshi stands in for
+     Aeonik, IBM Plex Mono for Input. */
+  --font-satoshi: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+
+  --text-caption: 13px;
+  --text-caption--line-height: 1.5;
+  --text-body: 16px;
+  --text-body--line-height: 1.25;
+  --text-heading-xs: 18px;
+  --text-heading-xs--line-height: 1.31;
+  --text-subheading: 21px;
+  --text-subheading--line-height: 1.05;
+  --text-heading-sm: 23px;
+  --text-heading-sm--line-height: 1.07;
+  --text-heading: 34px;
+  --text-heading--line-height: 1.03;
+  --text-heading-lg: 44px;
+  --text-heading-lg--line-height: 1.07;
+  --text-heading-lg--letter-spacing: -0.007em;
+  --text-display: 63px;
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.011em;
+}
+
+:root {
+  --paper: #101010;
+  --card: #080808;
+  --rule: #212121;
+  --ink: #f3f3f3;
+  --muted: #9c9c9c;
+  --signal: #ffffff;
+  --flag: #d97757;
+  --gold: #6f6759;
+  --pulse: #98ff38;
+  --blue: #4d7cff;
+
+  /* Slit lines: every rule on the page is a line of light whose ends fade
+     smoothly into the canvas. Structural lines sit at --slit, row separators
+     and input edges rest dimmer and brighten on focus/hover. */
+  --slit: rgba(255, 255, 255, 0.35);
+  --slit-dim: rgba(255, 255, 255, 0.2);
+  --slit-frame: rgba(255, 255, 255, 0.22);
+  --slit-frame-hi: rgba(255, 255, 255, 0.55);
+  --slit-bright: rgba(255, 255, 255, 0.85);
+  --slit-bar: rgba(255, 255, 255, 0.6);
+  --edge: rgba(255, 255, 255, 0.2);
+  --edge-focus: rgba(255, 255, 255, 0.8);
+
+  /* The claim line and section labels speak in Input's voice (mono, tight
+     utilitarian tracking). Headings speak in Bitcount Prop (pixel matrix,
+     set via the h1/h2/h3 rule below); Satoshi carries body copy. */
+  --font-display: var(--font-bitcount), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+
+  /* Slim the scrollbar to the hairline weight used elsewhere. `color-scheme`
+     above keeps the bar dark; this is purely about weight: the default bar is
+     heavy next to 1px graphite rules. */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, currentColor 24%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  /* content-box clipping plus a transparent border is what insets the thumb, so the bar
+     reads as a thin line rather than filling the full 10px gutter. */
+  background: color-mix(in srgb, currentColor 20%, transparent);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, currentColor 34%, transparent);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+/* Every heading renders in Bitcount Prop. Class-set families (the mono
+   meta labels, mono record blocks) keep winning over this element rule. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+}
+
+::selection {
+  background: var(--signal);
+  color: var(--paper);
+}
+
+/* Edge picker dock: bouncy spring animations for the selector pill.
+   The overshoot (scale > 1) is what makes it feel like a physical
+   spring, matching the iOS Dynamic Island's expansion feel. */
+@keyframes edgePickerPop {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  80% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+@keyframes edgePickerShrink {
+  0% { transform: scale(1.1); opacity: 0; }
+  60% { transform: scale(0.94); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.edge-picker-pill {
+  transition: height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* The claim-line input sits flush against the "[" "]" wordmark glyphs, with
+   no room for an outset box ring — it would draw across the brackets. Focus
+   is indicated by its own underline (see claim-form.jsx), so the box ring is
+   suppressed here specifically, not removed globally. */
+#claim-name:focus-visible {
+  outline: none;
+}
+
+@layer components {
+  /* Filled white pill: the single high-contrast action. Contrast alone
+     elevates it; no shadow, no border, radius 9999px. */
+  .btn-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    background: var(--signal);
+    color: var(--paper);
+    padding: 0.75rem 1.5rem;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .btn-pill:hover { opacity: 0.9; }
+  .btn-pill:active { transform: translateY(1px); }
+  .btn-pill[disabled], .btn-pill[aria-disabled='true'] {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Ghost outline: the secondary action, its 1px white outline rendered as a
+     slit (fading into the corners) rather than a hard box. */
+  .btn-ghost {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    color: var(--signal);
+    padding: 0.625rem 1.25rem;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .btn-ghost:hover { opacity: 0.8; }
+  .btn-ghost:active { transform: translateY(1px); }
+  .btn-ghost::before {
+    content: '';
+    position: absolute;
+    inset: -16px;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, transparent 0, rgba(255, 255, 255, 0.75) 40px, rgba(255, 255, 255, 0.75) calc(100% - 40px), transparent 100%) 0 16px / 100% 1px no-repeat,
+      linear-gradient(90deg, transparent 0, rgba(255, 255, 255, 0.75) 40px, rgba(255, 255, 255, 0.75) calc(100% - 40px), transparent 100%) 0 calc(100% - 16px) / 100% 1px no-repeat,
+      linear-gradient(180deg, transparent 0, rgba(255, 255, 255, 0.75) 40px, rgba(255, 255, 255, 0.75) calc(100% - 40px), transparent 100%) 16px 0 / 1px 100% no-repeat,
+      linear-gradient(180deg, transparent 0, rgba(255, 255, 255, 0.75) 40px, rgba(255, 255, 255, 0.75) calc(100% - 40px), transparent 100%) calc(100% - 16px) 0 / 1px 100% no-repeat;
+  }
+
+  /* Mono uppercase meta label, Input's role: captions, section labels,
+     fine print. */
+  .meta {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Inline and block code: carbon surface inside a graphite hairline. */
+  .code {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+
+/* ── Slit lines ──────────────────────────────────────────────────────
+   Every rule on the page is a slit: a slim line of light whose ends fade
+   smoothly into the canvas. Each edge of a frame is its own gradient, so
+   corners stay open (both adjacent edges fade before meeting). No hard
+   rectangles anywhere. */
+
+/* Standalone horizontal / vertical slit lines. */
+.slit-h {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
+}
+.slit-v {
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
+}
+
+/* Edge slits painted directly on an element, no extra markup. Composable:
+   .slit-top + .slit-bottom use separate longhands and stack fine. */
+.slit-top,
+.slit-bottom {
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+}
+.slit-top {
+  background-image: linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
+  background-position: 0 0;
+}
+.slit-bottom {
+  background-image: linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
+  background-position: 0 100%;
+}
+
+/* Dimmer variant for row separators. */
+.slit-dim { --slit: var(--slit-dim); }
+
+/* Both the top and bottom edge in one element (capped lists). */
+.slit-y {
+  background-image:
+    linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent),
+    linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
+  background-repeat: no-repeat;
+  background-size: 100% 1px, 100% 1px;
+  background-position: 0 0, 0 100%;
+}
+
+/* Vertical accent bar (record spines, warnings): 2px slit at the left edge,
+   fading out at top and bottom. --bar recolors it (e.g. the flag). */
+.slit-bar-l {
+  --bar: var(--slit-bar);
+  background-image: linear-gradient(180deg, transparent, var(--bar) 20%, var(--bar) 80%, transparent);
+  background-repeat: no-repeat;
+  background-size: 2px 100%;
+  background-position: 0 0;
+}
+.slit-bar-flag { --bar: rgba(217, 119, 87, 0.8); }
+
+/* Card and box outlines: four slit lines whose ends overshoot the box and
+   intersect at the corners (each line crosses its neighbor, technical-
+   drawing style; every tip still fades out). The ::before drawing surface
+   extends --slit-over past the box on every side; the perpendicular lines
+   run the full extended length, so each corner is a small crossing. That
+   is why cards need generous gaps: crossings from neighbors must never
+   touch. --slit-line is the line color, registered so hover/active
+   brightening can transition. */
+@property --slit-line {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255, 255, 255, 0.22);
+}
+
+.slit-frame {
+  --slit-line: var(--slit-frame);
+  --slit-over: 24px;
+  --slit-edge: 60px;
+  position: relative;
+  transition: --slit-line 0.25s ease;
+}
+.slit-frame::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--slit-over));
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 0, var(--slit-line) var(--slit-edge), var(--slit-line) calc(100% - var(--slit-edge)), transparent 100%) 0 var(--slit-over) / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent 0, var(--slit-line) var(--slit-edge), var(--slit-line) calc(100% - var(--slit-edge)), transparent 100%) 0 calc(100% - var(--slit-over)) / 100% 1px no-repeat,
+    linear-gradient(180deg, transparent 0, var(--slit-line) var(--slit-edge), var(--slit-line) calc(100% - var(--slit-edge)), transparent 100%) var(--slit-over) 0 / 1px 100% no-repeat,
+    linear-gradient(180deg, transparent 0, var(--slit-line) var(--slit-edge), var(--slit-line) calc(100% - var(--slit-edge)), transparent 100%) calc(100% - var(--slit-over)) 0 / 1px 100% no-repeat;
+}
+.slit-frame:hover { --slit-line: var(--slit-frame-hi); }
+/* Selected/active frame, and the flag (danger) variant. */
+.slit-frame-bright { --slit-line: var(--slit-bright); }
+.slit-frame-bright:hover { --slit-line: var(--slit-bright); }
+.slit-frame-flag { --slit-line: rgba(217, 119, 87, 0.5); }
+.slit-frame-flag:hover { --slit-line: rgba(217, 119, 87, 0.85); }
+
+/* List rows separated by dim slits instead of divide-y borders: the list
+   carries .slit-rows, every child after the first paints its own top slit. */
+.slit-rows > * + * {
+  background-image: linear-gradient(90deg, transparent, var(--slit-dim) 15%, var(--slit-dim) 85%, transparent);
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  background-position: 0 0;
+}
+
+/* Inputs: the same slit on all four edges, painted as backgrounds so it
+   works on <input>/<select>/<textarea> (which cannot carry pseudo-elements).
+   Backgrounds cannot overflow the box, so instead of overshooting, each
+   line runs to the corner with only a tiny ramp, and the perpendicular
+   line meets it there: the lines intersect inside the corner. The
+   transparent border keeps sizing identical to the old 1px-bordered
+   fields; focus brightens the line. */
+@property --edge-color {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255, 255, 255, 0.2);
+}
+
+.slit-input {
+  --edge-color: var(--edge);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(90deg, transparent 0, var(--edge-color) 6px, var(--edge-color) calc(100% - 6px), transparent 100%) top / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent 0, var(--edge-color) 6px, var(--edge-color) calc(100% - 6px), transparent 100%) bottom / 100% 1px no-repeat,
+    linear-gradient(180deg, transparent 0, var(--edge-color) 6px, var(--edge-color) calc(100% - 6px), transparent 100%) left / 1px 100% no-repeat,
+    linear-gradient(180deg, transparent 0, var(--edge-color) 6px, var(--edge-color) calc(100% - 6px), transparent 100%) right / 1px 100% no-repeat;
+  transition: --edge-color 0.2s ease;
+}
+.slit-input:focus,
+.slit-input:focus-visible {
+  --edge-color: var(--edge-focus);
+  outline: none;
+}
+/* Invalid/danger fields keep the slit but recolor it. */
+.slit-input-flag { --edge-color: rgba(217, 119, 87, 0.7); }
+.slit-input-flag:focus,
+.slit-input-flag:focus-visible { --edge-color: rgba(217, 119, 87, 0.95); }
+
+/* Inline code chip: the input treatment on an inline-block token. */
+.slit-inline {
+  display: inline-block;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, transparent 0, var(--edge) 5px, var(--edge) calc(100% - 5px), transparent 100%) top / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent 0, var(--edge) 5px, var(--edge) calc(100% - 5px), transparent 100%) bottom / 100% 1px no-repeat,
+    linear-gradient(180deg, transparent 0, var(--edge) 5px, var(--edge) calc(100% - 5px), transparent 100%) left / 1px 100% no-repeat,
+    linear-gradient(180deg, transparent 0, var(--edge) 5px, var(--edge) calc(100% - 5px), transparent 100%) right / 1px 100% no-repeat;
+}
+
+/* The claim-line input's underline: a horizontal slit under the name,
+   thickening on focus. --edge recolors it for the negative state. */
+.claim-underline {
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--edge, rgba(243, 243, 243, 0.9)) 12%, var(--edge, rgba(243, 243, 243, 0.9)) 88%, transparent) bottom / 100% 2px no-repeat;
+  transition: background-size 0.15s ease;
+}
+.claim-underline:focus-visible {
+  background-size: 100% 3px;
+}
+
+/* ── Split-flap tiles (wordmark triple-tap easter egg) ───────────────
+   Each tile of the flap grid is two halves hinged at the tile's centre
+   line, the way a Solari board works: the top half rotates around its
+   bottom edge, the bottom half around its top edge. Each half clips a
+   full-size copy of the artwork offset so the tile shows its own slice;
+   the halves' width/height percentages are relative to the half, which is
+   why the img is 2800% x 1600% (28 x 16 half-dimensions = the whole art).
+   The stagger comes from animationDelay on the tile; .flap-in plays the
+   reveal, .flap-out plays it in reverse for the trip back. */
+
+.flap-grid {
+  display: grid;
+  perspective: 900px;
+}
+.flap-tile {
+  position: relative;
+}
+.flap-half {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+.flap-half img {
+  position: absolute;
+  max-width: none;
+  /* width/height/left/top are inline per tile: cover-fit geometry computed
+     in claim-map.jsx. Each half clips its own slice, so the wider-than-box
+     artwork crops at the tile edges. */
+}
+.flap-top {
+  top: 0;
+  transform-origin: bottom center;
+}
+.flap-bottom {
+  bottom: 0;
+  transform-origin: top center;
+}
+
+@keyframes flap-top-in {
+  from { transform: rotateX(-90deg); }
+  to { transform: rotateX(0deg); }
+}
+@keyframes flap-bottom-in {
+  from { transform: rotateX(90deg); }
+  to { transform: rotateX(0deg); }
+}
+@keyframes flap-top-out {
+  from { transform: rotateX(0deg); }
+  to { transform: rotateX(-90deg); opacity: 0; }
+}
+@keyframes flap-bottom-out {
+  from { transform: rotateX(0deg); }
+  to { transform: rotateX(90deg); opacity: 0; }
+}
+
+/* Flip in: the bottom half swings up first, the top half follows a beat
+   later, so every tile reads as two blades closing on the new image. */
+.flap-in .flap-top {
+  animation: flap-top-in 0.3s ease-out both;
+  animation-delay: calc(var(--d) + 200ms);
+}
+.flap-in .flap-bottom {
+  animation: flap-bottom-in 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.08) both;
+  animation-delay: var(--d);
+}
+/* Resting on the artwork: no animation, both halves flat. Without this the
+   settled tiles would replay an animation whenever the class changes. */
+.flap-rest .flap-half {
+  transform: none;
+}
+/* On the way out the halves peel open and vanish, same stagger. */
+.flap-out .flap-top {
+  animation: flap-top-out 0.3s ease-in both;
+  animation-delay: var(--d);
+}
+.flap-out .flap-bottom {
+  animation: flap-bottom-out 0.3s ease-in both;
+  animation-delay: var(--d);
+}
+
+
+/* Blog post prose: markdown rendered by marked, styled in the site voice.
+   A scoped block rather than a typography plugin — the site has no
+   typography dependency, and these rules mirror the manual classes used
+   on every other page. */
+.post-prose { color: var(--color-ash); font-size: 16px; line-height: 1.7; }
+.post-prose > * + * { margin-top: 1.1em; }
+.post-prose h2, .post-prose h3, .post-prose h4 {
+  color: var(--color-ink);
+  font-weight: 400;
+  line-height: 1.2;
+  margin-top: 2em;
+  /* Anchored by the generator for the "On this page" menu; the offset keeps
+     the sticky topbar from covering the heading a deep link scrolls to. */
+  scroll-margin-top: 5.5rem;
+}
+.post-prose h2 { font-size: 23px; letter-spacing: -0.004em; padding-top: 0.4em; border-top: 1px solid var(--color-rule); }
+.post-prose h3 { font-size: 18px; }
+.post-prose a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; }
+.post-prose strong { color: var(--color-ink); }
+.post-prose ul, .post-prose ol { padding-left: 1.4em; margin-top: 1.1em; }
+.post-prose ul { list-style: disc; }
+.post-prose ol { list-style: decimal; }
+.post-prose li + li { margin-top: 0.4em; }
+.post-prose code {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.9em;
+  background: var(--color-card);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+.post-prose pre {
+  background: var(--color-card);
+  border: 1px solid var(--color-rule);
+  border-radius: 8px;
+  padding: 1em 1.2em;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.post-prose pre code { background: none; border: none; padding: 0; }
+.post-prose blockquote {
+  border-left: 2px solid var(--color-rule);
+  padding: 0.2em 0 0.2em 1.2em;
+  color: var(--color-muted);
+}
+.post-prose hr { border: 0; border-top: 1px solid var(--color-rule); margin: 2.5em 0; }
+.post-prose img { max-width: 100%; height: auto; border-radius: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Zeroing the duration still leaves the flap stagger delays running (up
+     to 1.4s of blank tiles) and the pulse dot half-faded. Kill both:
+     reduced motion means the swap and the status dot are static. */
+  .flap-half,
+  .pulse-dot {
+    animation: none !important;
+    animation-delay: 0s !important;
+    transform: none !important;
+    opacity: 1;
+  }
+}
+
+@keyframes field-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.record-block .record-field {
+  animation: field-in 0.28s ease both;
+}
+
+.record-block .record-field:nth-child(1) { animation-delay: 0ms; }
+.record-block .record-field:nth-child(2) { animation-delay: 40ms; }
+.record-block .record-field:nth-child(3) { animation-delay: 80ms; }
+.record-block .record-field:nth-child(4) { animation-delay: 120ms; }
+.record-block .record-field:nth-child(5) { animation-delay: 160ms; }
+.record-block .record-field:nth-child(6) { animation-delay: 200ms; }
+.record-block .record-field:nth-child(7) { animation-delay: 240ms; }
+.record-block .record-field:nth-child(8) { animation-delay: 280ms; }
+
+/* Pulse dot for live status indicators only (availability, verification). */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.pulse-dot {
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}

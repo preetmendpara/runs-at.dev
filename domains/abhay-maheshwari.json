@@ -1,0 +1,17 @@
+{
+  "name": "abhay-maheshwari",
+  "owner": {
+    "github": "Abhay-Maheshwari"
+  },
+  "claimedAt": "2026-09-12T16:32:30.699Z",
+  "records": {
+    "URL": "https://abhaymaheshwari.vercel.app/"
+  },
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=abhay-maheshwari.runs-on.dev,a13a5a332b2940b6a872"
+      ]
+    }
+  }
+}

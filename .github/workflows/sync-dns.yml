@@ -1,0 +1,146 @@
+name: sync-dns
+
+on:
+  push:
+    branches: [main]
+    paths: ['domains/**']
+  # Every run also sweeps the whole registry (planSweep in lib/dns.js), so a
+  # plain re-run repairs drift on its own. This trigger remains for naming the
+  # names that must succeed: a named name that fails turns the run red, where
+  # a swept one only warns.
+  workflow_dispatch:
+    inputs:
+      names:
+        description: 'Names to re-sync, space or comma separated (e.g. "laurentmaxhuni dexi")'
+        required: true
+        type: string
+  # Same contract, called rather than clicked: health-check repairs the drift
+  # it detects by calling this with the names it found. A workflow_call runs
+  # inside the caller's run, which sidesteps the fact that GITHUB_TOKEN cannot
+  # trigger a workflow_dispatch -- GitHub blocks that to prevent recursion, so
+  # the API route a script would take is not available to us.
+  workflow_call:
+    inputs:
+      names:
+        description: 'Names to re-sync, space or comma separated'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# A manual repair run and an automatic push run touching the same name would
+# race: both list the zone, then both delete what the other just created.
+#
+# The group holds one running and ONE pending run; a third arrival cancels the
+# pending one, grey rather than red. Under /manage save bursts that happens
+# daily, and it is why every run now sweeps: a cancelled run's names are picked
+# up by whichever run does go ahead.
+concurrency:
+  group: sync-dns
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    outputs:
+      over_cap: ${{ steps.sync.outputs.over_cap }}
+    steps:
+      # The tip of main, not the commit that triggered the run. Runs queue, and
+      # a queued run can start after newer pushes have landed; the sweep makes
+      # this run write every name, so reading an older tree would revert them.
+      # The push range below is still diffed from the event's own SHAs, which
+      # are ancestors of the tip. fetch-depth 0 is also what the sweep's
+      # released-name lookup reads.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - id: changed
+        env:
+          # Via the environment, never interpolated into the script body: a
+          # `${{ ... }}` expansion inside `run:` is substituted before bash sees
+          # it, so a crafted dispatch input would be executed rather than read.
+          DISPATCH_NAMES: ${{ inputs.names }}
+          EVENT_NAME: ${{ github.event_name }}
+        # Not `event_name = workflow_dispatch`: under workflow_call, event_name
+        # is the CALLER's event. health-check's daily repair arrives as
+        # `schedule`, which fell through to the push branch below, diffed
+        # against an empty SHA, and died (exit 128) every time it was needed.
+        # It only ever worked when health-check was dispatched by hand.
+        run: |
+          if [ "$EVENT_NAME" != 'push' ]; then
+            if [ -z "$DISPATCH_NAMES" ]; then
+              echo '::error::names input is required'
+              exit 1
+            fi
+
+            # Word-splitting the input is wanted; globbing it is not. Left
+            # unquoted without this, a dispatch of `*` expands against the
+            # checkout into `app lib data docs test ...` -- all shaped like
+            # claimable names, none of them files under domains/, so
+            # sync-dns.mjs would take its "record removed" branch and delete
+            # the DNS of whoever owns those names.
+            set -f
+            NAMES=$(printf '%s' "$DISPATCH_NAMES" | tr ',' ' ')
+
+            # Validate before emitting anything. sync-dns.mjs silently skips a
+            # path that misses its ^domains/([a-z0-9-]+)\.json$ guard, so a typo
+            # -- "Dexi", "dexi.json" -- would otherwise produce a green run that
+            # synced nothing and looked like a repair.
+            for name in $NAMES; do
+              case "$name" in
+                *[!a-z0-9-]*) echo "::error::not a claimable name: $name"; exit 1 ;;
+              esac
+            done
+
+            echo 'files<<EOF' >> $GITHUB_OUTPUT
+            for name in $NAMES; do
+              echo "domains/$name.json" >> $GITHUB_OUTPUT
+            done
+            echo 'EOF' >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Diff the whole push range, not HEAD^..HEAD. Actions fires one push event per
+          # push, not per commit, so a rebase-merge or a batch of merges lands several
+          # commits at once and HEAD^..HEAD would silently skip every domains/ file touched
+          # by any but the last — a merged PR that never reaches DNS, with no error at all.
+          BEFORE='${{ github.event.before }}'
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            RANGE=$(git rev-list --max-parents=0 HEAD | tail -1)
+          else
+            RANGE="$BEFORE"
+          fi
+          echo 'files<<EOF' >> $GITHUB_OUTPUT
+          git diff --name-only "$RANGE" '${{ github.event.after }}' -- domains/ >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+      - id: sync
+        run: node scripts/sync-dns.mjs
+        env:
+          CHANGED_FILES: ${{ steps.changed.outputs.files }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+
+  # The zone mirror hit Vercel's 50-value cap and deferred some challenges.
+  # Prune the ones whose claims have verified; the prune's push (deploy key,
+  # so it does trigger workflows) re-runs this sync, which publishes what was
+  # deferred. A prune with nothing eligible commits nothing, so this cannot
+  # loop. Called, not dispatched: see the workflow_call note above.
+  prune:
+    needs: sync
+    # !cancelled(), not the default success(): sync still exits red when one
+    # name fails, after it has written over_cap, and that must not block the
+    # cap relief every other waiting claim depends on.
+    if: ${{ !cancelled() && needs.sync.outputs.over_cap == 'true' }}
+    # The called workflow declares contents: write, and a called workflow can
+    # only narrow the caller's permissions, never widen them.
+    permissions:
+      contents: write
+    uses: ./.github/workflows/prune-verification.yml
+    with:
+      apply: true
+    secrets: inherit

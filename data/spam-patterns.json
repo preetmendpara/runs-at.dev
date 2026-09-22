@@ -1,0 +1,15 @@
+{
+  "$comment": "Patterns that mark a comment as spam in this repository's context. scripts/moderate-spam.mjs reads this file on every run, so adding a domain here needs no code change and no deploy. Each entry is compiled as a JavaScript regular expression and tested against the comment body. Prefer explicit domain literals over heuristics: the moderation bot blocks on a first match, which is only defensible while a match cannot happen by accident. Escape the dots.",
+  "patterns": [
+    {
+      "pattern": "go-live\\.me",
+      "flags": "i",
+      "note": "Advertised on four contributor pull requests on 2026-09-03. See .moderation/README.md."
+    },
+    {
+      "pattern": "golive\\.me",
+      "flags": "i",
+      "note": "Same service, unhyphenated spelling."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "nexus",
+  "owner": {
+    "github": "RiteshRanjanRR09"
+  },
+  "claimedAt": "2026-09-02T18:33:14.504Z",
+  "records": {
+    "CNAME": "57e73c72e945c569.vercel-dns-017.com"
+  },
+  "subdomains": {
+    "recruitment": {
+      "CNAME": "1f0f89ca65ce0a71.vercel-dns-017.com"
+    },
+    "_vercel.recruitment": {
+      "TXT": [
+        "vc-domain-verify=recruitment.nexus.runs-on.dev,d8d01cfd675744079257"
+      ]
+    }
+  }
+}

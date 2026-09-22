@@ -1,0 +1,307 @@
+import { readFile, readdir, appendFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import {
+  planDnsChanges,
+  planZoneVerificationRecords,
+  reconcileZoneVerification,
+  fitZoneVerification,
+  ZONE_VERIFICATION_CAP,
+  reconcileDnsRecords,
+  listPath,
+  createPath,
+  removePath,
+  ZONE_VERIFICATION_LABEL,
+  formatApiError,
+  syncEach,
+  planSweep,
+} from '../lib/dns.js';
+
+const DOMAIN = 'runs-on.dev';
+const TOKEN = process.env.VERCEL_TOKEN;
+const TEAM = process.env.VERCEL_TEAM_ID;
+const changed = (process.env.CHANGED_FILES ?? '').split('\n').filter(Boolean);
+
+const REQUIRED = { VERCEL_TOKEN: TOKEN, VERCEL_TEAM_ID: TEAM };
+const missing = Object.entries(REQUIRED)
+  .filter(([, value]) => !value)
+  .map(([key]) => key);
+
+if (missing.length > 0) {
+  console.error(`sync-dns: missing required environment variable(s): ${missing.join(', ')}`);
+  process.exit(1);
+}
+
+const vercel = (path, init = {}) =>
+  fetch(`https://api.vercel.com${path}${path.includes('?') ? '&' : '?'}teamId=${TEAM}`, {
+    ...init,
+    headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+  });
+
+// The whole zone, paged once and cached for the run. A 20-claim merge used
+// to walk the zone 20 times (once per changed file in existingFor) plus one
+// for the zone mirror — ~21 full paginations where one would do. The zone
+// is the unit the reconciler reasons about, and a single sync run is short
+// enough that staleness between files is not a concern.
+let zoneRecordsCache;
+async function zoneRecords() {
+  if (zoneRecordsCache) return zoneRecordsCache;
+  const found = [];
+  let cursor = '';
+  for (;;) {
+    const res = await vercel(listPath(DOMAIN, cursor));
+    if (!res.ok) {
+      console.error(`sync-dns: failed to list records for ${DOMAIN}: ${res.status} ${res.statusText}`);
+      process.exit(1);
+    }
+    const body = await res.json();
+    found.push(...body.records);
+    const next = body.pagination?.next;
+    if (!next) { zoneRecordsCache = found; return found; }
+    cursor = next;
+  }
+}
+
+async function existingFor(name) {
+  // Filter the single cached walk by name and children (`.<name>`). The
+  // leading dot means only genuine children match, never an unrelated
+  // record that happens to end the same way. `name` is never '*' or '' —
+  // it comes from the ^domains/([a-z0-9-]+)\.json$ match below — so the
+  // wildcard can never be selected for deletion.
+  return (await zoneRecords()).filter(
+    (r) => r.name === name || r.name.endsWith(`.${name}`),
+  );
+}
+
+async function deleteRecord(stale) {
+  const res = await vercel(removePath(DOMAIN, stale.id), { method: 'DELETE' });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    // 404 means the record is already gone — a prior run interrupted after
+    // deleting it, an operator removed it from the dashboard, or another
+    // sync beat this one. Either way the desired state (record absent)
+    // already holds, so treat it as success and keep syncing the rest.
+    if (res.status === 404) {
+      console.log(`deleted ${stale.type} ${stale.name} (already gone)`);
+      return true;
+    }
+    console.error(`sync-dns: failed to delete ${stale.type} ${stale.name}: ${formatApiError(res.status, detail)}`);
+    return false;
+  }
+  console.log(`deleted ${stale.type} ${stale.name}`);
+  return true;
+}
+
+async function createRecord(change) {
+  const body = { type: change.type, name: change.name, value: change.value, ttl: 3600 };
+  // Vercel's records API takes MX priority as a separate field, not folded
+  // into `value`.
+  if (change.type === 'MX') body.mxPriority = change.priority;
+  const res = await vercel(createPath(DOMAIN), {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    console.error(`failed to create ${change.type} ${change.name}: ${formatApiError(res.status, detail)}`);
+    return false;
+  }
+  console.log(`created ${change.type} ${change.name} -> ${change.value}`);
+  return true;
+}
+
+// Best-effort rollback when a create fails mid-sync. The records being
+// restored here are the ones that were just deleted as stale — restoring
+// them returns the name to its pre-sync state rather than leaving it with
+// a half-applied change. Each restore is attempted independently because
+// the API may still be in the transient state that caused the original
+// failure, and a second failure here means the name needs manual attention
+// regardless.
+async function rollback(deleted) {
+  if (deleted.length === 0) return;
+  console.error(`sync-dns: sync failed — rolling back ${deleted.length} deleted record(s)`);
+  for (const stale of deleted) {
+    const change = { type: stale.type, name: stale.name, value: stale.value, priority: stale.mxPriority };
+    const ok = await createRecord(change).catch(() => false);
+    if (!ok) console.error(`sync-dns: ROLLBACK FAILED for ${stale.type} ${stale.name} — manual intervention needed`);
+  }
+}
+
+// Diff-based reconciliation (issue #54). Only records that genuinely
+// changed are deleted and recreated — everything else survives untouched,
+// so a mid-sync API failure can't take out records that weren't being
+// changed. If a create does fail, the just-deleted stale records are
+// restored as a best-effort rollback to the pre-sync state.
+//
+// Returns false when the name could not be synced. A rejected delete stops
+// the name there: creating the new records anyway would leave the stale
+// ones live alongside them.
+async function reconcile(name, desired, { quiet = false } = {}) {
+  const existing = await existingFor(name);
+  const { unchanged, remove, create } = reconcileDnsRecords(existing, desired);
+
+  if (unchanged.length > 0 && !quiet) {
+    console.log(`${name}: ${unchanged.length} record(s) unchanged, not touched`);
+  }
+
+  const deleted = [];
+  for (const stale of remove) {
+    if (!(await deleteRecord(stale))) {
+      await rollback(deleted);
+      return false;
+    }
+    deleted.push(stale);
+  }
+
+  for (const change of create) {
+    const ok = await createRecord(change);
+    if (!ok) {
+      await rollback(deleted);
+      return false;
+    }
+  }
+
+  if (remove.length === 0 && create.length === 0 && unchanged.length > 0 && !quiet) {
+    console.log(`${name}: already in sync`);
+  }
+  return true;
+}
+
+async function syncName(name) {
+  const file = `domains/${name}.json`;
+  let record;
+  try {
+    record = JSON.parse(await readFile(file, 'utf8'));
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err;
+    // The record file is gone (owner released the name, or a maintainer removed
+    // it). Without this, readFile throws and the workflow crashes here, leaving
+    // the ex-owner's DNS live indefinitely.
+    let ok = true;
+    for (const stale of await existingFor(name)) ok = (await deleteRecord(stale)) && ok;
+    if (ok) console.log(`${name}: record removed, DNS cleared`);
+    return ok;
+  }
+
+  const desired = planDnsChanges(record);
+  if (!(await reconcile(name, desired))) return false;
+
+  if (desired.length === 0) console.log(`${name}: no records, wildcard serves the profile card`);
+  return true;
+}
+
+const names = changed
+  .map((file) => /^domains\/([a-z0-9-]+)\.json$/.exec(file)?.[1])
+  .filter(Boolean);
+const failed = await syncEach(names, syncName);
+
+// Every claim, read once: the sweep and the zone mirror both need the whole
+// registry, not just CHANGED_FILES.
+const claims = [];
+const unreadable = new Set();
+for (const file of await readdir('domains')) {
+  if (!file.endsWith('.json')) continue;
+  try {
+    claims.push(JSON.parse(await readFile(`domains/${file}`, 'utf8')));
+  } catch (err) {
+    // validate blocks unparsable claims from reaching main; crashing here
+    // instead would leave the names above already applied and the run half
+    // finished with no record of what was skipped.
+    console.error(`zone mirror: skipping unreadable ${file}: ${err.message}`);
+    // Still a live claim. Left out of the sweep's skip set, a file that once
+    // was deleted and has since been reclaimed would read as released.
+    unreadable.add(file.replace(/\.json$/, ''));
+  }
+}
+
+// The sweep: converge every other name too (see planSweep in lib/dns.js for
+// the cancelled-run drift this exists for). It runs after the named pass and
+// skips those names, whose cached listing is now stale, so nothing is touched
+// twice.
+//
+// A sweep failure warns rather than fails. The names above are the ones this
+// run was asked to sync and a failure there is still red; a name that drifted
+// earlier and still will not apply is retried by every later run, and failing
+// all of them over it would bring back the red-for-everyone problem #208 fixed.
+const SWEEP_LIMIT = 25;
+let released = new Set();
+try {
+  // --no-renames: the swap route moves one file to another, which rename
+  // detection would report as R rather than D, hiding the name given up.
+  const log = execFileSync('git', ['log', '--no-renames', '--diff-filter=D', '--name-only', '--format=', '--', 'domains/'], { encoding: 'utf8' });
+  released = new Set(log.split('\n').map((file) => /^domains\/([a-z0-9-]+)\.json$/.exec(file)?.[1]).filter(Boolean));
+} catch (err) {
+  console.log(`::warning::sweep: could not read released names from git, skipping their cleanup: ${err.message}`);
+}
+const sweep = planSweep(claims, await zoneRecords(), { skip: new Set([...names, ...unreadable]), released });
+const sweepFailed = [];
+if (sweep.length > SWEEP_LIMIT) {
+  // Drift on this scale is not a few lost runs; it is far likelier a listing
+  // that came back short, and acting on it would delete working DNS in bulk.
+  // Stop and make a person look. The named pass above has already applied.
+  console.log(`::error::sweep: ${sweep.length} names differ from DNS, over the ${SWEEP_LIMIT}-name safety limit; not applying. First few: ${sweep.slice(0, 10).map((d) => d.name).join(', ')}`);
+  sweepFailed.push(...sweep.map((d) => d.name));
+} else {
+  for (const { name, desired } of sweep) {
+    console.log(`sweep: ${name} differs from DNS, reconciling`);
+    let ok = false;
+    try {
+      ok = await reconcile(name, desired, { quiet: true });
+    } catch (err) {
+      console.error(`sweep: ${name}: ${err.message}`);
+    }
+    if (!ok) sweepFailed.push(name);
+  }
+  if (sweepFailed.length > 0) {
+    console.log(`::warning::sweep: could not reconcile ${sweepFailed.join(', ')}; the next run retries`);
+  } else if (sweep.length > 0) {
+    console.log(`sweep: reconciled ${sweep.length} drifted name(s)`);
+  }
+}
+
+// `_vercel.<name>` children belong to their claim's own sync pass above; the
+// mirror only owns the zone-level host itself.
+const existingVerification = (await existingFor(ZONE_VERIFICATION_LABEL)).filter(
+  (record) => record.name === ZONE_VERIFICATION_LABEL,
+);
+// Oldest claim first, so that when the cap forces a choice the names that
+// have waited longest get the free slots, not whichever sorts first.
+claims.sort((a, b) => String(a.claimedAt ?? '').localeCompare(String(b.claimedAt ?? '')));
+const { create: wanted, remove: toUnmirror } = reconcileZoneVerification(
+  planZoneVerificationRecords(claims),
+  existingVerification,
+);
+const { create: toMirror, deferred } = fitZoneVerification(wanted, toUnmirror, existingVerification);
+
+// A failed mirror write is counted, not fatal: the next sync retries it, and
+// exiting here would skip the cap check below and with it the prune.
+let mirrorFailures = 0;
+for (const stale of toUnmirror) {
+  if (!(await deleteRecord(stale))) mirrorFailures++;
+}
+
+for (const change of toMirror) {
+  if (!(await createRecord(change))) mirrorFailures++;
+}
+
+if (deferred.length > 0) {
+  // Not a failure of this run: every name's own records above are applied.
+  // The workflow's prune job frees slots from verified claims, and its push
+  // re-runs this sync, which publishes these. If nothing can be pruned (every
+  // holder is still pending) the prune commits nothing and these stay
+  // deferred -- that warning is the signal a human needs to look.
+  console.log(`::warning::_vercel.runs-on.dev is at its ${ZONE_VERIFICATION_CAP}-value cap; deferred ${deferred.length} verification challenge(s): ${deferred.map((c) => c.value.split('=')[1].split(',')[0]).join(', ')}`);
+  if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, 'over_cap=true\n');
+} else if (toMirror.length === 0 && toUnmirror.length === 0) {
+  console.log('zone verification: in sync');
+}
+
+// Still red, so a broken name gets noticed, but only after every other name
+// and the mirror have been applied, and the log says which record to fix.
+if (failed.length > 0 || mirrorFailures > 0 || sweep.length > SWEEP_LIMIT) {
+  const parts = [];
+  if (sweep.length > SWEEP_LIMIT) parts.push(`sweep refused ${sweep.length} drifted names`);
+  if (failed.length > 0) parts.push(`could not sync ${failed.join(', ')} (see the errors above; the record likely holds a value Vercel rejects)`);
+  if (mirrorFailures > 0) parts.push(`${mirrorFailures} zone mirror write(s) failed`);
+  console.log(`::error::sync-dns: ${parts.join('; ')}`);
+  process.exit(1);
+}

@@ -1,0 +1,18 @@
+{
+  "resource": "https://runs-on.dev",
+  "authorization_servers": [
+    "https://github.com"
+  ],
+  "scopes_supported": [
+    "names:claim",
+    "records:write",
+    "names:release",
+    "names:swap",
+    "tokens:mint",
+    "sites:publish"
+  ],
+  "bearer_methods_supported": [
+    "header"
+  ],
+  "resource_documentation": "https://runs-on.dev/openapi.json"
+}

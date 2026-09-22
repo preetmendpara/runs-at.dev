@@ -1,0 +1,20 @@
+{
+  "name": "flopy1",
+  "owner": {
+    "github": "flopytest-ctrl"
+  },
+  "claimedAt": "2026-09-20T16:51:51.217Z",
+  "records": {
+    "CNAME": "cname.vercel-dns.com"
+  },
+  "country": "IN",
+  "profile": {
+    "name": "flopy1",
+    "bio": "flopy1"
+  },
+  "subdomains": {
+    "flopy1": {
+      "CNAME": "41438dc49b5c44d7.vercel-dns-017.com"
+    }
+  }
+}

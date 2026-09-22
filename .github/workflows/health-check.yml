@@ -1,0 +1,62 @@
+name: health-check
+
+# A name whose provider verification never completed keeps its 200 and its
+# certificate while the wildcard answers with the registry's own profile card.
+# Nothing errors anywhere, so the only way this surfaces is by asking what each
+# pointed name actually serves. Issue #26 went unnoticed for exactly that
+# reason, across seventeen names.
+on:
+  schedule:
+    - cron: '23 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # The run opens a nudge issue for each newly stuck name and closes the ones
+  # whose names have recovered, so the person who can fix it is told, and told
+  # again when it is fixed.
+  issues: write
+
+# This used to cancel the older run, which was right while the job only read
+# public HTTP. It no longer is: the repair job writes DNS, and cancelling a run
+# mid-sync is precisely the failure this repair exists to clean up after.
+# Queue instead.
+concurrency:
+  group: health-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      drifted: ${{ steps.probe.outputs.drifted }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - id: probe
+        run: node scripts/health-check.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # A declared record missing from DNS can only be sync-dns having failed
+  # silently -- a run that lost its slot in the concurrency queue, most
+  # likely, since a queued run is evicted when a third arrives and each run
+  # only ever syncs its own push's names. Nothing else would pick those up.
+  #
+  # Repairing on detection closes that loop, using the same per-name path a
+  # maintainer would use by hand. If the repair fails, THIS job goes red,
+  # which is the alarm that actually warrants a person.
+  repair:
+    needs: check
+    if: needs.check.outputs.drifted != ''
+    # sync-dns can call prune-verification, which needs contents: write. A
+    # called workflow can only narrow the caller's permissions, so without
+    # this the whole run is rejected at startup, not just the prune.
+    permissions:
+      contents: write
+    uses: ./.github/workflows/sync-dns.yml
+    with:
+      names: ${{ needs.check.outputs.drifted }}
+    secrets: inherit

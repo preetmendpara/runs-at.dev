@@ -1,0 +1,15 @@
+{
+  "name": "tiago-07",
+  "owner": {
+    "github": "TiagoR07"
+  },
+  "claimedAt": "2026-09-12T13:08:13.894Z",
+  "records": {
+    "URL": "https://api-9s8z.onrender.com"
+  },
+  "subdomains": {
+    "api": {
+      "CNAME": "api-9s8z.onrender.com"
+    }
+  }
+}

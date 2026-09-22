@@ -1,0 +1,75 @@
+name: sync-owners
+
+# owners/<login>.json caches "how many names does this account hold" so the
+# website's claim path can enforce the per-account limit in one request. It used
+# to be written only by /api/claim, which meant a name claimed by pull request
+# never reached it and the account still read as owning nothing — a second name
+# for the asking. Rebuilding it from domains/ after every merge makes it derived
+# data that cannot drift, whichever door the claim came through.
+on:
+  push:
+    branches: [main]
+    paths: ['domains/**']
+  # The rebuild is idempotent, so a manual run is a safe way to prove the
+  # workflow works without waiting for a claim to land, and to repair the index
+  # by hand if a run is ever missed.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Two merges landing together would otherwise race to commit the same index.
+concurrency:
+  group: sync-owners
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      # ssh-key, not the default token: see prune-verification.yml. Without it
+      # this job only ever "succeeded" because the index already matched and it
+      # short-circuited before pushing -- a claim landing by PR merge would have
+      # been rejected with GH006 under a green check.
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.REGISTRY_DEPLOY_KEY }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Rebuild the index and commit it
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # /api/claim writes the record and the owner index as two separate
+          # commits. The first one triggers this workflow, so the checkout above
+          # can land in the gap between them -- main then moves under us and the
+          # push is rejected as non-fast-forward. Retrying is safe because the
+          # rebuild is a pure function of domains/: reset onto whatever main
+          # became, rebuild against that tree, and if the API's own index commit
+          # already did the work there is simply nothing left to commit.
+          attempt_sync() {
+            node scripts/sync-owners.mjs
+            if [ -z "$(git status --porcelain owners/)" ]; then
+              echo "owners/ already matches domains/, nothing to commit."
+              return 0
+            fi
+            git add owners/
+            git commit -m 'index: rebuild owners from domains'
+            # This push only touches owners/, and the trigger above is scoped to
+            # domains/**, so it cannot retrigger this workflow.
+            git push
+          }
+
+          for attempt in 1 2 3; do
+            if attempt_sync; then
+              exit 0
+            fi
+            echo "::warning::push rejected on attempt $attempt; refreshing main and rebuilding"
+            git fetch origin main
+            git reset --hard origin/main
+          done
+
+          echo "::error::could not sync owners/ after 3 attempts"
+          exit 1
