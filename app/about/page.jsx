@@ -60,15 +60,6 @@ export default function About() {
         </p>
       </Section>
 
-      <Section title="Credits">
-        <p className="text-sm leading-relaxed">
-          runs-at.dev is an independent service built on the open-source{' '}
-          <a className="text-(--color-signal) underline" href="https://github.com/zordhalo/runs-on.dev">runs-on.dev</a>{' '}
-          registry by Advance Labs Inc, used and modified under the GNU Affero General Public
-          License v3. It is not affiliated with or endorsed by runs-on.dev or Advance Labs.
-        </p>
-      </Section>
-
       <Section title="The source">
         <p className="text-sm leading-relaxed">
           Every claim, every hosting record, and every rule CI enforces lives in the public
