@@ -44,9 +44,9 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+    # The IDs are handed only to the two steps below, never to the vercel
+    # commands: those read the link written by "Link Vercel project", so an
+    # org id naming the wrong account cannot override it.
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -60,6 +60,8 @@ jobs:
       - name: Check Vercel project access
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
         run: |
           missing=''
           [ -n "$VERCEL_TOKEN" ] || missing="$missing VERCEL_TOKEN(secret)"
@@ -90,6 +92,31 @@ jobs:
             404) echo "::error::No project $VERCEL_PROJECT_ID under that scope (404): VERCEL_PROJECT_ID is wrong, or VERCEL_ORG_ID names a different account/team."; exit 1 ;;
             *) echo "::error::Vercel API answered $status."; exit 1 ;;
           esac
+      # Link explicitly instead of letting the CLI derive it. The CLI's own
+      # lookup failed with "Could not retrieve Project Settings" even though
+      # the project was reachable, which is what an org id naming a different
+      # account than the owner (a user id instead of the team id) produces.
+      # The owner comes from the project itself, so the link is always right;
+      # a mismatch with VERCEL_ORG_ID is reported so the variable can be fixed.
+      - name: Link Vercel project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+        run: |
+          case "$VERCEL_ORG_ID" in team_*) scope="?teamId=$VERCEL_ORG_ID" ;; *) scope='' ;; esac
+          curl -sf -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID$scope" -o "$RUNNER_TEMP/project.json"
+          node -e '
+            const fs = require("fs");
+            const p = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + "/project.json", "utf8"));
+            if (!p.id || !p.accountId) throw new Error("Vercel returned no project id/owner");
+            if (p.accountId !== process.env.VERCEL_ORG_ID) {
+              console.log("::warning::VERCEL_ORG_ID is not the project owner; linking to the owner (" + p.accountId.split("_")[0] + "_...) instead. Set VERCEL_ORG_ID to the Team ID of the team that owns the project.");
+            }
+            fs.mkdirSync(".vercel", { recursive: true });
+            fs.writeFileSync(".vercel/project.json", JSON.stringify({ orgId: p.accountId, projectId: p.id, projectName: p.name }));
+            console.log("Linked to Vercel project " + p.name + ".");
+          '
       - run: npx vercel pull --yes --environment=production --token='${{ secrets.VERCEL_TOKEN }}'
       - run: npx vercel build --prod --token='${{ secrets.VERCEL_TOKEN }}'
       - run: npx vercel deploy --prebuilt --prod --token='${{ secrets.VERCEL_TOKEN }}'
