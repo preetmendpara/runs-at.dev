@@ -428,9 +428,9 @@ test('Cloudflare records are read back in the shape the reconciler compares', ()
 
 test('Cloudflare creates are DNS-only and fully qualified', () => {
   assert.deepEqual(toCloudflareRecord({ type: 'CNAME', name: 'lucas', value: 'lucas.github.io' }, 'runs-at.dev'),
-    { type: 'CNAME', name: 'lucas.runs-at.dev', content: 'lucas.github.io', ttl: 3600, proxied: false });
+    { type: 'CNAME', name: 'lucas.runs-at.dev', content: 'lucas.github.io', ttl: 300, proxied: false });
   assert.deepEqual(toCloudflareRecord({ type: 'MX', name: 'lucas', value: 'mx.example.com', priority: 5 }, 'runs-at.dev'),
-    { type: 'MX', name: 'lucas.runs-at.dev', content: 'mx.example.com', ttl: 3600, priority: 5 });
+    { type: 'MX', name: 'lucas.runs-at.dev', content: 'mx.example.com', ttl: 300, priority: 5 });
   assert.equal(toCloudflareRecord({ type: 'TXT', name: '_vercel', value: 'v' }, 'runs-at.dev').name, '_vercel.runs-at.dev');
 });
 
