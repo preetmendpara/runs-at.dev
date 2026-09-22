@@ -41,7 +41,7 @@
       "githubSession": {
         "type": "apiKey",
         "in": "cookie",
-        "name": "session",
+        "name": "__Host-session",
         "description": "GitHub OAuth session cookie, minted by the sign-in flow at https://runs-at.dev/api/auth/github (start) and /api/auth/github/callback (completion). Signed HttpOnly cookie, 24-hour TTL. Grants: claim (names:claim), edit own records (records:write), release (names:release), swap (names:swap), mint deploy tokens (tokens:mint). One name per GitHub account. Scopes granted: names:claim, records:write, names:release, names:swap, tokens:mint (machine list in components.securitySchemes.registryOAuth and /.well-known/oauth-protected-resource)."
       },
       "siteToken": {

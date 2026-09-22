@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { readSession } from '../../lib/session.js';
+import { readSession, SESSION_COOKIE } from '../../lib/session.js';
 import { getOwnerIndex } from '../../lib/owners.js';
 import { getRecord } from '../../lib/registry.js';
 import RecordForm from './record-form.jsx';
@@ -19,7 +19,7 @@ export const dynamic = 'force-dynamic';
 const TOKEN = () => process.env.REGISTRY_TOKEN;
 
 export default async function Manage() {
-  const raw = (await cookies()).get('session')?.value;
+  const raw = (await cookies()).get(SESSION_COOKIE)?.value;
   const session = raw ? readSession(raw, process.env.SESSION_SECRET) : null;
 
   if (!session?.login) {

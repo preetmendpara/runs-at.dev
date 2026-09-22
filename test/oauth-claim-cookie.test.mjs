@@ -15,11 +15,11 @@ test('the claim name rides along as its own Set-Cookie header', async () => {
   const cookies = res.headers.getSetCookie();
   assert.equal(cookies.length, 2);
 
-  const state = cookies.find((c) => c.startsWith('oauth_state='));
-  const claim = cookies.find((c) => c.startsWith('oauth_claim='));
+  const state = cookies.find((c) => c.startsWith('__Host-oauth_state='));
+  const claim = cookies.find((c) => c.startsWith('__Host-oauth_claim='));
   assert.ok(state, 'oauth_state cookie present');
   assert.ok(claim, 'oauth_claim cookie present');
-  assert.match(claim, /^oauth_claim=refinix;/);
+  assert.match(claim, /^__Host-oauth_claim=refinix;/);
   assert.match(state, /Max-Age=600$/);
   assert.match(claim, /Max-Age=600$/);
 });
@@ -29,5 +29,5 @@ test('without a claim there is exactly one cookie', async () => {
 
   const cookies = res.headers.getSetCookie();
   assert.equal(cookies.length, 1);
-  assert.match(cookies[0], /^oauth_state=/);
+  assert.match(cookies[0], /^__Host-oauth_state=/);
 });

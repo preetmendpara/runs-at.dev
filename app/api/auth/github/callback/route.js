@@ -1,4 +1,11 @@
-import { SESSION_TTL_MS, signSession } from '../../../../../lib/session.js';
+import {
+  SESSION_TTL_MS,
+  signSession,
+  readCookie,
+  SESSION_COOKIE,
+  OAUTH_STATE_COOKIE,
+  OAUTH_CLAIM_COOKIE,
+} from '../../../../../lib/session.js';
 import { validateName } from '../../../../../lib/name.js';
 
 export async function GET(request) {
@@ -7,7 +14,7 @@ export async function GET(request) {
   const state = url.searchParams.get('state');
 
   const cookie = request.headers.get('cookie') ?? '';
-  const expected = cookie.match(/(?:^|;\s*)oauth_state=([^;]+)/)?.[1];
+  const expected = readCookie(cookie, OAUTH_STATE_COOKIE);
   if (!code || !state || !expected || state !== expected) {
     return new Response('bad oauth state', { status: 400 });
   }
@@ -54,8 +61,9 @@ export async function GET(request) {
   // cookie is not as trustworthy as HttpOnly suggests: a claimed
   // <name>.runs-at.dev can set a cookie for the parent domain, so a hostile
   // claim could plant `oauth_claim=%` and turn every sign-in on the apex into
-  // a 500. Decoding defensively keeps a bad value merely ignored.
-  const rawClaim = cookie.match(/(?:^|;\s*)oauth_claim=([^;]+)/)?.[1];
+  // a 500. The __Host- prefix now stops that planting; decoding defensively
+  // still keeps any bad value merely ignored.
+  const rawClaim = readCookie(cookie, OAUTH_CLAIM_COOKIE);
   let decodedClaim = '';
   try {
     decodedClaim = rawClaim ? decodeURIComponent(rawClaim) : '';
@@ -72,9 +80,13 @@ export async function GET(request) {
   const maxAge = Math.floor(SESSION_TTL_MS / 1000);
   headersOut.append(
     'Set-Cookie',
-    `session=${session}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`,
+    `${SESSION_COOKIE}=${session}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`,
   );
-  headersOut.append('Set-Cookie', 'oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0');
+  // The sign-in cookies are single-use, and the pre-__Host- names are
+  // retired; expire all of them.
+  for (const name of [OAUTH_STATE_COOKIE, OAUTH_CLAIM_COOKIE, 'oauth_state', 'oauth_claim', 'session']) {
+    headersOut.append('Set-Cookie', `${name}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`);
+  }
 
   return new Response(null, { status: 302, headers: headersOut });
 }

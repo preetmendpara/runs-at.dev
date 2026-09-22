@@ -9,7 +9,7 @@ import { CLAIM_GEO } from './components/claim-geo.js';
 import { geoPlacement } from '../lib/geo-placement.js';
 import { readRegistry } from '../lib/registry-files.js';
 import countryCentroids from '../scripts/country-centroids.json';
-import { readSession } from '../lib/session.js';
+import { readSession, SESSION_COOKIE } from '../lib/session.js';
 import { getOwnerIndex } from '../lib/owners.js';
 import { getRecord } from '../lib/registry.js';
 
@@ -91,7 +91,7 @@ function registry() {
 }
 
 export default async function Home() {
-  const raw = (await cookies()).get('session')?.value;
+  const raw = (await cookies()).get(SESSION_COOKIE)?.value;
   const session = raw ? readSession(raw, process.env.SESSION_SECRET) : null;
   const owned = await ownedName(session);
   const registryList = registry();

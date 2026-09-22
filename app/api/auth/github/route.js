@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import { OAUTH_STATE_COOKIE, OAUTH_CLAIM_COOKIE } from '../../../../lib/session.js';
 
 export async function GET(request) {
   const state = randomBytes(16).toString('hex');
@@ -17,9 +18,9 @@ export async function GET(request) {
   const claim = new URL(request.url).searchParams.get('claim') ?? '';
 
   const headers = new Headers({ Location: url.toString() });
-  headers.append('Set-Cookie', `oauth_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`);
+  headers.append('Set-Cookie', `${OAUTH_STATE_COOKIE}=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`);
   if (claim) {
-    headers.append('Set-Cookie', `oauth_claim=${encodeURIComponent(claim)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`);
+    headers.append('Set-Cookie', `${OAUTH_CLAIM_COOKIE}=${encodeURIComponent(claim)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`);
   }
 
   return new Response(null, { status: 302, headers });
