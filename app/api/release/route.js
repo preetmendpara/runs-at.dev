@@ -59,7 +59,7 @@ export async function POST(request) {
   // the current version; if someone changed the file between our read
   // and this delete, GitHub rejects with 409.
   const res = await fetch(
-    `https://api.github.com/repos/${process.env.REGISTRY_REPO ?? 'zordhalo/runs-on.dev'}/contents/domains/${name}.json`,
+    `https://api.github.com/repos/${process.env.REGISTRY_REPO ?? 'preetmendpara/runs-at.dev'}/contents/domains/${name}.json`,
     {
       method: 'DELETE',
       headers: {
@@ -113,6 +113,6 @@ export async function POST(request) {
   return Response.json({
     ok: true,
     name,
-    message: `${name}.runs-on.dev has been released and is now available to claim`,
+    message: `${name}.runs-at.dev has been released and is now available to claim`,
   });
 }

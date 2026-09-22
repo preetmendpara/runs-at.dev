@@ -47,7 +47,7 @@ export async function generateMetadata({ params }) {
   // previews read "Not found" for a 200 page whose whole job is conversion.
   if (!record) {
     return {
-      title: { absolute: `${name}.runs-on.dev is available · runs-on.dev` },
+      title: { absolute: `${name}.runs-at.dev is available · runs-at.dev` },
       description: 'This name is not claimed yet. Claim it with GitHub in seconds, free, forever.',
       robots: { index: false },
     };
@@ -122,12 +122,12 @@ export default async function Site({ params }) {
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="min-w-0">
                 <a
-                  href={`https://${name}.runs-on.dev`}
+                  href={`https://${name}.runs-at.dev`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[23px] leading-[1.07] font-normal tracking-[-0.004em] text-(--color-ink) underline decoration-(--color-blue) decoration-2 underline-offset-[6px] sm:text-[34px] sm:tracking-[-0.005em]"
                 >
-                  {name}.runs-on.dev
+                  {name}.runs-at.dev
                 </a>
               </h1>
               <a
@@ -180,15 +180,15 @@ export default async function Site({ params }) {
             </div>
           )}
           {/* The banner links must be absolute to the apex: this page renders
-              on <name>.runs-on.dev hosts, where a relative /banner/<name>
+              on <name>.runs-at.dev hosts, where a relative /banner/<name>
               would be rewritten by proxy.js into /sites/<name>/banner/... and
-              404. The banner route lives on runs-on.dev itself. */}
+              404. The banner route lives on runs-at.dev itself. */}
           <div className="flex gap-4">
             <dt className="w-24 shrink-0 text-(--color-muted)">share</dt>
             <dd className="text-(--color-muted)">
               <a
                 className="text-(--color-ink) underline"
-                href={`https://runs-on.dev/banner/${name}`}
+                href={`https://runs-at.dev/banner/${name}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -197,7 +197,7 @@ export default async function Site({ params }) {
               {' / '}
               <a
                 className="text-(--color-ink) underline"
-                href={`https://runs-on.dev/banner/${name}?theme=dark`}
+                href={`https://runs-at.dev/banner/${name}?theme=dark`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -210,8 +210,8 @@ export default async function Site({ params }) {
 
       <p className="mt-6 text-sm text-(--color-muted)">
         This name is registered on{' '}
-        <a className="text-(--color-ink) underline" href="https://runs-on.dev">
-          runs-on.dev
+        <a className="text-(--color-ink) underline" href="https://runs-at.dev">
+          runs-at.dev
         </a>
         . Claim your own.
       </p>
@@ -262,7 +262,7 @@ function editDistance(a, b) {
 
 async function findSimilarNames(attempted) {
   try {
-    const res = await fetch('https://api.github.com/repos/zordhalo/runs-on.dev/contents/domains', {
+    const res = await fetch('https://api.github.com/repos/preetmendpara/runs-at.dev/contents/domains', {
       headers: {
         Accept: 'application/vnd.github+json',
         ...(process.env.CARD_TOKEN ?? process.env.REGISTRY_TOKEN
@@ -296,7 +296,7 @@ async function ClaimPage({ name }) {
       <StatusBadge tone="live" pulse>Available</StatusBadge>
 
       <h1 className="mt-7 text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
-        {name}.runs-on.dev
+        {name}.runs-at.dev
       </h1>
 
       <p className="mt-4 max-w-md text-[16px] leading-[1.5] text-(--color-muted)">
@@ -307,7 +307,7 @@ async function ClaimPage({ name }) {
         href={`/api/auth/github?claim=${encodeURIComponent(name)}`}
         className="btn-pill mt-8"
       >
-        Claim {name}.runs-on.dev
+        Claim {name}.runs-at.dev
         <span aria-hidden="true">→</span>
       </a>
 
@@ -320,10 +320,10 @@ async function ClaimPage({ name }) {
             {suggestions.map((s) => (
               <li key={s}>
                 <a
-                  href={`https://${s}.runs-on.dev`}
+                  href={`https://${s}.runs-at.dev`}
                   className="font-(family-name:--font-mono) text-sm text-(--color-ink) underline"
                 >
-                  {s}.runs-on.dev
+                  {s}.runs-at.dev
                 </a>
               </li>
             ))}
@@ -332,8 +332,8 @@ async function ClaimPage({ name }) {
       )}
 
       <p className="mt-12 font-(family-name:--font-mono) text-xs text-(--color-muted)">
-        <a className="text-(--color-ink) underline" href="https://runs-on.dev">
-          runs-on.dev
+        <a className="text-(--color-ink) underline" href="https://runs-at.dev">
+          runs-at.dev
         </a>{' '}
         · every name here is a file in a{' '}
         <a

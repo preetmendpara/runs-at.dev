@@ -1,4 +1,7 @@
-runs-on.dev
+runs-at.dev
+Modifications Copyright (c) 2026 preetmendpara
+
+Based on runs-on.dev (https://github.com/zordhalo/runs-on.dev)
 Copyright (c) 2026 Advance Labs Inc
 
 This program is free software: you can redistribute it and/or modify it under
@@ -6,7 +9,7 @@ the terms of the GNU Affero General Public License as published by the Free
 Software Foundation, either version 3 of the License, or (at your option) any
 later version. See LICENSE for the full text.
 
-Because runs-on.dev is run as a network service, AGPL section 13 applies: if
+Because runs-at.dev is run as a network service, AGPL section 13 applies: if
 you run a modified version and let others interact with it over a network, you
 must offer those users the source of your modified version. The registry links
 its own source from the homepage for that reason.

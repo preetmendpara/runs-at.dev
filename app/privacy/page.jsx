@@ -2,9 +2,9 @@ import { Section, Quote } from '../components/Section.jsx';
 
 export const metadata = {
   title: 'Privacy',
-  description: 'What runs-on.dev stores, what it never tracks, and what is public by design. No analytics, no cookies beyond sign-in, no hidden data.',
-  alternates: { canonical: 'https://runs-on.dev/privacy' },
-  openGraph: { title: 'Privacy · runs-on.dev' },
+  description: 'What runs-at.dev stores, what it never tracks, and what is public by design. No analytics, no cookies beyond sign-in, no hidden data.',
+  alternates: { canonical: 'https://runs-at.dev/privacy' },
+  openGraph: { title: 'Privacy · runs-at.dev' },
 };
 
 export default function Privacy() {

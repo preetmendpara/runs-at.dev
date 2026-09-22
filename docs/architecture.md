@@ -2,11 +2,11 @@
 
 ## From request to rendered card
 
-1. A browser requests `you.runs-on.dev`.
-2. DNS resolves it via the wildcard `*.runs-on.dev` record (see below),
-   landing on the same Vercel project as `runs-on.dev` itself.
+1. A browser requests `you.runs-at.dev`.
+2. DNS resolves it via the wildcard `*.runs-at.dev` record (see below),
+   landing on the same Vercel project as `runs-at.dev` itself.
 3. `proxy.js` (Next's middleware) reads the `Host` header, strips the
-   `.runs-on.dev` suffix, validates the remaining label with
+   `.runs-at.dev` suffix, validates the remaining label with
    `lib/name.js`'s `validateName`, and rewrites the request internally to
    `/sites/<name>`.
 4. `app/sites/[name]/page.jsx` reads `domains/<name>.json` from this repo
@@ -24,7 +24,7 @@ through the internal rewrite, not from the outside on any host.
 
 ## The wildcard
 
-One DNS record, `*.runs-on.dev` pointed at the Vercel project, is enough
+One DNS record, `*.runs-at.dev` pointed at the Vercel project, is enough
 for every grammar-valid subdomain to resolve with a valid HTTPS certificate
 the moment it's requested: Vercel issues wildcard TLS for domains it
 manages. That means claiming a name is a git commit against this repo, not
@@ -113,7 +113,7 @@ is silent data loss rather than a visible error.
 
 `REGISTRY_TOKEN` has `contents:write` on this repo and is what `/api/claim`
 and `/api/check` use to read and write records. It's the token the whole
-claim flow's rate-limit budget depends on. But `*.runs-on.dev` is a
+claim flow's rate-limit budget depends on. But `*.runs-at.dev` is a
 wildcard: every grammar-valid hostname resolves and triggers a GitHub read
 in `app/sites/[name]/page.jsx`, on every request, from anyone. An anonymous
 curl loop over a few thousand candidate names would burn through
@@ -124,7 +124,7 @@ only up to a point).
 
 `CARD_TOKEN` is a separate, read-only token used only for profile-card
 renders (`app/sites/[name]/page.jsx` and, indirectly, every
-`<name>.runs-on.dev` request). It falls back to `REGISTRY_TOKEN` if unset,
+`<name>.runs-at.dev` request). It falls back to `REGISTRY_TOKEN` if unset,
 but setting it means the two workloads draw from different rate-limit
 budgets, so enumerating hostnames can't starve the claim flow.
 
@@ -175,7 +175,7 @@ None of this touches DNS or the record itself — `applyDeployment`
 (`lib/sites.js`) writes to a separate `sites/<name>.json` history
 (`active` deployment id, pruned to the last five), independent of
 `domains/<name>.json`. A working deploy through this whole chain still
-does not make `<name>.runs-on.dev` serve the uploaded files:
+does not make `<name>.runs-at.dev` serve the uploaded files:
 `app/sites/[name]/page.jsx` (the handler `proxy.js` rewrites every
 wildcard hostname to) only ever reads `domains/<name>.json` and renders a
 redirect, custom-domain notice, or profile card from it — nothing in the

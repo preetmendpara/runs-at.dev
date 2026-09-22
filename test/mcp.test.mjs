@@ -13,7 +13,7 @@ test('initialize returns the protocol version, capabilities, and server info', a
   assert.equal(out.id, 1);
   assert.equal(out.result.protocolVersion, PROTOCOL_VERSION);
   assert.ok(out.result.capabilities.tools);
-  assert.equal(out.result.serverInfo.name, 'runs-on.dev');
+  assert.equal(out.result.serverInfo.name, 'runs-at.dev');
 });
 
 test('tools/list exposes both tools with typed input schemas', async () => {
@@ -74,7 +74,7 @@ test('unknown tools and methods answer JSON-RPC errors', async () => {
 
 test('the JSON manifest mirrors the live server facts', () => {
   const m = mcpManifest();
-  assert.equal(m.name, 'runs-on.dev');
+  assert.equal(m.name, 'runs-at.dev');
   assert.equal(m.protocolVersion, PROTOCOL_VERSION);
   assert.equal(m.transport, 'streamable-http (POST JSON-RPC 2.0)');
   assert.deepEqual(m.tools.map((x) => x.name).sort(), ['check_name', 'get_record']);

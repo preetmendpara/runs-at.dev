@@ -1,13 +1,13 @@
-# SEO on a runs-on.dev name
+# SEO on a runs-at.dev name
 
-To a search engine, `you.runs-on.dev` is its own site. It gets indexed on
+To a search engine, `you.runs-at.dev` is its own site. It gets indexed on
 its own, ranks on its own, and starts with none of the registry's
-reputation. Nothing about sitting under `runs-on.dev` helps or hurts you;
+reputation. Nothing about sitting under `runs-at.dev` helps or hurts you;
 the name has to earn its own links like any other host.
 
 That cuts both ways, and which way depends entirely on which record type
 you use. The same material renders on the site at
-[`/docs/seo`](https://runs-on.dev/docs/seo).
+[`/docs/seo`](https://runs-at.dev/docs/seo).
 
 ## Redirect names cannot rank
 
@@ -45,15 +45,15 @@ registry is not in the request path at all once DNS resolves. See
 ## robots.txt and sitemaps are per host, not per domain
 
 This is the one that catches people. `robots.txt` is scoped to a single
-hostname. `https://runs-on.dev/robots.txt` says nothing at all about
-`you.runs-on.dev`, and you cannot inherit it, edit it, or be blocked by
+hostname. `https://runs-at.dev/robots.txt` says nothing at all about
+`you.runs-at.dev`, and you cannot inherit it, edit it, or be blocked by
 it.
 
 Serve your own:
 
 ```
-https://you.runs-on.dev/robots.txt
-https://you.runs-on.dev/sitemap.xml
+https://you.runs-at.dev/robots.txt
+https://you.runs-at.dev/sitemap.xml
 ```
 
 and reference the sitemap by its full URL on your own host:
@@ -62,7 +62,7 @@ and reference the sitemap by its full URL on your own host:
 User-Agent: *
 Allow: /
 
-Sitemap: https://you.runs-on.dev/sitemap.xml
+Sitemap: https://you.runs-at.dev/sitemap.xml
 ```
 
 A name with no hosting has no `robots.txt` of its own and returns 404 for
@@ -70,16 +70,16 @@ it, which crawlers read as "no restrictions".
 
 ## Pick one canonical
 
-If the same pages live at both `you.runs-on.dev` and `yoursite.com`,
+If the same pages live at both `you.runs-at.dev` and `yoursite.com`,
 search engines have to guess which one is the real address, and they will
 split the signals while they do it. Say it explicitly with a canonical
 link on every page.
 
-If the runs-on.dev name is the only home for the content, point it at
+If the runs-at.dev name is the only home for the content, point it at
 itself:
 
 ```html
-<link rel="canonical" href="https://you.runs-on.dev/about">
+<link rel="canonical" href="https://you.runs-at.dev/about">
 ```
 
 If it mirrors a site you already run, point it at that site instead, and
@@ -87,8 +87,8 @@ be consistent on every page rather than mixing the two.
 
 ## Verifying in Search Console and Bing
 
-Add `https://you.runs-on.dev` as its own property. It will not appear
-under a property for `runs-on.dev`, and you cannot verify the registry
+Add `https://you.runs-at.dev` as its own property. It will not appear
+under a property for `runs-at.dev`, and you cannot verify the registry
 domain itself.
 
 A URL-prefix property verified by an HTML file or meta tag is the simplest
@@ -117,7 +117,7 @@ explains why.
 ## HTTPS is already handled
 
 `.dev` is on the HSTS preload list as a whole TLD, with `force-https` and
-`include_subdomains` set. Browsers upgrade every `*.runs-on.dev` request
+`include_subdomains` set. Browsers upgrade every `*.runs-at.dev` request
 to HTTPS before it leaves the machine, and the registry sends
 `Strict-Transport-Security` on top of that.
 
@@ -135,11 +135,11 @@ search.
 
 ## One limitation worth knowing
 
-`runs-on.dev` is not on the [Public Suffix List](https://publicsuffix.org)
-yet. Until it is, a cookie scoped to `.runs-on.dev` is readable by every
+`runs-at.dev` is not on the [Public Suffix List](https://publicsuffix.org)
+yet. Until it is, a cookie scoped to `.runs-at.dev` is readable by every
 other name in the registry.
 
-Scope your cookies to `you.runs-on.dev` and nothing broader, and do not
+Scope your cookies to `you.runs-at.dev` and nothing broader, and do not
 put session tokens or anything else sensitive in a cookie set above your
 own host.
 

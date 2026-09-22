@@ -55,7 +55,7 @@ for (const [lat, lon] of Object.values(points)) {
   heat += `<circle cx="${x}" cy="${y}" r="${CORE_R}" fill-opacity="${CORE_OPACITY}"/>`;
 }
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="Dot-matrix world map; brighter dots mark where runs-on.dev names are claimed">
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="Dot-matrix world map; brighter dots mark where runs-at.dev names are claimed">
 <g fill="#f3f3f3" fill-opacity="0.45">${base}</g>
 <g fill="#4d7cff">${heat}</g>
 </svg>

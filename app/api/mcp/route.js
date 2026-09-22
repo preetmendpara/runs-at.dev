@@ -53,11 +53,11 @@ export async function POST(request) {
 // server, protocol version, tools, and how to connect). Content negotiation
 // picks between them.
 const STATUS_PAGE = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>runs-on.dev MCP</title>
+<html lang="en"><head><meta charset="utf-8"><title>runs-at.dev MCP</title>
 <style>body{background:#101010;color:#f3f3f3;font-family:ui-monospace,Consolas,monospace;max-width:640px;margin:60px auto;padding:0 20px;line-height:1.6}
 h1{font-weight:400;font-size:22px}code{color:#98ff38}a{color:#f3f3f3}hr{border:0;border-top:1px solid #212121}</style></head>
 <body>
-<h1>runs-on.dev MCP server · live</h1>
+<h1>runs-at.dev MCP server · live</h1>
 <p>protocol: Streamable HTTP JSON-RPC (${PROTOCOL_VERSION}) · transport: POST only</p>
 <hr>
 <p>tools:</p>

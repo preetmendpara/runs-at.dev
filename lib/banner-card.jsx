@@ -70,7 +70,7 @@ export function BannerCard({ theme = 'light' }) {
           yourname
         </span>
         <span style={{ fontSize: 84, fontWeight: 400, letterSpacing: -0.9, color: t.muted }}>]</span>
-        <span style={{ fontSize: 84, fontWeight: 400, letterSpacing: -0.9, color: t.muted }}>.runs-on.dev</span>
+        <span style={{ fontSize: 84, fontWeight: 400, letterSpacing: -0.9, color: t.muted }}>.runs-at.dev</span>
       </div>
     </div>
   );

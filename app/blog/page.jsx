@@ -3,9 +3,9 @@ import { Divider } from '../components/ui.jsx';
 
 export const metadata = {
   title: 'Blog',
-  description: 'Updates from runs-on.dev: new features, registry changes, and engineering notes.',
-  alternates: { canonical: 'https://runs-on.dev/blog' },
-  openGraph: { title: 'Blog · runs-on.dev' },
+  description: 'Updates from runs-at.dev: new features, registry changes, and engineering notes.',
+  alternates: { canonical: 'https://runs-at.dev/blog' },
+  openGraph: { title: 'Blog · runs-at.dev' },
 };
 
 const CATEGORY_LABEL = { announcement: 'Announcement', feature: 'Feature', engineering: 'Engineering', guide: 'Guide' };

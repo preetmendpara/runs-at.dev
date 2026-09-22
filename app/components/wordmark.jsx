@@ -44,7 +44,7 @@ export default function Wordmark() {
       onClick={onClick}
       className="text-[18px] tracking-[-0.01em] text-(--color-ink) no-underline"
     >
-      runs-on<span className="text-(--color-muted)">.dev</span>
+      runs-at<span className="text-(--color-muted)">.dev</span>
     </a>
   );
 }

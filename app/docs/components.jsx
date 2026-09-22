@@ -96,7 +96,7 @@ export function ApplyNote() {
     <p className="slit-bar-l rounded-r-lg bg-(--color-card) p-4 pl-5 text-sm leading-relaxed text-(--color-ash)">
       Two ways to apply this. The quickest is{' '}
       <a className="text-(--color-ink) underline" href="/manage">
-        runs-on.dev/manage
+        runs-at.dev/manage
       </a>
       : sign in, pick the record type, paste the value, save. It writes the same
       commit to the registry and DNS follows within seconds. The steps below do

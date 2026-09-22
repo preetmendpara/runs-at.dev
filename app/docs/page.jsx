@@ -3,9 +3,9 @@ import { Eyebrow, DocTitle, Lede, DocList } from './components.jsx';
 
 export const metadata = {
   title: 'Docs',
-  description: 'Documentation for runs-on.dev: quickstart, the full record reference, provider guides, and where to find the source.',
-  alternates: { canonical: 'https://runs-on.dev/docs' },
-  openGraph: { title: 'Docs · runs-on.dev' },
+  description: 'Documentation for runs-at.dev: quickstart, the full record reference, provider guides, and where to find the source.',
+  alternates: { canonical: 'https://runs-at.dev/docs' },
+  openGraph: { title: 'Docs · runs-at.dev' },
 };
 
 export default function Docs() {

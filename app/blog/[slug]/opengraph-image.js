@@ -10,7 +10,7 @@ export function generateStaticParams() {
 
 export default function Image({ params }) {
   const post = getPost(params.slug);
-  const title = post?.title ?? 'runs-on.dev updates';
+  const title = post?.title ?? 'runs-at.dev updates';
   const date = post?.date ?? '';
 
   return new ImageResponse(
@@ -29,7 +29,7 @@ export default function Image({ params }) {
       >
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <span style={{ fontSize: 28, letterSpacing: 2, color: '#9c9c9c', textTransform: 'uppercase', display: 'flex' }}>
-            runs-on.dev
+            runs-at.dev
           </span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>

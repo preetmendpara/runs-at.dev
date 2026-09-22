@@ -12,16 +12,28 @@ import {
   removePath,
   ZONE_VERIFICATION_LABEL,
   formatApiError,
+  cloudflareZonePath,
+  fromCloudflareRecord,
+  toCloudflareRecord,
   syncEach,
   planSweep,
 } from '../lib/dns.js';
 
-const DOMAIN = 'runs-on.dev';
-const TOKEN = process.env.VERCEL_TOKEN;
-const TEAM = process.env.VERCEL_TEAM_ID;
-const changed = (process.env.CHANGED_FILES ?? '').split('\n').filter(Boolean);
+const DOMAIN = 'runs-at.dev';
+const changed = (process.env.CHANGED_FILES ?? '').split('
+').filter(Boolean);
 
-const REQUIRED = { VERCEL_TOKEN: TOKEN, VERCEL_TEAM_ID: TEAM };
+// Which DNS host holds the zone. runs-at.dev lives on Cloudflare; the Vercel
+// path is kept from the upstream runs-on.dev code so either one works.
+const PROVIDER = process.env.DNS_PROVIDER ?? 'cloudflare';
+if (PROVIDER !== 'cloudflare' && PROVIDER !== 'vercel') {
+  console.error(`sync-dns: DNS_PROVIDER must be "cloudflare" or "vercel", got "${PROVIDER}"`);
+  process.exit(1);
+}
+
+const REQUIRED = PROVIDER === 'cloudflare'
+  ? { CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN, CLOUDFLARE_ZONE_ID: process.env.CLOUDFLARE_ZONE_ID }
+  : { VERCEL_TOKEN: process.env.VERCEL_TOKEN, VERCEL_TEAM_ID: process.env.VERCEL_TEAM_ID };
 const missing = Object.entries(REQUIRED)
   .filter(([, value]) => !value)
   .map(([key]) => key);
@@ -32,9 +44,15 @@ if (missing.length > 0) {
 }
 
 const vercel = (path, init = {}) =>
-  fetch(`https://api.vercel.com${path}${path.includes('?') ? '&' : '?'}teamId=${TEAM}`, {
+  fetch(`https://api.vercel.com${path}${path.includes('?') ? '&' : '?'}teamId=${process.env.VERCEL_TEAM_ID}`, {
     ...init,
-    headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${process.env.VERCEL_TOKEN}`, 'Content-Type': 'application/json' },
+  });
+
+const cloudflare = (path, init = {}) =>
+  fetch(`https://api.cloudflare.com/client/v4${cloudflareZonePath(process.env.CLOUDFLARE_ZONE_ID)}${path}`, {
+    ...init,
+    headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`, 'Content-Type': 'application/json' },
   });
 
 // The whole zone, paged once and cached for the run. A 20-claim merge used
@@ -42,10 +60,25 @@ const vercel = (path, init = {}) =>
 // for the zone mirror — ~21 full paginations where one would do. The zone
 // is the unit the reconciler reasons about, and a single sync run is short
 // enough that staleness between files is not a concern.
+//
+// Records come back in one shape whichever provider holds the zone:
+// { id, type, name (relative, '' for the apex), value, mxPriority }.
 let zoneRecordsCache;
 async function zoneRecords() {
   if (zoneRecordsCache) return zoneRecordsCache;
   const found = [];
+  if (PROVIDER === 'cloudflare') {
+    for (let page = 1; ; page++) {
+      const res = await cloudflare(`/dns_records?per_page=100&page=${page}`);
+      if (!res.ok) {
+        console.error(`sync-dns: failed to list records for ${DOMAIN}: ${res.status} ${res.statusText}`);
+        process.exit(1);
+      }
+      const body = await res.json();
+      found.push(...body.result.map((r) => fromCloudflareRecord(r, DOMAIN)));
+      if (page >= (body.result_info?.total_pages ?? 1)) { zoneRecordsCache = found; return found; }
+    }
+  }
   let cursor = '';
   for (;;) {
     const res = await vercel(listPath(DOMAIN, cursor));
@@ -65,7 +98,7 @@ async function existingFor(name) {
   // Filter the single cached walk by name and children (`.<name>`). The
   // leading dot means only genuine children match, never an unrelated
   // record that happens to end the same way. `name` is never '*' or '' —
-  // it comes from the ^domains/([a-z0-9-]+)\.json$ match below — so the
+  // it comes from the ^domains/([a-z0-9-]+).json$ match below — so the
   // wildcard can never be selected for deletion.
   return (await zoneRecords()).filter(
     (r) => r.name === name || r.name.endsWith(`.${name}`),
@@ -73,7 +106,9 @@ async function existingFor(name) {
 }
 
 async function deleteRecord(stale) {
-  const res = await vercel(removePath(DOMAIN, stale.id), { method: 'DELETE' });
+  const res = PROVIDER === 'cloudflare'
+    ? await cloudflare(`/dns_records/${encodeURIComponent(stale.id)}`, { method: 'DELETE' })
+    : await vercel(removePath(DOMAIN, stale.id), { method: 'DELETE' });
   if (!res.ok) {
     const detail = await res.text().catch(() => '');
     // 404 means the record is already gone — a prior run interrupted after
@@ -92,14 +127,22 @@ async function deleteRecord(stale) {
 }
 
 async function createRecord(change) {
-  const body = { type: change.type, name: change.name, value: change.value, ttl: 3600 };
-  // Vercel's records API takes MX priority as a separate field, not folded
-  // into `value`.
-  if (change.type === 'MX') body.mxPriority = change.priority;
-  const res = await vercel(createPath(DOMAIN), {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
+  let res;
+  if (PROVIDER === 'cloudflare') {
+    res = await cloudflare('/dns_records', {
+      method: 'POST',
+      body: JSON.stringify(toCloudflareRecord(change, DOMAIN)),
+    });
+  } else {
+    const body = { type: change.type, name: change.name, value: change.value, ttl: 3600 };
+    // Vercel's records API takes MX priority as a separate field, not folded
+    // into `value`.
+    if (change.type === 'MX') body.mxPriority = change.priority;
+    res = await vercel(createPath(DOMAIN), {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
   if (!res.ok) {
     const detail = await res.text().catch(() => '');
     console.error(`failed to create ${change.type} ${change.name}: ${formatApiError(res.status, detail)}`);
@@ -289,7 +332,7 @@ if (deferred.length > 0) {
   // re-runs this sync, which publishes these. If nothing can be pruned (every
   // holder is still pending) the prune commits nothing and these stay
   // deferred -- that warning is the signal a human needs to look.
-  console.log(`::warning::_vercel.runs-on.dev is at its ${ZONE_VERIFICATION_CAP}-value cap; deferred ${deferred.length} verification challenge(s): ${deferred.map((c) => c.value.split('=')[1].split(',')[0]).join(', ')}`);
+  console.log(`::warning::_vercel.runs-at.dev is at its ${ZONE_VERIFICATION_CAP}-value cap; deferred ${deferred.length} verification challenge(s): ${deferred.map((c) => c.value.split('=')[1].split(',')[0]).join(', ')}`);
   if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, 'over_cap=true\n');
 } else if (toMirror.length === 0 && toUnmirror.length === 0) {
   console.log('zone verification: in sync');
@@ -300,7 +343,7 @@ if (deferred.length > 0) {
 if (failed.length > 0 || mirrorFailures > 0 || sweep.length > SWEEP_LIMIT) {
   const parts = [];
   if (sweep.length > SWEEP_LIMIT) parts.push(`sweep refused ${sweep.length} drifted names`);
-  if (failed.length > 0) parts.push(`could not sync ${failed.join(', ')} (see the errors above; the record likely holds a value Vercel rejects)`);
+  if (failed.length > 0) parts.push(`could not sync ${failed.join(', ')} (see the errors above; the record likely holds a value the DNS provider rejects)`);
   if (mirrorFailures > 0) parts.push(`${mirrorFailures} zone mirror write(s) failed`);
   console.log(`::error::sync-dns: ${parts.join('; ')}`);
   process.exit(1);

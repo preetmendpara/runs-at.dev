@@ -3,9 +3,9 @@ import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record } from '../../components.
 
 export const metadata = {
   title: 'Replit',
-  description: 'Point name.runs-on.dev at a Replit deployment with an A and TXT record.',
-  alternates: { canonical: 'https://runs-on.dev/docs/guides/replit' },
-  openGraph: { title: 'Replit · runs-on.dev' },
+  description: 'Point name.runs-at.dev at a Replit deployment with an A and TXT record.',
+  alternates: { canonical: 'https://runs-at.dev/docs/guides/replit' },
+  openGraph: { title: 'Replit · runs-at.dev' },
 };
 
 export default function ReplitGuide() {
@@ -13,7 +13,7 @@ export default function ReplitGuide() {
     <main className="mx-auto max-w-3xl px-6 py-12">
       <Eyebrow>Docs / Guides / Replit</Eyebrow>
       <DocTitle>Replit</DocTitle>
-      <Lede>you.runs-on.dev serving a Replit deployment, over HTTPS, via A and TXT records.</Lede>
+      <Lede>you.runs-at.dev serving a Replit deployment, over HTTPS, via A and TXT records.</Lede>
 
       <Section title="The record">
         <Record path="domains/you.json">{`"records": {
@@ -38,18 +38,18 @@ export default function ReplitGuide() {
 
         <ol className="list-decimal space-y-2 pl-6 text-sm leading-relaxed sm:text-base">
           <li>
-            In Replit: your deployment → Publishing → Domains → Manual Setup → <C>you.runs-on.dev</C>.
+            In Replit: your deployment → Publishing → Domains → Manual Setup → <C>you.runs-at.dev</C>.
             Note the A and TXT values it shows you.
           </li>
-          <li>Fork <a className="text-(--color-signal) underline" href="https://github.com/zordhalo/runs-on.dev">the registry</a> and edit <C>domains/you.json</C> to the record above, using those values.</li>
+          <li>Fork <a className="text-(--color-signal) underline" href="https://github.com/preetmendpara/runs-at.dev">the registry</a> and edit <C>domains/you.json</C> to the record above, using those values.</li>
           <li>Open a pull request. Once merged, both records are synced to DNS automatically.</li>
         </ol>
       </Section>
 
       <Section title="How to tell it worked">
         <p className="text-sm leading-relaxed sm:text-base">
-          The Domains tab shows <C>you.runs-on.dev</C> as verified once Replit confirms both
-          records. Visiting <C>https://you.runs-on.dev</C> should then serve the deployment.
+          The Domains tab shows <C>you.runs-at.dev</C> as verified once Replit confirms both
+          records. Visiting <C>https://you.runs-at.dev</C> should then serve the deployment.
         </p>
       </Section>
     </main>

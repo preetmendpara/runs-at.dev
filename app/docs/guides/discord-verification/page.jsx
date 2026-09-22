@@ -3,9 +3,9 @@ import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record } from '../../components.
 
 export const metadata = {
   title: 'Discord verification',
-  description: 'Verify ownership of you.runs-on.dev with Discord using a _discord TXT subdomain.',
-  alternates: { canonical: 'https://runs-on.dev/docs/guides/discord-verification' },
-  openGraph: { title: 'Discord verification · runs-on.dev' },
+  description: 'Verify ownership of you.runs-at.dev with Discord using a _discord TXT subdomain.',
+  alternates: { canonical: 'https://runs-at.dev/docs/guides/discord-verification' },
+  openGraph: { title: 'Discord verification · runs-at.dev' },
 };
 
 export default function DiscordVerificationGuide() {
@@ -13,12 +13,12 @@ export default function DiscordVerificationGuide() {
     <main className="mx-auto max-w-3xl px-6 py-12">
       <Eyebrow>Docs / Guides / Discord verification</Eyebrow>
       <DocTitle>Discord verification</DocTitle>
-      <Lede>Proving you own you.runs-on.dev to Discord, via a TXT record.</Lede>
+      <Lede>Proving you own you.runs-at.dev to Discord, via a TXT record.</Lede>
 
       <Section title="What you'll end up with">
         <p className="text-sm leading-relaxed sm:text-base">
           Discord verifies domain ownership (for a linked-role application, or a domain attached to
-          your profile) by checking for a TXT record at <C>_discord.you.runs-on.dev</C> containing a
+          your profile) by checking for a TXT record at <C>_discord.you.runs-at.dev</C> containing a
           token it generates for you.
         </p>
       </Section>
@@ -40,9 +40,9 @@ export default function DiscordVerificationGuide() {
           <li>
             In Discord&apos;s domain verification flow (Developer Portal, for a linked-role
             application, or your user settings for a profile domain), enter{' '}
-            <C>you.runs-on.dev</C> and copy the <C>dh=...</C> value it gives you.
+            <C>you.runs-at.dev</C> and copy the <C>dh=...</C> value it gives you.
           </li>
-          <li>Fork <a className="text-(--color-signal) underline" href="https://github.com/zordhalo/runs-on.dev">the registry</a> and edit <C>domains/you.json</C> to the record above, using that value.</li>
+          <li>Fork <a className="text-(--color-signal) underline" href="https://github.com/preetmendpara/runs-at.dev">the registry</a> and edit <C>domains/you.json</C> to the record above, using that value.</li>
           <li>Open a pull request. Once merged, the TXT record is synced to DNS automatically.</li>
           <li>Back in Discord, click Verify.</li>
         </ol>

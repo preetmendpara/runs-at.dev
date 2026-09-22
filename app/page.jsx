@@ -14,9 +14,9 @@ import { getOwnerIndex } from '../lib/owners.js';
 import { getRecord } from '../lib/registry.js';
 
 export const metadata = {
-  title: 'runs-on.dev · free subdomains',
-  description: 'Claim your own name.runs-on.dev in seconds. Free, forever.',
-  alternates: { canonical: 'https://runs-on.dev' },
+  title: 'runs-at.dev · free subdomains',
+  description: 'Claim your own name.runs-at.dev in seconds. Free, forever.',
+  alternates: { canonical: 'https://runs-at.dev' },
 };
 
 const websiteJsonLd = {
@@ -24,29 +24,28 @@ const websiteJsonLd = {
   '@graph': [
     {
       '@type': 'WebSite',
-      '@id': 'https://runs-on.dev/#website',
-      url: 'https://runs-on.dev',
-      name: 'runs-on.dev',
-      description: 'A free subdomain registry. Claim your own name.runs-on.dev in seconds.',
-      publisher: { '@id': 'https://advancelabs.dev/#organization' },
+      '@id': 'https://runs-at.dev/#website',
+      url: 'https://runs-at.dev',
+      name: 'runs-at.dev',
+      description: 'A free subdomain registry. Claim your own name.runs-at.dev in seconds.',
+      publisher: { '@id': 'https://runs-at.dev/#operator' },
     },
     {
-      '@type': 'Organization',
-      '@id': 'https://advancelabs.dev/#organization',
-      name: 'Advance Labs',
-      description: 'Independent software studio; builds and operates the runs-on.dev free subdomain registry.',
-      url: 'https://advancelabs.dev',
-      logo: 'https://runs-on.dev/icon.svg',
-      sameAs: ['https://github.com/zordhalo/runs-on.dev', 'https://advancelabs.dev'],
+      '@type': 'Person',
+      '@id': 'https://runs-at.dev/#operator',
+      name: 'preetmendpara',
+      description: 'Operates the runs-at.dev free subdomain registry.',
+      url: 'https://github.com/preetmendpara',
+      logo: 'https://runs-at.dev/icon.svg',
+      sameAs: ['https://github.com/preetmendpara/runs-at.dev', 'https://github.com/preetmendpara'],
       contactPoint: [
         {
           '@type': 'ContactPoint',
-          email: 'abuse@runs-on.dev',
+          email: 'abuse@runs-at.dev',
           contactType: 'abuse reports and support',
-          url: 'https://runs-on.dev/contact',
+          url: 'https://runs-at.dev/contact',
         },
       ],
-      address: { '@type': 'PostalAddress', addressCountry: 'IN' },
     },
   ],
 };
@@ -58,7 +57,7 @@ const LINKS = [
   { href: '/openapi.json', label: 'API', note: 'OpenAPI spec for programmatic access' },
   { href: '/about', label: 'About', note: 'what this is and is not' },
   { href: '/faq', label: 'FAQ', note: 'straight answers' },
-  { href: 'https://github.com/zordhalo/runs-on.dev', label: 'GitHub', note: 'the registry itself', external: true },
+  { href: 'https://github.com/preetmendpara/runs-at.dev', label: 'GitHub', note: 'the registry itself', external: true },
 ];
 
 // Only for a signed-in visitor: this page is the highest-traffic route on the
@@ -102,7 +101,7 @@ export default async function Home() {
     <main>
       <JsonLd data={websiteJsonLd} />
 
-      <h1 className="sr-only">runs-on.dev · a free subdomain registry</h1>
+      <h1 className="sr-only">runs-at.dev · a free subdomain registry</h1>
 
       {/* Hero: the claim line IS the display headline, set at 63px weight 400
           with negative tracking. Centered stack, then the dot-map world below. */}
@@ -142,7 +141,7 @@ export default async function Home() {
             </h2>
             <p className="mt-5 text-[16px] leading-[1.5] text-(--color-muted)">
               That file says the name is yours, and it is the only thing that makes{' '}
-              <span className="font-(family-name:--font-mono) text-[15px]">*.runs-on.dev</span>{' '}
+              <span className="font-(family-name:--font-mono) text-[15px]">*.runs-at.dev</span>{' '}
               resolve. No hidden database, nothing you can&rsquo;t read yourself.
             </p>
             <dl className="mx-auto mt-8 max-w-[440px] space-y-3 text-left font-(family-name:--font-mono) text-[13px]">
@@ -192,7 +191,7 @@ export default async function Home() {
         <Section title="Report abuse">
           <Quote>
             If a subdomain is phishing, impersonating someone, or serving malware, email
-            abuse@runs-on.dev and it will be reclaimed.
+            abuse@runs-at.dev and it will be reclaimed.
           </Quote>
         </Section>
       </div>

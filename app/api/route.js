@@ -4,7 +4,7 @@
 export const dynamic = 'force-static';
 
 const ENDPOINTS = {
-  'GET /api/check?name=<name>': 'Is <name>.runs-on.dev available to claim?',
+  'GET /api/check?name=<name>': 'Is <name>.runs-at.dev available to claim?',
   'POST /api/claim': 'Claim a name for the signed-in GitHub account',
   'POST /api/records': 'Update the DNS records, subdomains, and profile of a name you own',
   'POST /api/release': 'Release your name back to the pool',
@@ -18,13 +18,13 @@ const ENDPOINTS = {
 
 export function GET() {
   return Response.json({
-    name: 'runs-on.dev',
+    name: 'runs-at.dev',
     version: '1',
-    description: 'Free subdomain registry: claim name.runs-on.dev, manage DNS records, and host static sites on them.',
-    spec: 'https://runs-on.dev/openapi.json',
-    mcp: 'https://runs-on.dev/.well-known/mcp',
-    docs: 'https://runs-on.dev/docs',
-    auth: 'GitHub OAuth session (sign in at https://runs-on.dev) or a rod1 deploy token (scope sites:publish, self-serve at /manage)',
+    description: 'Free subdomain registry: claim name.runs-at.dev, manage DNS records, and host static sites on them.',
+    spec: 'https://runs-at.dev/openapi.json',
+    mcp: 'https://runs-at.dev/.well-known/mcp',
+    docs: 'https://runs-at.dev/docs',
+    auth: 'GitHub OAuth session (sign in at https://runs-at.dev) or a rod1 deploy token (scope sites:publish, self-serve at /manage)',
     rate_limit: 'RateLimit-Limit / RateLimit-Remaining / RateLimit-Reset headers on limited endpoints; 429 carries Retry-After',
     endpoints: ENDPOINTS,
   });

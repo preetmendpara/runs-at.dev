@@ -1,7 +1,7 @@
 name: prune-verification
 
 # Vercel caps one TXT hostname at 50 values. Every claim mirroring a
-# `vc-domain-verify=` challenge holds one at `_vercel.runs-on.dev`, and past
+# `vc-domain-verify=` challenge holds one at `_vercel.runs-at.dev`, and past
 # the cap sync-dns cannot publish at all — the next claim's verification can
 # never complete (issues #104, #105).
 #

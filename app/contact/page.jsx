@@ -2,9 +2,9 @@ import { Section, Quote } from '../components/Section.jsx';
 
 export const metadata = {
   title: 'Contact',
-  description: 'How to reach runs-on.dev: abuse reports, name support, registry bugs, and the public source of every rule.',
-  alternates: { canonical: 'https://runs-on.dev/contact' },
-  openGraph: { title: 'Contact · runs-on.dev' },
+  description: 'How to reach runs-at.dev: abuse reports, name support, registry bugs, and the public source of every rule.',
+  alternates: { canonical: 'https://runs-at.dev/contact' },
+  openGraph: { title: 'Contact · runs-at.dev' },
 };
 
 export default function Contact() {
@@ -22,7 +22,7 @@ export default function Contact() {
       <Section title="Abuse and security">
         <p className="text-sm leading-relaxed sm:text-base">
           Phishing, impersonation, malware, or a name squatting a brand: email{' '}
-          <a className="text-(--color-ink) underline" href="mailto:abuse@runs-on.dev">abuse@runs-on.dev</a> with the
+          <a className="text-(--color-ink) underline" href="mailto:abuse@runs-at.dev">abuse@runs-at.dev</a> with the
           name and one line about what it is doing. Reclamation for the clear cases is same-day, no
           lawyer needed. Security reports about the site itself go to the same address; please do
           not open a public issue for anything exploitable.
@@ -36,7 +36,7 @@ export default function Contact() {
           &ldquo;did it work?&rdquo; panel, and the{' '}
           <a className="text-(--color-ink) underline" href="/docs/guides">hosting guides</a> cover every
           provider&rsquo;s gotchas. If you are still stuck, the registry&rsquo;s{' '}
-          <a className="text-(--color-ink) underline" href="https://github.com/zordhalo/runs-on.dev/issues">
+          <a className="text-(--color-ink) underline" href="https://github.com/preetmendpara/runs-at.dev/issues">
             issue tracker
           </a>{' '}
           is the right place: include the name and what you expected.
@@ -45,10 +45,9 @@ export default function Contact() {
 
       <Section title="Everything else">
         <p className="text-sm leading-relaxed sm:text-base">
-          runs-on.dev is built and operated by{' '}
-          <a className="text-(--color-ink) underline" href="https://advancelabs.dev">Advance Labs</a>. The
-          operator&rsquo;s own site carries the current ways to get in touch; the{' '}
-          <a className="text-(--color-ink) underline" href="https://github.com/zordhalo/runs-on.dev">
+          runs-at.dev is built and operated by{' '}
+          <a className="text-(--color-ink) underline" href="https://github.com/preetmendpara">@preetmendpara</a>. The{' '}
+          <a className="text-(--color-ink) underline" href="https://github.com/preetmendpara/runs-at.dev">
             public repo
           </a>{' '}
           is where product decisions happen in the open, and the{' '}

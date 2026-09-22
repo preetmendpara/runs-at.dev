@@ -12,6 +12,9 @@ import {
   removePath,
   formatApiError,
   planSweep,
+  cloudflareZonePath,
+  fromCloudflareRecord,
+  toCloudflareRecord,
 } from '../lib/dns.js';
 
 const base = { name: 'lucas', owner: { github: 'zordhalo' }, claimedAt: '2026-08-30T00:00:00Z' };
@@ -86,38 +89,38 @@ test('plans both root and nested subdomain records together', () => {
 // missing its {domain} segment, so every delete 404'd from the day it was
 // written and the sync only stayed green while no name had records to replace.
 test('listPath asks for the domain\'s records, a page at a time', () => {
-  assert.equal(listPath('runs-on.dev'), '/v4/domains/runs-on.dev/records?limit=100');
+  assert.equal(listPath('runs-at.dev'), '/v4/domains/runs-at.dev/records?limit=100');
   assert.equal(
-    listPath('runs-on.dev', 'abc123'),
-    '/v4/domains/runs-on.dev/records?limit=100&until=abc123',
+    listPath('runs-at.dev', 'abc123'),
+    '/v4/domains/runs-at.dev/records?limit=100&until=abc123',
   );
 });
 
 test('createPath posts under the domain', () => {
-  assert.equal(createPath('runs-on.dev'), '/v2/domains/runs-on.dev/records');
+  assert.equal(createPath('runs-at.dev'), '/v2/domains/runs-at.dev/records');
 });
 
 test('removePath includes the domain, not just the record id', () => {
-  assert.equal(removePath('runs-on.dev', 'rec_abc'), '/v2/domains/runs-on.dev/records/rec_abc');
+  assert.equal(removePath('runs-at.dev', 'rec_abc'), '/v2/domains/runs-at.dev/records/rec_abc');
 });
 
 test('the zone mirror unions _vercel TXT values across claims, deduplicated', () => {
   const claims = [
-    { ...base, subdomains: { _vercel: { TXT: ['vc-domain-verify=lucas.runs-on.dev,a1'] } } },
+    { ...base, subdomains: { _vercel: { TXT: ['vc-domain-verify=lucas.runs-at.dev,a1'] } } },
     {
       name: 'shrey',
       owner: { github: 'someone' },
       claimedAt: '2026-09-01T00:00:00Z',
       subdomains: {
-        _vercel: { TXT: ['vc-domain-verify=shrey.runs-on.dev,b2', 'vc-domain-verify=lucas.runs-on.dev,a1'] },
+        _vercel: { TXT: ['vc-domain-verify=shrey.runs-at.dev,b2', 'vc-domain-verify=lucas.runs-at.dev,a1'] },
       },
     },
     { ...base, name: 'dexi', records: { CNAME: 'cname.vercel-dns.com' } },
   ];
 
   assert.deepEqual(planZoneVerificationRecords(claims), [
-    { type: 'TXT', name: '_vercel', value: 'vc-domain-verify=lucas.runs-on.dev,a1' },
-    { type: 'TXT', name: '_vercel', value: 'vc-domain-verify=shrey.runs-on.dev,b2' },
+    { type: 'TXT', name: '_vercel', value: 'vc-domain-verify=lucas.runs-at.dev,a1' },
+    { type: 'TXT', name: '_vercel', value: 'vc-domain-verify=shrey.runs-at.dev,b2' },
   ]);
 });
 
@@ -149,11 +152,11 @@ test('identical existing and desired records are all unchanged — nothing touch
 test('a CNAME value change produces exactly one remove and one create, not a full wipe', () => {
   const existing = [
     { id: 'rec_1', type: 'CNAME', name: 'lucas', value: 'old.vercel-dns.com' },
-    { id: 'rec_2', type: 'TXT', name: '_vercel.lucas', value: 'vc-domain-verify=lucas.runs-on.dev,abc' },
+    { id: 'rec_2', type: 'TXT', name: '_vercel.lucas', value: 'vc-domain-verify=lucas.runs-at.dev,abc' },
   ];
   const desired = [
     { type: 'CNAME', name: 'lucas', value: 'new.vercel-dns.com' },
-    { type: 'TXT', name: '_vercel.lucas', value: 'vc-domain-verify=lucas.runs-on.dev,abc' },
+    { type: 'TXT', name: '_vercel.lucas', value: 'vc-domain-verify=lucas.runs-at.dev,abc' },
   ];
   const { unchanged, remove, create } = reconcileDnsRecords(existing, desired);
   // The TXT is untouched even though the CNAME changed — this is the exact
@@ -214,15 +217,15 @@ test('a no-op save touches zero DNS records', () => {
 
 test('reconcile creates missing values and drops only unclaimed vc-domain-verify TXTs', () => {
   const { create, remove } = reconcileZoneVerification(
-    [{ type: 'TXT', name: '_vercel', value: 'vc-domain-verify=lucas.runs-on.dev,a1' }],
+    [{ type: 'TXT', name: '_vercel', value: 'vc-domain-verify=lucas.runs-at.dev,a1' }],
     [
-      { id: 'rec_stays', type: 'TXT', name: '_vercel', value: 'vc-domain-verify=lucas.runs-on.dev,a1' },
-      { id: 'rec_dropped', type: 'TXT', name: '_vercel', value: 'vc-domain-verify=gone.runs-on.dev,z9' },
+      { id: 'rec_stays', type: 'TXT', name: '_vercel', value: 'vc-domain-verify=lucas.runs-at.dev,a1' },
+      { id: 'rec_dropped', type: 'TXT', name: '_vercel', value: 'vc-domain-verify=gone.runs-at.dev,z9' },
       // Hand-placed by the operator: no vc-domain-verify= prefix, so the
       // mirror must never claim ownership of it.
       { id: 'rec_manual', type: 'TXT', name: '_vercel', value: 'operator-note=keep-me' },
       // A claim's own child record: belongs to that claim's sync pass.
-      { id: 'rec_child', type: 'TXT', name: '_vercel.lucas', value: 'vc-domain-verify=lucas.runs-on.dev,a1' },
+      { id: 'rec_child', type: 'TXT', name: '_vercel.lucas', value: 'vc-domain-verify=lucas.runs-at.dev,a1' },
     ],
   );
 
@@ -232,11 +235,11 @@ test('reconcile creates missing values and drops only unclaimed vc-domain-verify
 
 test('reconcile creates a value the zone does not hold yet', () => {
   const { create, remove } = reconcileZoneVerification(
-    [{ type: 'TXT', name: '_vercel', value: 'vc-domain-verify=shovith.runs-on.dev,c3' }],
+    [{ type: 'TXT', name: '_vercel', value: 'vc-domain-verify=shovith.runs-at.dev,c3' }],
     [],
   );
 
-  assert.deepEqual(create, [{ type: 'TXT', name: '_vercel', value: 'vc-domain-verify=shovith.runs-on.dev,c3' }]);
+  assert.deepEqual(create, [{ type: 'TXT', name: '_vercel', value: 'vc-domain-verify=shovith.runs-at.dev,c3' }]);
   assert.deepEqual(remove, []);
 });
 
@@ -247,26 +250,26 @@ test('a claim may only mirror a challenge naming its own hostname', () => {
   const attacker = {
     name: 'attacker',
     subdomains: { _vercel: { TXT: [
-      'vc-domain-verify=runs-on.dev,ATTACKERTOKEN',
-      'vc-domain-verify=hussain.runs-on.dev,ATTACKERTOKEN',
-      'vc-domain-verify=attacker.runs-on.dev,OWNTOKEN',
+      'vc-domain-verify=runs-at.dev,ATTACKERTOKEN',
+      'vc-domain-verify=hussain.runs-at.dev,ATTACKERTOKEN',
+      'vc-domain-verify=attacker.runs-at.dev,OWNTOKEN',
     ] } },
   };
   const values = planZoneVerificationRecords([attacker]).map((r) => r.value);
-  assert.deepEqual(values, ['vc-domain-verify=attacker.runs-on.dev,OWNTOKEN']);
+  assert.deepEqual(values, ['vc-domain-verify=attacker.runs-at.dev,OWNTOKEN']);
 });
 
 test('a challenge for the apex itself is never mirrored', () => {
-  // Publishing this would let the claimant attach runs-on.dev to their own
+  // Publishing this would let the claimant attach runs-at.dev to their own
   // Vercel account: the apex, not their one name.
-  const claim = { name: 'x', subdomains: { _vercel: { TXT: ['vc-domain-verify=runs-on.dev,T'] } } };
+  const claim = { name: 'x', subdomains: { _vercel: { TXT: ['vc-domain-verify=runs-at.dev,T'] } } };
   assert.deepEqual(planZoneVerificationRecords([claim]), []);
 });
 
 test('a name that merely prefixes another cannot borrow its challenge', () => {
   // "hussain" must not satisfy the prefix check for "hussain-two".
   const claim = { name: 'hussain', subdomains: { _vercel: { TXT: [
-    'vc-domain-verify=hussain-two.runs-on.dev,T',
+    'vc-domain-verify=hussain-two.runs-at.dev,T',
   ] } } };
   assert.deepEqual(planZoneVerificationRecords([claim]), []);
 });
@@ -274,7 +277,7 @@ test('a name that merely prefixes another cannot borrow its challenge', () => {
 test('every real _vercel claim still mirrors', () => {
   const claims = ['hussain', 'shovith', 'laurentmaxhuni', 'feel-your-phone'].map((name) => ({
     name,
-    subdomains: { _vercel: { TXT: [`vc-domain-verify=${name}.runs-on.dev,tok`] } },
+    subdomains: { _vercel: { TXT: [`vc-domain-verify=${name}.runs-at.dev,tok`] } },
   }));
   assert.equal(planZoneVerificationRecords(claims).length, 4);
 });
@@ -301,7 +304,7 @@ test('an empty error body falls back to the bare status', () => {
   assert.equal(formatApiError(500, '   '), '500');
 });
 
-const txt = (n) => ({ type: 'TXT', name: '_vercel', value: `vc-domain-verify=n${n}.runs-on.dev,x` });
+const txt = (n) => ({ type: 'TXT', name: '_vercel', value: `vc-domain-verify=n${n}.runs-at.dev,x` });
 const held = (n) => Array.from({ length: n }, (_, i) => ({ id: `rec_${i}`, ...txt(1000 + i) }));
 
 test('fit publishes every create while under the cap', () => {
@@ -376,7 +379,7 @@ test('sweep sees subdomain drift as the claim\'s own', () => {
 test('an in-sync zone plans no sweep work', () => {
   const zone = [
     { id: 'a', type: 'CNAME', name: 'lucas', value: 'lucas.vercel.app.' },
-    { id: 'b', type: 'TXT', name: '_vercel', value: 'vc-domain-verify=lucas.runs-on.dev,abc' },
+    { id: 'b', type: 'TXT', name: '_vercel', value: 'vc-domain-verify=lucas.runs-at.dev,abc' },
   ];
   assert.deepEqual(planSweep([claim('lucas', { CNAME: 'lucas.vercel.app' })], zone), []);
 });
@@ -395,7 +398,7 @@ test('sweep never touches records for a label that was never a claim', () => {
   // The operator's Bing verification CNAME, the zone mirror, the wildcard.
   const zone = [
     { id: 'a', type: 'CNAME', name: '50aa782de4a596073f9d2a9ff3bd04e6', value: 'verify.bing.com.' },
-    { id: 'b', type: 'TXT', name: '_vercel', value: 'vc-domain-verify=x.runs-on.dev,1' },
+    { id: 'b', type: 'TXT', name: '_vercel', value: 'vc-domain-verify=x.runs-at.dev,1' },
     { id: 'c', type: 'CNAME', name: '*', value: 'cname.vercel-dns.com.' },
   ];
   assert.deepEqual(planSweep([], zone, { released: new Set(['old']) }), []);
@@ -410,4 +413,38 @@ test('a released name since reclaimed is reconciled as a claim, not cleared', ()
 test('a skipped released name (unreadable claim file) is never cleared', () => {
   const zone = [{ id: 'a', type: 'CNAME', name: 'broken', value: 'x.example.com.' }];
   assert.deepEqual(planSweep([], zone, { skip: new Set(['broken']), released: new Set(['broken']) }), []);
+});
+
+test('Cloudflare records are read back in the shape the reconciler compares', () => {
+  const zone = 'runs-at.dev';
+  assert.deepEqual(fromCloudflareRecord({ id: 'a', type: 'CNAME', name: 'blog.lucas.runs-at.dev', content: 'lucas.github.io' }, zone),
+    { id: 'a', type: 'CNAME', name: 'blog.lucas', value: 'lucas.github.io' });
+  assert.equal(fromCloudflareRecord({ id: 'b', type: 'A', name: 'runs-at.dev', content: '1.2.3.4' }, zone).name, '');
+  assert.equal(fromCloudflareRecord({ id: 'c', type: 'TXT', name: '_vercel.runs-at.dev', content: '"vc-domain-verify=a.runs-at.dev,x"' }, zone).value, 'vc-domain-verify=a.runs-at.dev,x');
+  assert.equal(fromCloudflareRecord({ id: 'd', type: 'MX', name: 'lucas.runs-at.dev', content: 'mx.example.com', priority: 10 }, zone).mxPriority, 10);
+});
+
+test('Cloudflare creates are DNS-only and fully qualified', () => {
+  assert.deepEqual(toCloudflareRecord({ type: 'CNAME', name: 'lucas', value: 'lucas.github.io' }, 'runs-at.dev'),
+    { type: 'CNAME', name: 'lucas.runs-at.dev', content: 'lucas.github.io', ttl: 3600, proxied: false });
+  assert.deepEqual(toCloudflareRecord({ type: 'MX', name: 'lucas', value: 'mx.example.com', priority: 5 }, 'runs-at.dev'),
+    { type: 'MX', name: 'lucas.runs-at.dev', content: 'mx.example.com', ttl: 3600, priority: 5 });
+  assert.equal(toCloudflareRecord({ type: 'TXT', name: '_vercel', value: 'v' }, 'runs-at.dev').name, '_vercel.runs-at.dev');
+});
+
+test('a read-back Cloudflare record matches the change that created it', () => {
+  const change = { type: 'CNAME', name: 'lucas', value: 'lucas.github.io' };
+  const cf = toCloudflareRecord(change, 'runs-at.dev');
+  const back = fromCloudflareRecord({ id: 'x', ...cf }, 'runs-at.dev');
+  assert.deepEqual(reconcileDnsRecords([back], [change]).create, []);
+});
+
+test('the Cloudflare zone id must be 32 hex characters', () => {
+  assert.equal(cloudflareZonePath('0123456789abcdef0123456789abcdef'), '/zones/0123456789abcdef0123456789abcdef');
+  assert.throws(() => cloudflareZonePath('../accounts'));
+  assert.throws(() => cloudflareZonePath(undefined));
+});
+
+test('Cloudflare error bodies are folded into the log line', () => {
+  assert.equal(formatApiError(400, JSON.stringify({ errors: [{ code: 81053, message: 'Record already exists.' }] })), '400 Record already exists.');
 });

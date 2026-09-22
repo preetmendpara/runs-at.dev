@@ -8,20 +8,20 @@ import {
 import { BANNER_SIZE } from '../lib/banner-size.js';
 
 test('the image comes off the apex, never the claimed host', () => {
-  // A relative path, or one built against <name>.runs-on.dev, is rewritten by
+  // A relative path, or one built against <name>.runs-at.dev, is rewritten by
   // proxy.js into /sites/<name>/... and 404s. The card page's share row
   // carries the same warning.
   for (const theme of BADGE_THEMES) {
-    assert.ok(badgeImageUrl('lucas', theme).startsWith('https://runs-on.dev/banner/lucas'));
+    assert.ok(badgeImageUrl('lucas', theme).startsWith('https://runs-at.dev/banner/lucas'));
   }
-  assert.equal(badgeImageUrl('lucas', 'dark'), 'https://runs-on.dev/banner/lucas?theme=dark');
-  assert.equal(badgeImageUrl('lucas', 'light'), 'https://runs-on.dev/banner/lucas');
+  assert.equal(badgeImageUrl('lucas', 'dark'), 'https://runs-at.dev/banner/lucas?theme=dark');
+  assert.equal(badgeImageUrl('lucas', 'light'), 'https://runs-at.dev/banner/lucas');
 });
 
 test('the badge links to the owner card, not the apex', () => {
-  assert.equal(badgeLinkUrl('lucas'), 'https://lucas.runs-on.dev');
-  assert.ok(badgeHtml('lucas').includes('href="https://lucas.runs-on.dev"'));
-  assert.ok(badgeMarkdown('lucas').endsWith('](https://lucas.runs-on.dev)'));
+  assert.equal(badgeLinkUrl('lucas'), 'https://lucas.runs-at.dev');
+  assert.ok(badgeHtml('lucas').includes('href="https://lucas.runs-at.dev"'));
+  assert.ok(badgeMarkdown('lucas').endsWith('](https://lucas.runs-at.dev)'));
 });
 
 test('the html snippet reserves the image box', () => {
@@ -34,8 +34,8 @@ test('the html snippet reserves the image box', () => {
 });
 
 test('both snippets carry an alt text that says what the badge is', () => {
-  assert.ok(badgeHtml('lucas').includes('alt="lucas.runs-on.dev"'));
-  assert.ok(badgeMarkdown('lucas').startsWith('[![lucas.runs-on.dev]'));
+  assert.ok(badgeHtml('lucas').includes('alt="lucas.runs-at.dev"'));
+  assert.ok(badgeMarkdown('lucas').startsWith('[![lucas.runs-at.dev]'));
 });
 
 test('an unknown theme falls back to light rather than forging a url', () => {

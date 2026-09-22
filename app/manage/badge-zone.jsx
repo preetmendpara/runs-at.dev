@@ -55,7 +55,7 @@ export default function BadgeZone({ name }) {
       <div className="slit-bottom px-6 py-5 sm:px-8">
         <p className="meta">Badge</p>
         <p className="mt-2 text-sm leading-relaxed text-(--color-muted)">
-          A card for {name}.runs-on.dev you can put on a page you own. It links back to your
+          A card for {name}.runs-at.dev you can put on a page you own. It links back to your
           name and updates itself when you change your record.
         </p>
       </div>
@@ -80,7 +80,7 @@ export default function BadgeZone({ name }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={snippets.imageUrl}
-          alt={`Preview of the ${name}.runs-on.dev badge, ${theme} theme`}
+          alt={`Preview of the ${name}.runs-at.dev badge, ${theme} theme`}
           width={snippets.width}
           className="mt-3 h-auto w-full max-w-[420px] rounded-[4px]"
         />

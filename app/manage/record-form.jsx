@@ -126,7 +126,7 @@ const PRESETS = [
     guide: null,
     steps: (name, login) => [
       `Target ${login ? `${String(login).toLowerCase()}.github.io` : 'yourusername.github.io'} (or <project>.github.io if the site lives in a project repo)`,
-      `In that repo: Settings → Pages → Custom domain, enter ${name}.runs-on.dev, save`,
+      `In that repo: Settings → Pages → Custom domain, enter ${name}.runs-at.dev, save`,
       "Save here. The zone publishes within a minute, HTTPS follows on GitHub's side",
     ],
   },
@@ -138,7 +138,7 @@ const PRESETS = [
     guide: null,
     steps: (name) => [
       "Target your site's netlify.app address (Domain settings shows it)",
-      `In Netlify: Domain settings → Add a domain → ${name}.runs-on.dev`,
+      `In Netlify: Domain settings → Add a domain → ${name}.runs-at.dev`,
       'Save here, then let Netlify provision the certificate',
     ],
   },
@@ -150,7 +150,7 @@ const PRESETS = [
     guide: null,
     steps: (name) => [
       "Target your project's pages.dev address",
-      `In Cloudflare: your Pages project → Custom domains → Set up a custom domain → ${name}.runs-on.dev`,
+      `In Cloudflare: your Pages project → Custom domains → Set up a custom domain → ${name}.runs-at.dev`,
       'Save here. Cloudflare issues the certificate once the CNAME is live',
     ],
   },
@@ -161,7 +161,7 @@ const PRESETS = [
     prefillFor: () => 'cname.vercel-dns.com',
     guide: '/docs/guides/vercel',
     steps: (name) => [
-      `In your Vercel project: Settings → Domains → Add, enter ${name}.runs-on.dev`,
+      `In your Vercel project: Settings → Domains → Add, enter ${name}.runs-at.dev`,
       'It will show a verification TXT starting with vc-domain-verify= — copy the whole value',
       'Add it below as a subdomain record: label _vercel, type TXT',
       'Save here. Vercel needs one re-check after the TXT is live, so give it a minute',
@@ -175,7 +175,7 @@ const PRESETS = [
     guide: null,
     steps: (name) => [
       "Target your service's onrender.com address",
-      `In Render: your service → Settings → Custom Domains → Add ${name}.runs-on.dev`,
+      `In Render: your service → Settings → Custom Domains → Add ${name}.runs-at.dev`,
       'Save here; Render validates the CNAME and issues the certificate',
     ],
   },
@@ -289,7 +289,7 @@ export default function RecordForm({ name, record }) {
       <div className="flex flex-wrap items-center justify-between gap-4 slit-bottom px-6 py-5 sm:px-8">
         <div>
           <p className="font-(family-name:--font-mono) text-xs text-(--color-muted)">domains/{name}.json</p>
-          <h2 className="mt-1.5 text-[23px] leading-[1.07] font-normal tracking-[-0.004em] text-(--color-ink)">{name}.runs-on.dev</h2>
+          <h2 className="mt-1.5 text-[23px] leading-[1.07] font-normal tracking-[-0.004em] text-(--color-ink)">{name}.runs-at.dev</h2>
         </div>
         <span className="inline-flex items-center gap-2 slit-frame rounded-[4px] bg-(--color-badge) px-3.5 py-2 font-(family-name:--font-mono) text-[12px] tracking-[0.05em] text-(--color-muted) uppercase">
           <span
@@ -569,7 +569,7 @@ function SwapZone({ name }) {
         </button>
       ) : (
         <div className="space-y-3">
-          <p className="text-[14px] text-(--color-ink)">Swap {name}.runs-on.dev</p>
+          <p className="text-[14px] text-(--color-ink)">Swap {name}.runs-at.dev</p>
           <p className="max-w-[600px] text-xs leading-relaxed text-(--color-muted)">
             Trade this name for a new one. All your settings (CNAME, profile, subdomains)
             carry over. The old name is released immediately and becomes available to anyone.
@@ -593,7 +593,7 @@ function SwapZone({ name }) {
             )}
             {nameAvailable && (
               <p className="font-(family-name:--font-mono) text-xs text-(--color-muted)">
-                → {newName.trim().toLowerCase()}.runs-on.dev
+                → {newName.trim().toLowerCase()}.runs-at.dev
               </p>
             )}
           </div>
@@ -684,7 +684,7 @@ function ReleaseZone({ name }) {
         </button>
       ) : (
         <div className="space-y-3">
-          <p className="text-[14px] text-(--color-flag)">Release {name}.runs-on.dev?</p>
+          <p className="text-[14px] text-(--color-flag)">Release {name}.runs-at.dev?</p>
           <p className="max-w-[600px] text-xs leading-relaxed text-(--color-muted)">
             This permanently deletes your claim. The name becomes available for anyone
             to claim immediately. DNS records and your profile card are removed.
@@ -745,7 +745,7 @@ function SubdomainRecords({ name, subRows, setRow, addRow, removeRow }) {
         <div key={i} className="slit-frame mt-12 rounded-lg p-3">
           <div className="flex flex-wrap items-center gap-2">
             <input value={row.label} onChange={(e) => setRow(i, { label: e.target.value })} placeholder="_vercel" aria-label="Subdomain label" spellCheck={false} className={`w-32 ${INPUT}`} />
-            <span className="font-(family-name:--font-mono) text-xs text-(--color-muted)">.{name}.runs-on.dev</span>
+            <span className="font-(family-name:--font-mono) text-xs text-(--color-muted)">.{name}.runs-at.dev</span>
             <select value={row.type} onChange={(e) => setRow(i, { type: e.target.value })} aria-label="Record type" className={`w-auto ${INPUT}`}>
               {SUBDOMAIN_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>

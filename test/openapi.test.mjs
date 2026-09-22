@@ -11,7 +11,7 @@ test('is a valid OpenAPI 3.1 document with identity metadata', () => {
   assert.equal(spec.openapi, '3.1.0');
   assert.ok(spec.info.title.length > 3);
   assert.ok(spec.info.description.length > 50);
-  assert.ok(Array.isArray(spec.servers) && spec.servers[0].url === 'https://runs-on.dev');
+  assert.ok(Array.isArray(spec.servers) && spec.servers[0].url === 'https://runs-at.dev');
 });
 
 test('every operation has a unique operationId, tags, and responses', () => {

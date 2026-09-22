@@ -3,9 +3,9 @@ import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record } from '../../components.
 
 export const metadata = {
   title: 'Email forwarding',
-  description: 'Forward you@you.runs-on.dev to your real inbox with MX records, using ImprovMX as the worked example.',
-  alternates: { canonical: 'https://runs-on.dev/docs/guides/email-forwarding' },
-  openGraph: { title: 'Email forwarding · runs-on.dev' },
+  description: 'Forward you@you.runs-at.dev to your real inbox with MX records, using ImprovMX as the worked example.',
+  alternates: { canonical: 'https://runs-at.dev/docs/guides/email-forwarding' },
+  openGraph: { title: 'Email forwarding · runs-at.dev' },
 };
 
 export default function EmailForwardingGuide() {
@@ -13,7 +13,7 @@ export default function EmailForwardingGuide() {
     <main className="mx-auto max-w-3xl px-6 py-12">
       <Eyebrow>Docs / Guides / Email forwarding</Eyebrow>
       <DocTitle>Email forwarding</DocTitle>
-      <Lede>you@you.runs-on.dev arriving in your real inbox, via MX records and ImprovMX.</Lede>
+      <Lede>you@you.runs-at.dev arriving in your real inbox, via MX records and ImprovMX.</Lede>
 
       <Section title="The record">
         <Record path="domains/you.json">{`"records": {
@@ -26,7 +26,7 @@ export default function EmailForwardingGuide() {
           <C>mx1.improvmx.com</C> and <C>mx2.improvmx.com</C> at priorities 10 and 20 are
           ImprovMX&apos;s standard mail servers, the same for every domain. <C>MX</C> may coexist
           with <C>A</C> and <C>TXT</C> at the same name, so this is safe to add even if you also
-          point <C>you.runs-on.dev</C> at a site.
+          point <C>you.runs-at.dev</C> at a site.
         </p>
       </Section>
 
@@ -36,10 +36,10 @@ export default function EmailForwardingGuide() {
         <ol className="list-decimal space-y-2 pl-6 text-sm leading-relaxed sm:text-base">
           <li>
             At <a className="text-(--color-signal) underline" href="https://improvmx.com">improvmx.com</a>,
-            add <C>you.runs-on.dev</C> as a domain and set up a forwarding alias (for example,{' '}
-            <C>*@you.runs-on.dev</C> → your real address).
+            add <C>you.runs-at.dev</C> as a domain and set up a forwarding alias (for example,{' '}
+            <C>*@you.runs-at.dev</C> → your real address).
           </li>
-          <li>Fork <a className="text-(--color-signal) underline" href="https://github.com/zordhalo/runs-on.dev">the registry</a> and edit <C>domains/you.json</C> to the record above.</li>
+          <li>Fork <a className="text-(--color-signal) underline" href="https://github.com/preetmendpara/runs-at.dev">the registry</a> and edit <C>domains/you.json</C> to the record above.</li>
           <li>Open a pull request. Once merged, the MX records are synced to DNS automatically.</li>
         </ol>
       </Section>
@@ -47,7 +47,7 @@ export default function EmailForwardingGuide() {
       <Section title="How to tell it worked">
         <p className="text-sm leading-relaxed sm:text-base">
           ImprovMX&apos;s dashboard shows the domain as verified once it can see both MX records.
-          Send a test email to your <C>you.runs-on.dev</C> address and confirm it lands in the
+          Send a test email to your <C>you.runs-at.dev</C> address and confirm it lands in the
           forwarded inbox, usually within a minute.
         </p>
       </Section>

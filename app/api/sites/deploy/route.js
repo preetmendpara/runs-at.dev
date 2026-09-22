@@ -111,7 +111,7 @@ export async function POST(request) {
   }
 
   return Response.json({
-    url: `https://${name.name}.runs-on.dev/`,
+    url: `https://${name.name}.runs-at.dev/`,
     deploymentId: deployment.id,
     files: deployment.files,
     bytes: deployment.bytes,

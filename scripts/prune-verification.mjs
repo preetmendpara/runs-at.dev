@@ -2,7 +2,7 @@ import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { classifyClaim } from '../lib/health.js';
 import { planVerificationPrune } from '../lib/prune.js';
 
-// Frees slots at the capped `_vercel.runs-on.dev` TXT host by dropping the
+// Frees slots at the capped `_vercel.runs-at.dev` TXT host by dropping the
 // verification challenge from claims that have demonstrably finished
 // verifying. See lib/prune.js for why this has to happen at the claim rather
 // than at the DNS record.
@@ -25,10 +25,10 @@ if (Number.isNaN(LIMIT) || LIMIT <= 0) {
 // classification, so it must be the same question, asked the same way.
 async function probe(name) {
   try {
-    const res = await fetch(`https://${name}.runs-on.dev/`, {
+    const res = await fetch(`https://${name}.runs-at.dev/`, {
       redirect: 'follow',
       signal: AbortSignal.timeout(TIMEOUT_MS),
-      headers: { 'user-agent': 'runs-on-dev-prune-verification (github.com/zordhalo/runs-on.dev)' },
+      headers: { 'user-agent': 'runs-at-dev-prune-verification (github.com/preetmendpara/runs-at.dev)' },
     });
     const body = await res.text();
     const title = /<title[^>]*>([^<]*)<\/title>/i.exec(body)?.[1]?.trim() ?? '';
@@ -59,7 +59,7 @@ const queue = claims
   ))
   .map((claim) => claim.name);
 
-console.log(`prune: ${queue.length} claim(s) hold ${held.total} value(s) at _vercel.runs-on.dev (cap 50)`);
+console.log(`prune: ${queue.length} claim(s) hold ${held.total} value(s) at _vercel.runs-at.dev (cap 50)`);
 
 const probes = new Map();
 const pending = [...queue];
@@ -94,7 +94,7 @@ if (plan.skipped.length > 0) {
 }
 
 const remaining = plan.held.total - plan.freed;
-console.log(`\n_vercel.runs-on.dev: ${plan.held.total} -> ${remaining} of 50`);
+console.log(`\n_vercel.runs-at.dev: ${plan.held.total} -> ${remaining} of 50`);
 
 if (!APPLY) {
   console.log('\ndry run. re-run with APPLY=true to write these changes.');

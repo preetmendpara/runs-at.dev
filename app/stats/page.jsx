@@ -13,9 +13,9 @@ import ClaimMap from '../components/claim-map.jsx';
 export const metadata = {
   title: 'Stats',
   description:
-    'How many names have been claimed on runs-on.dev, by whom, and what people point them at. Counted straight from the public registry.',
-  alternates: { canonical: 'https://runs-on.dev/stats' },
-  openGraph: { title: 'Stats · runs-on.dev' },
+    'How many names have been claimed on runs-at.dev, by whom, and what people point them at. Counted straight from the public registry.',
+  alternates: { canonical: 'https://runs-at.dev/stats' },
+  openGraph: { title: 'Stats · runs-at.dev' },
 };
 
 // Read at build time, never per request. Deploys run from GitHub Actions on
@@ -151,9 +151,9 @@ export default function Stats() {
               >
                 <a
                   className="font-(family-name:--font-mono) text-sm text-(--color-ink) underline"
-                  href={`https://${claim.name}.runs-on.dev`}
+                  href={`https://${claim.name}.runs-at.dev`}
                 >
-                  {claim.name}.runs-on.dev
+                  {claim.name}.runs-at.dev
                 </a>
                 <span className="font-(family-name:--font-mono) text-xs text-(--color-muted)">
                   @{claim.github} · {day(claim.claimedAt)}

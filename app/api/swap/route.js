@@ -70,7 +70,7 @@ export async function POST(request) {
   // Check the new name is available
   const existing = await getRecord(to, { token, fetchImpl: uncachedFetch }).catch(() => null);
   if (existing) {
-    return Response.json({ error: 'taken', detail: `${to}.runs-on.dev is already claimed` }, { status: 409 });
+    return Response.json({ error: 'taken', detail: `${to}.runs-at.dev is already claimed` }, { status: 409 });
   }
 
   // Check the new name isn't reserved
@@ -114,7 +114,7 @@ export async function POST(request) {
   // this fails, the swap has not happened at all and the user still owns
   // their old name — report failure honestly.
   const deleteRes = await fetch(
-    `https://api.github.com/repos/${process.env.REGISTRY_REPO ?? 'zordhalo/runs-on.dev'}/contents/domains/${from}.json`,
+    `https://api.github.com/repos/${process.env.REGISTRY_REPO ?? 'preetmendpara/runs-at.dev'}/contents/domains/${from}.json`,
     {
       method: 'DELETE',
       headers: {
@@ -134,7 +134,7 @@ export async function POST(request) {
     return Response.json({
       ok: false,
       error: 'release_failed',
-      detail: `could not release ${from}.runs-on.dev; nothing was changed, try again`,
+      detail: `could not release ${from}.runs-at.dev; nothing was changed, try again`,
     }, { status: 500 });
   }
 
@@ -149,8 +149,8 @@ export async function POST(request) {
       ok: false,
       error: taken ? 'taken' : 'create_failed',
       detail: taken
-        ? `${from}.runs-on.dev was released, but ${to} was just claimed by someone else. Claim a different name from the homepage.`
-        : `${from}.runs-on.dev was released, but the new record could not be created. Claim ${to} again from the homepage while it is still free.`,
+        ? `${from}.runs-at.dev was released, but ${to} was just claimed by someone else. Claim a different name from the homepage.`
+        : `${from}.runs-at.dev was released, but the new record could not be created. Claim ${to} again from the homepage while it is still free.`,
     }, { status: taken ? 409 : 500 });
   }
 
@@ -180,6 +180,6 @@ export async function POST(request) {
     ok: true,
     name: to,
     oldName: from,
-    message: `swapped ${from}.runs-on.dev → ${to}.runs-on.dev`,
+    message: `swapped ${from}.runs-at.dev → ${to}.runs-at.dev`,
   });
 }

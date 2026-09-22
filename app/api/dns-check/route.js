@@ -11,7 +11,7 @@ import { createRateLimiter, rateLimitHeaders } from '../../../lib/throttle.js';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const ZONE = 'runs-on.dev';
+const ZONE = 'runs-at.dev';
 
 // Same budget the write routes use: generous for a real owner polling after
 // a save, tight enough that a leaned-on loop can't spend the registry's DNS

@@ -3,9 +3,9 @@ import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record } from '../../components.
 
 export const metadata = {
   title: 'Render',
-  description: 'Point name.runs-on.dev at a Render web service with a CNAME record.',
-  alternates: { canonical: 'https://runs-on.dev/docs/guides/render' },
-  openGraph: { title: 'Render · runs-on.dev' },
+  description: 'Point name.runs-at.dev at a Render web service with a CNAME record.',
+  alternates: { canonical: 'https://runs-at.dev/docs/guides/render' },
+  openGraph: { title: 'Render · runs-at.dev' },
 };
 
 export default function RenderGuide() {
@@ -13,7 +13,7 @@ export default function RenderGuide() {
     <main className="mx-auto max-w-3xl px-6 py-12">
       <Eyebrow>Docs / Guides / Render</Eyebrow>
       <DocTitle>Render</DocTitle>
-      <Lede>you.runs-on.dev serving a Render web service, over HTTPS, via CNAME.</Lede>
+      <Lede>you.runs-at.dev serving a Render web service, over HTTPS, via CNAME.</Lede>
 
       <Section title="The record">
         <Record path="domains/you.json">{`"records": { "CNAME": "you-service.onrender.com" }`}</Record>
@@ -27,11 +27,11 @@ export default function RenderGuide() {
         <ApplyNote />
 
         <ol className="list-decimal space-y-2 pl-6 text-sm leading-relaxed sm:text-base">
-          <li>Fork <a className="text-(--color-signal) underline" href="https://github.com/zordhalo/runs-on.dev">the registry</a> and edit <C>domains/you.json</C> to the record above.</li>
+          <li>Fork <a className="text-(--color-signal) underline" href="https://github.com/preetmendpara/runs-at.dev">the registry</a> and edit <C>domains/you.json</C> to the record above.</li>
           <li>Open a pull request. Once merged, the CNAME is synced to DNS automatically.</li>
           <li>
             In the Render dashboard: your service → Settings → Custom Domains → Add Custom Domain →{' '}
-            <C>you.runs-on.dev</C>. Render verifies the CNAME and issues a certificate automatically.
+            <C>you.runs-at.dev</C>. Render verifies the CNAME and issues a certificate automatically.
           </li>
         </ol>
       </Section>
@@ -39,7 +39,7 @@ export default function RenderGuide() {
       <Section title="How to tell it worked">
         <p className="text-sm leading-relaxed sm:text-base">
           Custom Domains shows the domain as verified once Render has confirmed the CNAME and issued
-          a certificate. Visiting <C>https://you.runs-on.dev</C> should then serve the service.
+          a certificate. Visiting <C>https://you.runs-at.dev</C> should then serve the service.
         </p>
       </Section>
     </main>

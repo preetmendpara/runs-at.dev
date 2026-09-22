@@ -38,8 +38,8 @@ jobs:
             echo "no new suggestions"
             exit 0
           fi
-          git config user.name "runs-on.dev content bot"
-          git config user.email "content@runs-on.dev"
+          git config user.name "runs-at.dev content bot"
+          git config user.email "content@runs-at.dev"
           git add content/suggestions
           git commit -m "content: new post suggestions for review"
           git push

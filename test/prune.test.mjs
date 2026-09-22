@@ -12,7 +12,7 @@ const claim = (name, extra = {}) => ({
 
 const withChallenge = (name) =>
   claim(name, {
-    subdomains: { _vercel: { TXT: [`vc-domain-verify=${name}.runs-on.dev,tok`] } },
+    subdomains: { _vercel: { TXT: [`vc-domain-verify=${name}.runs-at.dev,tok`] } },
   });
 
 test('a claim with no challenge holds nothing', () => {
@@ -24,7 +24,7 @@ test('a claim with no challenge holds nothing', () => {
 // so it holds none of the contended slots and must survive the prune.
 test('a nested _vercel.<sub> label is not a zone challenge and is left alone', () => {
   const rec = claim('a', {
-    subdomains: { '_vercel.blog': { TXT: ['vc-domain-verify=blog.a.runs-on.dev,tok'] } },
+    subdomains: { '_vercel.blog': { TXT: ['vc-domain-verify=blog.a.runs-at.dev,tok'] } },
   });
   assert.deepEqual(zoneChallengeValues(rec), []);
   assert.equal(withoutZoneChallenge(rec), null);
@@ -41,7 +41,7 @@ test('pruning drops the _vercel label and the empty subdomains key with it', () 
 test('pruning preserves sibling subdomain labels', () => {
   const rec = claim('a', {
     subdomains: {
-      _vercel: { TXT: ['vc-domain-verify=a.runs-on.dev,tok'] },
+      _vercel: { TXT: ['vc-domain-verify=a.runs-at.dev,tok'] },
       _atproto: { TXT: ['did=plc:xyz'] },
     },
   });
@@ -53,7 +53,7 @@ test('pruning preserves sibling subdomain labels', () => {
 // keep the label alive with it.
 test('a non-challenge TXT under _vercel keeps the label', () => {
   const rec = claim('a', {
-    subdomains: { _vercel: { TXT: ['vc-domain-verify=a.runs-on.dev,tok', 'something-else'] } },
+    subdomains: { _vercel: { TXT: ['vc-domain-verify=a.runs-at.dev,tok', 'something-else'] } },
   });
   assert.deepEqual(withoutZoneChallenge(rec).subdomains, { _vercel: { TXT: ['something-else'] } });
 });
@@ -103,7 +103,7 @@ test('limit selects deterministically by name and reports the remainder', () => 
 
 test('a claim holding two challenge values frees both', () => {
   const rec = claim('a', {
-    subdomains: { _vercel: { TXT: ['vc-domain-verify=a.runs-on.dev,one', 'vc-domain-verify=a.runs-on.dev,two'] } },
+    subdomains: { _vercel: { TXT: ['vc-domain-verify=a.runs-at.dev,one', 'vc-domain-verify=a.runs-at.dev,two'] } },
   });
   const plan = planVerificationPrune([rec], () => 'ok');
   assert.equal(plan.freed, 2);

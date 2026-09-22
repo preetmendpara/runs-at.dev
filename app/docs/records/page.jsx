@@ -3,9 +3,9 @@ import { Eyebrow, DocTitle, Lede, C, Code, Record } from '../components.jsx';
 
 export const metadata = {
   title: 'Record reference',
-  description: 'The complete runs-on.dev record format: every field, every supported record type, the coexistence rules, and why they exist.',
-  alternates: { canonical: 'https://runs-on.dev/docs/records' },
-  openGraph: { title: 'Record reference · runs-on.dev' },
+  description: 'The complete runs-at.dev record format: every field, every supported record type, the coexistence rules, and why they exist.',
+  alternates: { canonical: 'https://runs-at.dev/docs/records' },
+  openGraph: { title: 'Record reference · runs-at.dev' },
 };
 
 function Row({ cells }) {
@@ -115,13 +115,13 @@ export default function Records() {
 
       <Section title="URL redirects">
         <p className="text-sm leading-relaxed sm:text-base">
-          A <C>URL</C> record has no DNS representation. The wildcard <C>*.runs-on.dev</C> record
+          A <C>URL</C> record has no DNS representation. The wildcard <C>*.runs-at.dev</C> record
           already routes every claimed name to the app, so when a record&apos;s <C>records</C> object
           holds only <C>URL</C>, the site issues a 307 redirect to that URL instead of rendering the
           profile card. <C>lib/dns.js</C>&apos;s <C>planDnsChanges</C> plans no DNS change for it.
         </p>
         <p className="text-sm leading-relaxed sm:text-base">
-          Because this makes a <C>runs-on.dev</C> name an open redirector for whatever URL is in the
+          Because this makes a <C>runs-at.dev</C> name an open redirector for whatever URL is in the
           file, the target must be an absolute <C>http://</C> or <C>https://</C> URL. <C>javascript:</C>,{' '}
           <C>data:</C>, <C>vbscript:</C>, and protocol-relative (<C>//evil.com</C>) values are all
           rejected, checked both in CI and again at render time.
@@ -150,7 +150,7 @@ export default function Records() {
             serve a redirect record living underneath it.
           </li>
           <li>
-            The resulting full name (<C>&lt;label&gt;.&lt;name&gt;.runs-on.dev</C>) must stay within
+            The resulting full name (<C>&lt;label&gt;.&lt;name&gt;.runs-at.dev</C>) must stay within
             the 253-character DNS name limit.
           </li>
         </ul>
@@ -166,7 +166,7 @@ export default function Records() {
         </p>
         <Quote>
           You never touch DNS directly, and claiming itself needs no DNS write at all, since{' '}
-          <C>*.runs-on.dev</C> is a wildcard record that already resolves every name.
+          <C>*.runs-at.dev</C> is a wildcard record that already resolves every name.
         </Quote>
       </Section>
     </main>

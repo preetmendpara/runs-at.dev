@@ -19,7 +19,7 @@ test('pointed name with a foreign page answering is ok', () => {
   assert.equal(
     classifyClaim(
       { ...base, records: { CNAME: 'cname.vercel-dns.com' } },
-      { ok: true, finalHost: 'lucas.runs-on.dev', title: 'Lucas — portfolio' },
+      { ok: true, finalHost: 'lucas.runs-at.dev', title: 'Lucas — portfolio' },
     ),
     'ok',
   );
@@ -39,7 +39,7 @@ test('pointed name still answering with the profile card is stuck', () => {
   assert.equal(
     classifyClaim(
       { ...base, records: { CNAME: 'cname.vercel-dns.com' } },
-      { ok: true, finalHost: 'lucas.runs-on.dev', title: 'Lucas (lucas.runs-on.dev)' },
+      { ok: true, finalHost: 'lucas.runs-at.dev', title: 'Lucas (lucas.runs-at.dev)' },
     ),
     'stuck',
   );
@@ -54,8 +54,8 @@ test('pointed name with nothing answering is down', () => {
 });
 
 test('issueName reads the claim out of a nudge title', () => {
-  assert.equal(issueName('dexi.runs-on.dev is pointing at Vercel but not serving your project'), 'dexi');
-  assert.equal(issueName('feel-your-phone.runs-on.dev should verify now — worth a re-check'), 'feel-your-phone');
+  assert.equal(issueName('dexi.runs-at.dev is pointing at Vercel but not serving your project'), 'dexi');
+  assert.equal(issueName('feel-your-phone.runs-at.dev should verify now — worth a re-check'), 'feel-your-phone');
   assert.equal(issueName('sync-dns fails deleting existing records with 404'), null);
   assert.equal(issueName(undefined), null);
 });
@@ -63,14 +63,14 @@ test('issueName reads the claim out of a nudge title', () => {
 test('closes a nudge issue once its name serves something real', () => {
   const rows = [{ name: 'dexi', status: 'ok' }, { name: 'shrey', status: 'stuck' }];
   const issues = [
-    { number: 35, title: 'dexi.runs-on.dev is pointing at Vercel but not serving your project' },
-    { number: 40, title: 'shrey.runs-on.dev is pointing at Vercel but not serving your project' },
+    { number: 35, title: 'dexi.runs-at.dev is pointing at Vercel but not serving your project' },
+    { number: 40, title: 'shrey.runs-at.dev is pointing at Vercel but not serving your project' },
   ];
   assert.deepEqual(planIssueClosures(rows, issues), [{ number: 35, name: 'dexi' }]);
 });
 
 test('a redirect counts as recovered, a bare profile card does not', () => {
-  const issues = [{ number: 1, title: 'a.runs-on.dev x' }, { number: 2, title: 'b.runs-on.dev x' }];
+  const issues = [{ number: 1, title: 'a.runs-at.dev x' }, { number: 2, title: 'b.runs-at.dev x' }];
   const rows = [{ name: 'a', status: 'redirect' }, { name: 'b', status: 'card' }];
   // 'card' means the records were removed: no longer stuck, but not serving
   // their site either, so "this is working now" would be untrue.
@@ -79,7 +79,7 @@ test('a redirect counts as recovered, a bare profile card does not', () => {
 
 test('never closes an issue for a name this run did not probe', () => {
   const rows = [{ name: 'dexi', status: 'ok' }];
-  const issues = [{ number: 9, title: 'someoneelse.runs-on.dev is broken' }];
+  const issues = [{ number: 9, title: 'someoneelse.runs-at.dev is broken' }];
   assert.deepEqual(planIssueClosures(rows, issues), []);
 });
 
@@ -90,7 +90,7 @@ test('never closes an issue whose title it cannot parse', () => {
 
 test('a down name keeps its issue open', () => {
   const rows = [{ name: 'dexi', status: 'down' }];
-  assert.deepEqual(planIssueClosures(rows, [{ number: 35, title: 'dexi.runs-on.dev x' }]), []);
+  assert.deepEqual(planIssueClosures(rows, [{ number: 35, title: 'dexi.runs-at.dev x' }]), []);
 });
 
 test('normalizeAnswer strips the trailing dot and case from hostnames', () => {
@@ -98,45 +98,45 @@ test('normalizeAnswer strips the trailing dot and case from hostnames', () => {
   assert.equal(normalizeAnswer('MX', '10 MX.Example.COM.'), '10 mx.example.com');
   // A TXT value is compared byte for byte: a verification token is case
   // sensitive and a trailing dot inside one would be part of the value.
-  assert.equal(normalizeAnswer('TXT', 'vc-domain-verify=X.runs-on.dev,AbC.'), 'vc-domain-verify=X.runs-on.dev,AbC.');
+  assert.equal(normalizeAnswer('TXT', 'vc-domain-verify=X.runs-at.dev,AbC.'), 'vc-domain-verify=X.runs-at.dev,AbC.');
 });
 
 test('findDrift reports a declared record the zone does not serve', () => {
-  const expected = [{ type: 'CNAME', host: 'dexi.runs-on.dev', value: 'cname.vercel-dns.com' }];
+  const expected = [{ type: 'CNAME', host: 'dexi.runs-at.dev', value: 'cname.vercel-dns.com' }];
   assert.equal(findDrift(expected, new Map()).length, 1);
-  const resolved = new Map([['CNAME dexi.runs-on.dev', ['cname.vercel-dns.com']]]);
+  const resolved = new Map([['CNAME dexi.runs-at.dev', ['cname.vercel-dns.com']]]);
   assert.deepEqual(findDrift(expected, resolved), []);
 });
 
 test('findDrift is a subset check, so unplanned records are not drift', () => {
   // The zone legitimately holds the apex, the wildcard, and anything placed
   // by hand. Reporting those would make the gate cry wolf immediately.
-  const expected = [{ type: 'TXT', host: '_vercel.runs-on.dev', value: 'vc-domain-verify=a.runs-on.dev,tok' }];
-  const resolved = new Map([['TXT _vercel.runs-on.dev', [
-    'vc-domain-verify=a.runs-on.dev,tok',
-    'vc-domain-verify=someone-else.runs-on.dev,other',
+  const expected = [{ type: 'TXT', host: '_vercel.runs-at.dev', value: 'vc-domain-verify=a.runs-at.dev,tok' }];
+  const resolved = new Map([['TXT _vercel.runs-at.dev', [
+    'vc-domain-verify=a.runs-at.dev,tok',
+    'vc-domain-verify=someone-else.runs-at.dev,other',
     'google-site-verification=whatever',
   ]]]);
   assert.deepEqual(findDrift(expected, resolved), []);
 });
 
 test('findDrift matches a resolver answer that came back dotted and uppercased', () => {
-  const expected = [{ type: 'CNAME', host: 'x.runs-on.dev', value: 'cname.vercel-dns.com' }];
-  const resolved = new Map([['CNAME x.runs-on.dev', [normalizeAnswer('CNAME', 'CNAME.Vercel-DNS.com.')]]]);
+  const expected = [{ type: 'CNAME', host: 'x.runs-at.dev', value: 'cname.vercel-dns.com' }];
+  const resolved = new Map([['CNAME x.runs-at.dev', [normalizeAnswer('CNAME', 'CNAME.Vercel-DNS.com.')]]]);
   assert.deepEqual(findDrift(expected, resolved), []);
 });
 
 test('findDrift compares MX on priority as well as host', () => {
-  const expected = [{ type: 'MX', host: 'm.runs-on.dev', value: 'mx.example.com', priority: 10 }];
-  const wrongPriority = new Map([['MX m.runs-on.dev', ['20 mx.example.com']]]);
+  const expected = [{ type: 'MX', host: 'm.runs-at.dev', value: 'mx.example.com', priority: 10 }];
+  const wrongPriority = new Map([['MX m.runs-at.dev', ['20 mx.example.com']]]);
   assert.equal(findDrift(expected, wrongPriority).length, 1);
-  const right = new Map([['MX m.runs-on.dev', ['10 mx.example.com']]]);
+  const right = new Map([['MX m.runs-at.dev', ['10 mx.example.com']]]);
   assert.deepEqual(findDrift(expected, right), []);
 });
 
 // A TXT wrapped in quotes is zone-file presentation, not content: the provider
 // stores the inner string, so comparing raw reported drift that no resync could
-// clear and failed health-check forever. selim.runs-on.dev sat in that state.
+// clear and failed health-check forever. selim.runs-at.dev sat in that state.
 test('a quoted TXT compares equal to the value DNS holds', () => {
   assert.equal(
     normalizeAnswer('TXT', '"Under Construction... SOON"'),
@@ -150,7 +150,7 @@ test('only one surrounding pair is stripped, inner quotes survive', () => {
 });
 
 test('a verification token is unaffected by TXT normalization', () => {
-  const t = 'vc-domain-verify=selim.runs-on.dev,ABC123def';
+  const t = 'vc-domain-verify=selim.runs-at.dev,ABC123def';
   assert.equal(normalizeAnswer('TXT', t), t);
 });
 
@@ -170,14 +170,14 @@ test('down is never reported, however many there are', () => {
 });
 
 test('a name that already has an issue is not given another', () => {
-  const issues = [{ number: 7, title: 'a.runs-on.dev is not serving your site yet' }];
+  const issues = [{ number: 7, title: 'a.runs-at.dev is not serving your site yet' }];
   assert.deepEqual(planIssueOpens(rows({ a: 'stuck', b: 'stuck' }), issues).map((x) => x.name), ['b']);
 });
 
 // Deduping reads closed issues too: an owner who closed theirs without fixing
 // the name should not be handed a fresh one every morning.
 test('a closed issue still counts as spoken for', () => {
-  const issues = [{ number: 7, title: 'a.runs-on.dev is not serving your site yet', state: 'closed' }];
+  const issues = [{ number: 7, title: 'a.runs-at.dev is not serving your site yet', state: 'closed' }];
   assert.deepEqual(planIssueOpens(rows({ a: 'stuck' }), issues), []);
 });
 
@@ -197,7 +197,7 @@ test('a vercel target with no challenge is distinguished from one awaiting verif
   const cname = { CNAME: 'abc.vercel-dns-017.com' };
   assert.equal(diagnoseStuck({ records: cname }), 'vercel-no-challenge');
   assert.equal(
-    diagnoseStuck({ records: cname, subdomains: { _vercel: { TXT: ['vc-domain-verify=a.runs-on.dev,t'] } } }),
+    diagnoseStuck({ records: cname, subdomains: { _vercel: { TXT: ['vc-domain-verify=a.runs-at.dev,t'] } } }),
     'vercel-awaiting-verification',
   );
 });
@@ -228,20 +228,20 @@ test('every diagnosis renders a body naming the owner and the name', () => {
       : stuckClaim;
     const body = stuckIssueBody(kind, 'aman', claim);
     assert.ok(body.startsWith('@aman690888 — '), `${kind} should address the owner`);
-    assert.ok(body.includes('aman.runs-on.dev'), `${kind} should name the hostname`);
+    assert.ok(body.includes('aman.runs-at.dev'), `${kind} should name the hostname`);
     assert.ok(body.includes('**Fix:**') || kind === 'unknown', `${kind} should say what to do`);
   }
 });
 
 test('an unrecognised diagnosis falls back rather than throwing', () => {
   const body = stuckIssueBody('something-new', 'aman', stuckClaim);
-  assert.ok(body.includes('aman.runs-on.dev'));
+  assert.ok(body.includes('aman.runs-at.dev'));
 });
 
 test('a claim with no owner still renders', () => {
   const body = stuckIssueBody('unknown', 'aman', { name: 'aman', records: {} });
   assert.ok(!body.startsWith('@'));
-  assert.ok(body.includes('aman.runs-on.dev'));
+  assert.ok(body.includes('aman.runs-at.dev'));
 });
 
 test('an A-record claim renders its addresses rather than undefined', () => {
@@ -254,7 +254,7 @@ test('an A-record claim renders its addresses rather than undefined', () => {
 // alone filed a second issue at an owner who already had one open, with a
 // conversation running in it -- so the hostname in the title is what counts.
 test('an unlabelled issue naming the host still counts as spoken for', () => {
-  const issues = [{ number: 119, title: 'amanworks.runs-on.dev: CNAME restored after a manage-page bug removed it' }];
+  const issues = [{ number: 119, title: 'amanworks.runs-at.dev: CNAME restored after a manage-page bug removed it' }];
   const out = planIssueOpens(rows({ amanworks: 'stuck', other: 'stuck' }), issues);
   assert.deepEqual(out.map((x) => x.name), ['other']);
 });
@@ -268,19 +268,19 @@ test('a challenge for the apex is diagnosed as the wrong challenge, not awaiting
   const claim = {
     name: 'jagath',
     records: { CNAME: 'abc.vercel-dns-017.com' },
-    subdomains: { _vercel: { TXT: ['vc-domain-verify=runs-on.dev,ecc4e84313a4d739b055'] } },
+    subdomains: { _vercel: { TXT: ['vc-domain-verify=runs-at.dev,ecc4e84313a4d739b055'] } },
   };
   assert.equal(diagnoseStuck(claim), 'vercel-wrong-challenge');
   const body = stuckIssueBody('vercel-wrong-challenge', 'jagath', claim);
-  assert.ok(body.includes('vc-domain-verify=runs-on.dev,ecc4e84313a4d739b055'));
-  assert.ok(body.includes('vc-domain-verify=jagath.runs-on.dev,'));
+  assert.ok(body.includes('vc-domain-verify=runs-at.dev,ecc4e84313a4d739b055'));
+  assert.ok(body.includes('vc-domain-verify=jagath.runs-at.dev,'));
 });
 
 test('a challenge for a nested subdomain is the wrong challenge for the claim itself', () => {
   const claim = {
     name: 'safal',
     records: { CNAME: 'abc.vercel-dns-017.com' },
-    subdomains: { _vercel: { TXT: ['vc-domain-verify=blog.safal.runs-on.dev,4325'] } },
+    subdomains: { _vercel: { TXT: ['vc-domain-verify=blog.safal.runs-at.dev,4325'] } },
   };
   assert.equal(diagnoseStuck(claim), 'vercel-wrong-challenge');
 });
@@ -289,7 +289,7 @@ test('the claim\'s own challenge still reads as awaiting verification', () => {
   const claim = {
     name: 'saiom',
     records: { CNAME: 'cname.vercel-dns.com' },
-    subdomains: { _vercel: { TXT: ['vc-domain-verify=saiom.runs-on.dev,bc31'] } },
+    subdomains: { _vercel: { TXT: ['vc-domain-verify=saiom.runs-at.dev,bc31'] } },
   };
   assert.equal(diagnoseStuck(claim), 'vercel-awaiting-verification');
 });

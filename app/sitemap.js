@@ -30,7 +30,7 @@ export default function sitemap() {
   const fresh = new Set(['', '/stats', '/blog']);
 
   const pages = routes.map((route) => ({
-    url: `https://runs-on.dev${route}`,
+    url: `https://runs-at.dev${route}`,
     lastModified: now,
     changeFrequency: fresh.has(route) ? 'weekly' : 'monthly',
     priority: route === '' ? 1 : 0.6,
@@ -38,7 +38,7 @@ export default function sitemap() {
 
   // Published posts with their real dates; drafts are excluded by the lib.
   const posts = publishedPosts().map((p) => ({
-    url: `https://runs-on.dev/blog/${p.slug}`,
+    url: `https://runs-at.dev/blog/${p.slug}`,
     lastModified: p.updated ? new Date(p.updated) : new Date(p.date),
     changeFrequency: 'monthly',
     priority: 0.5,

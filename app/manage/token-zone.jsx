@@ -7,15 +7,15 @@ import { useState } from 'react';
 // one thing an agent cannot do for itself is mint a browser-session
 // credential — everything after that is three curl-able endpoints.
 function agentPrompt(token, expiresNote) {
-  return `You are deploying a static site to runs-on.dev for me.
+  return `You are deploying a static site to runs-at.dev for me.
 
 AUTH
-Bearer token (publishes only to my claimed runs-on.dev name, ${expiresNote}):
+Bearer token (publishes only to my claimed runs-at.dev name, ${expiresNote}):
 ${token}
 Send it as an Authorization: Bearer header on every request below. Never
-commit it to git, log it, or send it anywhere except runs-on.dev.
+commit it to git, log it, or send it anywhere except runs-at.dev.
 
-BASE URL: https://runs-on.dev
+BASE URL: https://runs-at.dev
 
 1) DEPLOY
 - Build the site first. The upload is the BUILT static output (HTML, CSS,
@@ -24,7 +24,7 @@ BASE URL: https://runs-on.dev
   dist/ or public/ folder:
     cd <output-directory> && zip -r site.zip .
 - Upload:
-    curl -X POST https://runs-on.dev/api/sites/deploy \\
+    curl -X POST https://runs-at.dev/api/sites/deploy \\
       -H "Authorization: Bearer ${token}" \\
       -F "site=@site.zip"
 - Success is 200 with { url, deploymentId, files, bytes }. Tell me the url
@@ -39,11 +39,11 @@ ZIP RULES (enforced server-side; a bad zip is rejected with a reason)
 
 2) LIST DEPLOYMENTS
     curl -H "Authorization: Bearer ${token}" \\
-      https://runs-on.dev/api/sites/deployments
+      https://runs-at.dev/api/sites/deployments
 Returns { active, deployments: [{ id, at, files, bytes }] }, newest last.
 
 3) ROLL BACK (instant, no re-upload)
-    curl -X POST https://runs-on.dev/api/sites/rollback \\
+    curl -X POST https://runs-at.dev/api/sites/rollback \\
       -H "Authorization: Bearer ${token}" \\
       -H "Content-Type: application/json" \\
       -d '{"deploymentId":"<8-hex id from the list>"}'
@@ -55,14 +55,14 @@ ERRORS: fix per code, never blind-retry
 - 409 stale: a newer deploy landed mid-flight. List deployments, decide,
   then redeploy
 - 429 rate_limited: wait the Retry-After seconds, retry once
-- 503: runs-on.dev is busy or its storage is not configured. Tell me and
+- 503: runs-at.dev is busy or its storage is not configured. Tell me and
   stop retrying
 
 NOTES
 - The last 5 deployments are kept; older ones are deleted and cannot be
   rolled back to.
 - If the url still shows a profile card, serving is not enabled on
-  runs-on.dev yet; the deployment itself succeeded.
+  runs-at.dev yet; the deployment itself succeeded.
 - Deploying never touches DNS records or the profile card settings.`;
 }
 
@@ -128,7 +128,7 @@ export default function TokenZone({ login }) {
           needed. Generate a token, then:
         </p>
         <pre className="slit-frame mt-4 rounded-lg bg-(--color-card) px-3 py-2.5 font-(family-name:--font-mono) text-xs leading-relaxed whitespace-pre-wrap [overflow-wrap:break-word] text-(--color-ash)">
-{`curl -X POST https://runs-on.dev/api/sites/deploy \\
+{`curl -X POST https://runs-at.dev/api/sites/deploy \\
   -H "Authorization: Bearer <token>" \\
   -F "site=@dist.zip"`}
         </pre>

@@ -173,7 +173,7 @@ export default function ClaimForm({ signedIn }) {
           </span>
           <span aria-hidden="true" className="text-(--color-muted)">]</span>
         </span>
-        <span className="text-(--color-muted)">.runs-on.dev</span>
+        <span className="text-(--color-muted)">.runs-at.dev</span>
       </div>
 
       <div
@@ -211,7 +211,7 @@ export default function ClaimForm({ signedIn }) {
           // with a way to reach that name. This is where a returning owner
           // ends up, so it has to lead somewhere.
           <a href="/manage" className="btn-pill">
-            {ownedName ? `Point ${ownedName}.runs-on.dev somewhere` : 'Point your name somewhere'}
+            {ownedName ? `Point ${ownedName}.runs-at.dev somewhere` : 'Point your name somewhere'}
             <span aria-hidden="true">→</span>
           </a>
         ) : signedIn ? (
@@ -262,7 +262,7 @@ function Claimed({ name, commit }) {
         </a>
         <a
           className="font-(family-name:--font-mono) text-sm text-(--color-muted) underline hover:text-(--color-ink)"
-          href={`https://${name}.runs-on.dev`}
+          href={`https://${name}.runs-at.dev`}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -285,7 +285,7 @@ function Field({ name, value, valueClass = 'text-(--color-ink)' }) {
 
 function message(status, name, ownedName) {
   const map = {
-    available: `${name}.runs-on.dev is available.`,
+    available: `${name}.runs-at.dev is available.`,
     taken: 'Already claimed.',
     reserved: 'That name is reserved.',
     invalid_length: 'Names are 2 to 32 characters.',
@@ -299,7 +299,7 @@ function message(status, name, ownedName) {
     retry_exhausted: 'Still overloaded. Try again in a few minutes.',
     busy: 'Too busy to check right now. Claiming it still works.',
     check_failed: 'Could not check that name. Try claiming it anyway.',
-    claimed: `Done. ${name}.runs-on.dev is yours.`,
+    claimed: `Done. ${name}.runs-at.dev is yours.`,
     signin_required: 'Sign in with GitHub first.',
     ineligible_age: 'Your GitHub account must be at least 30 days old.',
     ineligible_repos: 'Your GitHub account needs at least one public repository.',
@@ -308,7 +308,7 @@ function message(status, name, ownedName) {
     // who only has to wait that something is broken.
     rate_limited: 'Too many attempts in a short window. Give it a few minutes.',
     limit_reached: ownedName
-      ? `You already own ${ownedName}.runs-on.dev. One per account for now.`
+      ? `You already own ${ownedName}.runs-at.dev. One per account for now.`
       : 'You already have a name. One per account for now.',
   };
   return map[status] ?? 'Something went wrong.';

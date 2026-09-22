@@ -4,12 +4,12 @@ import { loadPolicy, parseInline } from '../../lib/policy.js';
 export const metadata = {
   title: 'Policy',
   description:
-    'The terms for runs-on.dev in plain language: names are free and may be reclaimed, what forfeits a name immediately, and how to report abuse.',
-  alternates: { canonical: 'https://runs-on.dev/policy' },
-  openGraph: { title: 'Policy · runs-on.dev' },
+    'The terms for runs-at.dev in plain language: names are free and may be reclaimed, what forfeits a name immediately, and how to report abuse.',
+  alternates: { canonical: 'https://runs-at.dev/policy' },
+  openGraph: { title: 'Policy · runs-at.dev' },
 };
 
-const REPO_BLOB = 'https://github.com/zordhalo/runs-on.dev/blob/main/';
+const REPO_BLOB = 'https://github.com/preetmendpara/runs-at.dev/blob/main/';
 
 function resolveHref(href) {
   return href.startsWith('http') ? href : REPO_BLOB + href;
@@ -38,7 +38,7 @@ export default function Policy() {
         This page is rendered from{' '}
         <a
           className="text-(--color-signal) underline"
-          href="https://github.com/zordhalo/runs-on.dev/blob/main/POLICY.md"
+          href="https://github.com/preetmendpara/runs-at.dev/blob/main/POLICY.md"
         >
           POLICY.md
         </a>{' '}

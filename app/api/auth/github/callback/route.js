@@ -52,7 +52,7 @@ export async function GET(request) {
   //
   // decodeURIComponent throws URIError on a malformed sequence, and this
   // cookie is not as trustworthy as HttpOnly suggests: a claimed
-  // <name>.runs-on.dev can set a cookie for the parent domain, so a hostile
+  // <name>.runs-at.dev can set a cookie for the parent domain, so a hostile
   // claim could plant `oauth_claim=%` and turn every sign-in on the apex into
   // a 500. Decoding defensively keeps a bad value merely ignored.
   const rawClaim = cookie.match(/(?:^|;\s*)oauth_claim=([^;]+)/)?.[1];

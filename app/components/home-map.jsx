@@ -51,7 +51,7 @@ export default function HomeMap({ heading = false, points = {}, resolved = 0, to
         <div className="relative">
           <img
             src="/claim-map.svg"
-            alt={`Dot-matrix world map where brighter dots mark claimed runs-on.dev names: ${resolved} of ${total} owners resolved from claim-time countries and public GitHub profiles`}
+            alt={`Dot-matrix world map where brighter dots mark claimed runs-at.dev names: ${resolved} of ${total} owners resolved from claim-time countries and public GitHub profiles`}
             className="h-auto w-full transition-opacity duration-500"
             style={{ opacity: selected ? 0.15 : 1 }}
           />

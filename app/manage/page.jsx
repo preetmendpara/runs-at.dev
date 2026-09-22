@@ -7,8 +7,8 @@ import BadgeZone from './badge-zone.jsx';
 import TokenZone from './token-zone.jsx';
 
 export const metadata = {
-  title: 'Manage your name · runs-on.dev',
-  description: 'Point your runs-on.dev name at your own hosting.',
+  title: 'Manage your name · runs-at.dev',
+  description: 'Point your runs-at.dev name at your own hosting.',
   robots: { index: false },
 };
 

@@ -247,7 +247,7 @@ test('rejects a subdomain label with a dot but no leading underscore', () => {
 test('accepts a two-label verification subdomain like _vercel.recruitment', () => {
   const out = validateRecord({
     ...valid,
-    subdomains: { '_vercel.recruitment': { TXT: ['vc-domain-verify=recruitment.lucas.runs-on.dev,abc123'] } },
+    subdomains: { '_vercel.recruitment': { TXT: ['vc-domain-verify=recruitment.lucas.runs-at.dev,abc123'] } },
   });
   assert.deepEqual(out, { ok: true, errors: [] });
 });
@@ -271,11 +271,11 @@ test('two-label subdomains round-trip through planDnsChanges', async () => {
   const { planDnsChanges } = await import('../lib/dns.js');
   const record = {
     ...valid,
-    subdomains: { '_vercel.recruitment': { TXT: ['vc-domain-verify=recruitment.lucas.runs-on.dev,abc123'] } },
+    subdomains: { '_vercel.recruitment': { TXT: ['vc-domain-verify=recruitment.lucas.runs-at.dev,abc123'] } },
   };
   const changes = planDnsChanges(record);
   assert.deepEqual(changes, [
-    { type: 'TXT', name: '_vercel.recruitment.lucas', value: 'vc-domain-verify=recruitment.lucas.runs-on.dev,abc123' },
+    { type: 'TXT', name: '_vercel.recruitment.lucas', value: 'vc-domain-verify=recruitment.lucas.runs-at.dev,abc123' },
   ]);
 });
 
@@ -409,7 +409,7 @@ test('rejects a truncated Vercel verification token', () => {
   const out = validateRecord({
     name: 'krishna', owner: { github: 'k' }, claimedAt: '2026-01-01T00:00:00Z',
     records: {},
-    subdomains: { _vercel: { TXT: ['vc-domain-verify=krishna.runs-on.dev,70f2fede6bc7dc6f0...'] } },
+    subdomains: { _vercel: { TXT: ['vc-domain-verify=krishna.runs-at.dev,70f2fede6bc7dc6f0...'] } },
   });
   assert.equal(out.ok, false);
   assert.ok(out.errors.some((e) => e.includes('truncated Vercel verification token')));
@@ -419,7 +419,7 @@ test('rejects a placeholder token pasted from the docs', () => {
   const out = validateRecord({
     name: 'you', owner: { github: 'y' }, claimedAt: '2026-01-01T00:00:00Z',
     records: {},
-    subdomains: { _vercel: { TXT: ['vc-domain-verify=you.runs-on.dev,PASTE-YOUR-TOKEN'] } },
+    subdomains: { _vercel: { TXT: ['vc-domain-verify=you.runs-at.dev,PASTE-YOUR-TOKEN'] } },
   });
   assert.equal(out.ok, false);
 });
@@ -428,7 +428,7 @@ test('accepts a real verification token', () => {
   const out = validateRecord({
     name: 'hussain', owner: { github: 'h' }, claimedAt: '2026-01-01T00:00:00Z',
     records: {},
-    subdomains: { _vercel: { TXT: ['vc-domain-verify=hussain.runs-on.dev,696f1780aaddd44898ab'] } },
+    subdomains: { _vercel: { TXT: ['vc-domain-verify=hussain.runs-at.dev,696f1780aaddd44898ab'] } },
   });
   assert.deepEqual(out, { ok: true, errors: [] });
 });
@@ -445,7 +445,7 @@ test('the guard only applies to vc-domain-verify values', () => {
 test('the guard applies at the root too, not only under subdomains', () => {
   const out = validateRecord({
     name: 'lucas', owner: { github: 'x' }, claimedAt: '2026-01-01T00:00:00Z',
-    records: { TXT: ['vc-domain-verify=lucas.runs-on.dev,nothex...'] },
+    records: { TXT: ['vc-domain-verify=lucas.runs-at.dev,nothex...'] },
   });
   assert.equal(out.ok, false);
   assert.ok(out.errors.some((e) => e.includes('truncated Vercel verification token')));
@@ -477,17 +477,17 @@ test('rejects TXT values Vercel reads as empty', () => {
 });
 
 test('rejects a CNAME pointing at the claim\'s own hostname', () => {
-  const out = validateRecord({ ...valid, records: { CNAME: `${valid.name}.runs-on.dev` } });
+  const out = validateRecord({ ...valid, records: { CNAME: `${valid.name}.runs-at.dev` } });
   assert.equal(out.ok, false);
   assert.ok(out.errors.some((e) => e.includes('itself')));
 });
 
 test('rejects a subdomain CNAME pointing at its own hostname', () => {
-  const out = validateRecord({ ...valid, records: {}, subdomains: { blog: { CNAME: `blog.${valid.name}.runs-on.dev` } } });
+  const out = validateRecord({ ...valid, records: {}, subdomains: { blog: { CNAME: `blog.${valid.name}.runs-at.dev` } } });
   assert.equal(out.ok, false);
   assert.ok(out.errors.some((e) => e.includes('itself')));
 });
 
-test('a CNAME to another runs-on.dev name is still allowed', () => {
-  assert.equal(validateRecord({ ...valid, records: { CNAME: 'someone-else.runs-on.dev' } }).ok, true);
+test('a CNAME to another runs-at.dev name is still allowed', () => {
+  assert.equal(validateRecord({ ...valid, records: { CNAME: 'someone-else.runs-at.dev' } }).ok, true);
 });

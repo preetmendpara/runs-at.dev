@@ -1,25 +1,25 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "runs-on.dev registry API",
-    "summary": "Claim free name.runs-on.dev subdomains, manage their DNS records, and deploy static sites to them.",
-    "description": "The public API of the runs-on.dev subdomain registry. Availability checks and record reads are free and unauthenticated. Claiming, editing, releasing, swapping, and deploy-token minting require a GitHub OAuth session (obtained by signing in at https://runs-on.dev with GitHub; the session is a signed HttpOnly cookie). Static-site deployment uses scoped bearer tokens (scope sites:publish) minted self-serve at https://runs-on.dev/manage. All error responses are JSON objects: { \"error\": \"<code>\", \"detail\"?: string, \"retryInMs\"?: number }. Unknown /api/* paths return a JSON 404 in that same shape. VERSIONING: this surface is v1, signaled by the X-API-Version: 1 response header on every /api/* route and by info.version here. Additive changes (new optional fields, new endpoints) do not bump the version. Breaking changes ship under a new /api/v2/* prefix for at least 6 months while the old surface sends Deprecation: true and Sunset: <date> response headers before removal. There are currently no deprecated endpoints. RATE LIMITING: every limited endpoint answers with RateLimit-Limit, RateLimit-Remaining, and RateLimit-Reset (seconds) headers on both success and 429 responses; 429 additionally carries Retry-After. Self-throttle from these values.",
+    "title": "runs-at.dev registry API",
+    "summary": "Claim free name.runs-at.dev subdomains, manage their DNS records, and deploy static sites to them.",
+    "description": "The public API of the runs-at.dev subdomain registry. Availability checks and record reads are free and unauthenticated. Claiming, editing, releasing, swapping, and deploy-token minting require a GitHub OAuth session (obtained by signing in at https://runs-at.dev with GitHub; the session is a signed HttpOnly cookie). Static-site deployment uses scoped bearer tokens (scope sites:publish) minted self-serve at https://runs-at.dev/manage. All error responses are JSON objects: { \"error\": \"<code>\", \"detail\"?: string, \"retryInMs\"?: number }. Unknown /api/* paths return a JSON 404 in that same shape. VERSIONING: this surface is v1, signaled by the X-API-Version: 1 response header on every /api/* route and by info.version here. Additive changes (new optional fields, new endpoints) do not bump the version. Breaking changes ship under a new /api/v2/* prefix for at least 6 months while the old surface sends Deprecation: true and Sunset: <date> response headers before removal. There are currently no deprecated endpoints. RATE LIMITING: every limited endpoint answers with RateLimit-Limit, RateLimit-Remaining, and RateLimit-Reset (seconds) headers on both success and 429 responses; 429 additionally carries Retry-After. Self-throttle from these values.",
     "version": "1.0.0",
     "contact": {
-      "name": "runs-on.dev abuse and support",
-      "email": "abuse@runs-on.dev",
-      "url": "https://runs-on.dev/contact"
+      "name": "runs-at.dev abuse and support",
+      "email": "abuse@runs-at.dev",
+      "url": "https://runs-at.dev/contact"
     },
     "license": {
       "name": "AGPL-3.0-only",
-      "url": "https://github.com/zordhalo/runs-on.dev/blob/main/LICENSE"
+      "url": "https://github.com/preetmendpara/runs-at.dev/blob/main/LICENSE"
     },
     "x-api-version": "1",
     "x-versioning-policy": "URL stays unversioned for v1; breaking changes move to /api/v2/*; deprecated endpoints send Deprecation: true and Sunset headers for a documented grace period before removal."
   },
   "servers": [
     {
-      "url": "https://runs-on.dev"
+      "url": "https://runs-at.dev"
     }
   ],
   "tags": [
@@ -42,7 +42,7 @@
         "type": "apiKey",
         "in": "cookie",
         "name": "session",
-        "description": "GitHub OAuth session cookie, minted by the sign-in flow at https://runs-on.dev/api/auth/github (start) and /api/auth/github/callback (completion). Signed HttpOnly cookie, 24-hour TTL. Grants: claim (names:claim), edit own records (records:write), release (names:release), swap (names:swap), mint deploy tokens (tokens:mint). One name per GitHub account. Scopes granted: names:claim, records:write, names:release, names:swap, tokens:mint (machine list in components.securitySchemes.registryOAuth and /.well-known/oauth-protected-resource)."
+        "description": "GitHub OAuth session cookie, minted by the sign-in flow at https://runs-at.dev/api/auth/github (start) and /api/auth/github/callback (completion). Signed HttpOnly cookie, 24-hour TTL. Grants: claim (names:claim), edit own records (records:write), release (names:release), swap (names:swap), mint deploy tokens (tokens:mint). One name per GitHub account. Scopes granted: names:claim, records:write, names:release, names:swap, tokens:mint (machine list in components.securitySchemes.registryOAuth and /.well-known/oauth-protected-resource)."
       },
       "siteToken": {
         "type": "http",
@@ -55,9 +55,9 @@
         "description": "GitHub OAuth (authorization code, completed by /api/auth/github/callback). The resulting session grants the listed scopes for 24 hours via a signed HttpOnly cookie. sites:publish is not granted directly by the session: mint a rod1 bearer token (POST /api/tokens, scope tokens:mint) to exercise it.",
         "flows": {
           "authorizationCode": {
-            "authorizationUrl": "https://runs-on.dev/api/auth/github",
+            "authorizationUrl": "https://runs-at.dev/api/auth/github",
             "tokenUrl": "https://github.com/login/oauth/access_token",
-            "refreshUrl": "https://runs-on.dev/api/auth/github",
+            "refreshUrl": "https://runs-at.dev/api/auth/github",
             "scopes": {
               "names:claim": "Claim one free subdomain for the signed-in GitHub account",
               "records:write": "Edit DNS records, subdomains, and the profile of names the account owns",
@@ -427,7 +427,7 @@
             "name": "name",
             "in": "query",
             "required": true,
-            "description": "The name to check, without the .runs-on.dev suffix.",
+            "description": "The name to check, without the .runs-at.dev suffix.",
             "schema": {
               "type": "string",
               "minLength": 2,

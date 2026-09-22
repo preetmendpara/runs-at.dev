@@ -221,9 +221,9 @@ const projectClaim = (author, over = {}) => claim({
   ...over,
 });
 
-test('lets the maintainer claim a listed project name past the one-name limit', async () => {
+test('the upstream maintainer project names are not exempt here', async () => {
   const out = await validateChangeset(projectClaim('zordhalo'));
-  assert.deepEqual(out, { ok: true, errors: [] });
+  assert.ok(out.errors.some((e) => e.includes('one name per account')));
 });
 
 test('the project exemption is not transferable to another account', async () => {

@@ -112,7 +112,7 @@ test('labels are lowercased, since DNS labels are not case sensitive', () => {
 
 test('subdomain rows round-trip', () => {
   const subdomains = {
-    _vercel: { TXT: ['vc-domain-verify=you.runs-on.dev,abc123'] },
+    _vercel: { TXT: ['vc-domain-verify=you.runs-at.dev,abc123'] },
     mail: { MX: [{ priority: 10, value: 'mx.example.com' }] },
   };
   assert.deepEqual(buildSubdomains(subdomainsToRows(subdomains)), subdomains);
@@ -123,7 +123,7 @@ test('the Vercel verification record the guide documents builds correctly', () =
     name: 'you', owner: { github: 'you' }, claimedAt: '2026-01-01T00:00:00.000Z',
     records: buildRecords('cname', { cname: 'cname.vercel-dns.com' }),
     subdomains: buildSubdomains([
-      { label: '_vercel', type: 'TXT', value: 'vc-domain-verify=you.runs-on.dev,abc123' },
+      { label: '_vercel', type: 'TXT', value: 'vc-domain-verify=you.runs-at.dev,abc123' },
     ]),
   });
   assert.deepEqual(out, { ok: true, errors: [] });
@@ -249,6 +249,6 @@ test('an MX host is normalized but its priority is untouched', () => {
 
 // Verification tokens are opaque and case-sensitive; normalizing one breaks it.
 test('TXT values are never lowercased or stripped', () => {
-  const v = 'vc-domain-verify=amanworks.runs-on.dev,81E73fdea1b7f9058ffa';
+  const v = 'vc-domain-verify=amanworks.runs-at.dev,81E73fdea1b7f9058ffa';
   assert.deepEqual(buildSubdomains([{ label: '_vercel', type: 'TXT', value: v }]), { _vercel: { TXT: [v] } });
 });

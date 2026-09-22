@@ -3,9 +3,9 @@ import { Eyebrow, DocTitle, Lede, DocList } from '../components.jsx';
 
 export const metadata = {
   title: 'Guides',
-  description: 'Copy-paste walkthroughs for pointing a runs-on.dev name at a host, email forwarding, or a social verification record.',
-  alternates: { canonical: 'https://runs-on.dev/docs/guides' },
-  openGraph: { title: 'Guides · runs-on.dev' },
+  description: 'Copy-paste walkthroughs for pointing a runs-at.dev name at a host, email forwarding, or a social verification record.',
+  alternates: { canonical: 'https://runs-at.dev/docs/guides' },
+  openGraph: { title: 'Guides · runs-at.dev' },
 };
 
 export default function Guides() {

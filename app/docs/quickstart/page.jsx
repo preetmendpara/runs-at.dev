@@ -3,9 +3,9 @@ import { Eyebrow, DocTitle, Lede, C, Record } from '../components.jsx';
 
 export const metadata = {
   title: 'Quickstart',
-  description: 'Claim a name.runs-on.dev and get it live end to end: sign in, claim, and the fastest way to point it somewhere.',
-  alternates: { canonical: 'https://runs-on.dev/docs/quickstart' },
-  openGraph: { title: 'Quickstart · runs-on.dev' },
+  description: 'Claim a name.runs-at.dev and get it live end to end: sign in, claim, and the fastest way to point it somewhere.',
+  alternates: { canonical: 'https://runs-at.dev/docs/quickstart' },
+  openGraph: { title: 'Quickstart · runs-at.dev' },
 };
 
 export default function Quickstart() {
@@ -17,7 +17,7 @@ export default function Quickstart() {
 
       <Section title="1. Sign in">
         <p className="text-sm leading-relaxed sm:text-base">
-          Go to <a className="text-(--color-signal) underline" href="https://runs-on.dev">runs-on.dev</a> and click
+          Go to <a className="text-(--color-signal) underline" href="https://runs-at.dev">runs-at.dev</a> and click
           <C> Sign in with GitHub</C>. This starts an OAuth flow and sets a signed session cookie, nothing more.
         </p>
       </Section>
@@ -48,7 +48,7 @@ export default function Quickstart() {
   "records": {}
 }`}</Record>
         <p className="text-sm leading-relaxed sm:text-base">
-          <C>you.runs-on.dev</C> resolves immediately after this, over HTTPS, serving a profile card
+          <C>you.runs-at.dev</C> resolves immediately after this, over HTTPS, serving a profile card
           built from your GitHub account. There is nothing left to provision, since a wildcard DNS
           record already points every name at the app.
         </p>
@@ -57,7 +57,7 @@ export default function Quickstart() {
       <Section title="4. Point it somewhere">
         <p className="text-sm leading-relaxed sm:text-base">
           The profile card is fine to leave as is. To send the name somewhere else, sign in and open{' '}
-          <a className="text-(--color-signal) underline" href="/manage">runs-on.dev/manage</a>, pick a
+          <a className="text-(--color-signal) underline" href="/manage">runs-at.dev/manage</a>, pick a
           record type, fill it in, and save. That commits to <C>domains/&lt;name&gt;.json</C> the same
           way a merged pull request would, and DNS follows within seconds.
         </p>

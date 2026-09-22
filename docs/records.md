@@ -77,14 +77,14 @@ verification.
   subdomain is exactly one level deep).
 - A two-label form `_<label>.<label>` is also accepted for verification
   records: Vercel reads its challenge from `_vercel.<domain>` and a
-  subdomain of a claim (e.g. `recruitment.you.runs-on.dev`) needs its TXT
-  at `_vercel.recruitment.you.runs-on.dev`. Only underscore-first is
+  subdomain of a claim (e.g. `recruitment.you.runs-at.dev`) needs its TXT
+  at `_vercel.recruitment.you.runs-at.dev`. Only underscore-first is
   allowed; a bare `a.b` is still rejected.
 - Each value holds `A`, `TXT`, `CNAME`, or `MX` under the same coexistence
   rules as the root `records` object. `URL` is not allowed on a
   subdomain. The app only ever looks up the claimed name itself, so a
   redirect record there could never be served.
-- The resulting full name (`<label>.<name>.runs-on.dev`) must stay within
+- The resulting full name (`<label>.<name>.runs-at.dev`) must stay within
   the 253-character DNS name limit.
 
 `lib/dns.js`'s `planDnsChanges` emits these as `<label>.<name>` DNS entries,
@@ -93,7 +93,7 @@ so `_atproto` under `you` becomes `_atproto.you`.
 ### The `_vercel` zone mirror
 
 `_vercel` is the one label with a second life. Vercel reads its ownership
-challenge for `<name>.runs-on.dev` from `_vercel.runs-on.dev` — zone level,
+challenge for `<name>.runs-at.dev` from `_vercel.runs-at.dev` — zone level,
 one label ABOVE every claim — because the apex itself sits in a Vercel
 account. No claim file can express that host: `subdomains` records are
 always children of the claim's own name. So `sync-dns` mirrors every
@@ -106,7 +106,7 @@ an operator places at that host by hand survives every sync.
 ## `profile`
 
 An optional object controlling what the profile card shows at
-`<name>.runs-on.dev` when the name has no DNS records pointing it
+`<name>.runs-at.dev` when the name has no DNS records pointing it
 elsewhere. Every field is optional and falls back to the owner's GitHub
 profile; `links` exist only here.
 
@@ -128,7 +128,7 @@ profile; `links` exist only here.
   the same scheme rules as a `URL` record: `javascript:`, `data:`, and
   protocol-relative forms are rejected.
 - No other keys. The card art also feeds a shareable banner at
-  `https://runs-on.dev/banner/<name>` (add `?theme=dark` for GitHub
+  `https://runs-at.dev/banner/<name>` (add `?theme=dark` for GitHub
   READMEs) and the social preview when the link is shared.
 
 ## Why CNAME can't coexist with other record types
@@ -168,7 +168,7 @@ a project (Project → Settings → Domains).
 ```
 
 Replace `you` with your GitHub username or org. You'll also need a `CNAME`
-file in the Pages repo itself containing `you.runs-on.dev`, which is
+file in the Pages repo itself containing `you.runs-at.dev`, which is
 GitHub's standard custom-domain setup, independent of this registry.
 
 ### Netlify
@@ -177,7 +177,7 @@ GitHub's standard custom-domain setup, independent of this registry.
 "records": { "CNAME": "apex-loadbalancer.netlify.com" }
 ```
 
-Then add `you.runs-on.dev` as a custom domain in the Netlify site's
+Then add `you.runs-at.dev` as a custom domain in the Netlify site's
 settings so it can issue a TLS certificate for it.
 
 ### Cloudflare Pages
@@ -187,7 +187,7 @@ settings so it can issue a TLS certificate for it.
 ```
 
 Replace `you-project` with your Pages project's own `*.pages.dev`
-subdomain, then add `you.runs-on.dev` as a custom domain in the Pages
+subdomain, then add `you.runs-at.dev` as a custom domain in the Pages
 project's settings.
 
 ### URL redirect
@@ -211,7 +211,7 @@ below for how this is served and what's rejected.
 }
 ```
 
-Point `you@you.runs-on.dev` at a forwarding provider's MX hosts (the values
+Point `you@you.runs-at.dev` at a forwarding provider's MX hosts (the values
 above are [ForwardEmail](https://forwardemail.net)'s; use whatever your
 provider gives you). `MX` may coexist with `A` and `TXT` at the same name.
 
@@ -224,7 +224,7 @@ provider gives you). `MX` may coexist with `A` and `TXT` at the same name.
 ```
 
 Bluesky verifies a custom handle by looking up a TXT record at
-`_atproto.<handle>`. With this in place, `you.runs-on.dev` can be set as
+`_atproto.<handle>`. With this in place, `you.runs-at.dev` can be set as
 the Bluesky handle directly, and `did:plc:abc123` should be your account's
 actual DID (Settings → Advanced → your DID, in the Bluesky app).
 
@@ -232,13 +232,13 @@ actual DID (Settings → Advanced → your DID, in the Bluesky app).
 
 A `URL` record has no DNS representation. A `CNAME`, `A`, or `TXT` record
 is a DNS-level pointer, but a `URL` redirect is served by the app itself.
-The wildcard `*.runs-on.dev` record already routes every claimed name to
+The wildcard `*.runs-at.dev` record already routes every claimed name to
 the app, so when a record's `records` object holds only `URL`,
 `app/sites/[name]/page.jsx` issues a 307 redirect to that URL instead of
 rendering the profile card. `lib/dns.js`'s `planDnsChanges` ignores `URL`
 entirely; it plans no DNS change for it.
 
-Because this makes a `runs-on.dev` name an open redirector for whatever URL
+Because this makes a `runs-at.dev` name an open redirector for whatever URL
 is in the file, the target is validated as an absolute `http://` or
 `https://` URL and nothing else. `javascript:`, `data:`, `vbscript:`, and
 protocol-relative (`//evil.com`) values are all rejected. This is enforced

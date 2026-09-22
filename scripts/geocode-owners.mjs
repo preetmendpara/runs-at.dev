@@ -89,7 +89,7 @@ async function openMeteo(q) {
 async function nominatim(q) {
   try {
     const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`;
-    const res = await fetch(url, { headers: { 'User-Agent': 'runs-on-dev-claim-map/1.0' } });
+    const res = await fetch(url, { headers: { 'User-Agent': 'runs-at-dev-claim-map/1.0' } });
     if (!res.ok) return null;
     const hit = (await res.json())?.[0];
     if (hit) return { lat: parseFloat(hit.lat), lon: parseFloat(hit.lon) };

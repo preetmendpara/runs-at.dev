@@ -133,7 +133,7 @@ export function ClaimBanner({ name, login, displayName, bio, claimedYear, avatar
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <span style={{ fontSize: 88, fontWeight: 400, letterSpacing: -1, color: t.ink, display: 'flex' }}>
           {name}
-          <span style={{ fontSize: 88, fontWeight: 400, letterSpacing: -1, color: t.muted, display: 'flex' }}>.runs-on.dev</span>
+          <span style={{ fontSize: 88, fontWeight: 400, letterSpacing: -1, color: t.muted, display: 'flex' }}>.runs-at.dev</span>
         </span>
         {bio ? (
           <span style={{ fontSize: 26, color: t.muted, marginTop: 20, display: 'flex', maxWidth: 900 }}>

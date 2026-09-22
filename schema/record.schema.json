@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "runs-on.dev registry record",
+  "title": "runs-at.dev registry record",
   "type": "object",
   "additionalProperties": false,
   "required": [

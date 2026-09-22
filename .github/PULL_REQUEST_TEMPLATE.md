@@ -1,6 +1,6 @@
 ## Which name?
 
-`<name>.runs-on.dev`
+`<name>.runs-at.dev`
 
 ## Checklist
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { validateName } from './lib/name.js';
 
-const ROOT = 'runs-on.dev';
+const ROOT = 'runs-at.dev';
 
 function prefersMarkdown(request) {
   const accept = request.headers.get('accept') ?? '';
@@ -66,7 +66,7 @@ export function proxy(request) {
   // A claimed host serves exactly one thing: that name's card, at "/". Every
   // other path belongs to the registry, and the card page renders the site
   // footer and the nav dock, whose links are relative -- so clicking "manage"
-  // on kl.runs-on.dev asked kl.runs-on.dev for /manage, which rewrote to
+  // on kl.runs-at.dev asked kl.runs-at.dev for /manage, which rewrote to
   // /sites/kl/manage, which does not exist, and 404'd. Every link on a card
   // was broken this way, and so was any path a visitor typed.
   //

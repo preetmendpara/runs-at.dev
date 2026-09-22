@@ -122,8 +122,11 @@ jobs:
         run: node scripts/sync-dns.mjs
         env:
           CHANGED_FILES: ${{ steps.changed.outputs.files }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          # runs-at.dev's zone is on Cloudflare. Set DNS_PROVIDER to 'vercel'
+          # (and the VERCEL_* secrets) only if the zone ever moves to Vercel DNS.
+          DNS_PROVIDER: cloudflare
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
 
   # The zone mirror hit Vercel's 50-value cap and deferred some challenges.
   # Prune the ones whose claims have verified; the prune's push (deploy key,

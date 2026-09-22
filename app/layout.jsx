@@ -39,23 +39,23 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata = {
-  metadataBase: new URL('https://runs-on.dev'),
+  metadataBase: new URL('https://runs-at.dev'),
   title: {
-    default: 'runs-on.dev · free subdomains',
-    template: '%s · runs-on.dev',
+    default: 'runs-at.dev · free subdomains',
+    template: '%s · runs-at.dev',
   },
-  description: 'Claim your own name.runs-on.dev in seconds. Free, forever.',
+  description: 'Claim your own name.runs-at.dev in seconds. Free, forever.',
   openGraph: {
-    siteName: 'runs-on.dev',
+    siteName: 'runs-at.dev',
     type: 'website',
-    url: 'https://runs-on.dev',
-    title: 'runs-on.dev · free subdomains',
-    description: 'Claim your own name.runs-on.dev in seconds. Free, forever.',
+    url: 'https://runs-at.dev',
+    title: 'runs-at.dev · free subdomains',
+    description: 'Claim your own name.runs-at.dev in seconds. Free, forever.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'runs-on.dev · free subdomains',
-    description: 'Claim your own name.runs-on.dev in seconds. Free, forever.',
+    title: 'runs-at.dev · free subdomains',
+    description: 'Claim your own name.runs-at.dev in seconds. Free, forever.',
   },
   // Bing Webmaster Tools ownership. Not a secret -- a verification token is
   // only meaningful when it is publicly readable in the head of the site it

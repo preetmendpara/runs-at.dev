@@ -4,16 +4,16 @@ import { Eyebrow, DocTitle, Lede, C, Code, Record, Warning } from '../components
 export const metadata = {
   title: 'SEO',
   description:
-    'How search engines treat a runs-on.dev name: why robots.txt and sitemaps are per host, why a URL redirect cannot rank, and which canonical to declare.',
-  alternates: { canonical: 'https://runs-on.dev/docs/seo' },
-  openGraph: { title: 'SEO · runs-on.dev' },
+    'How search engines treat a runs-at.dev name: why robots.txt and sitemaps are per host, why a URL redirect cannot rank, and which canonical to declare.',
+  alternates: { canonical: 'https://runs-at.dev/docs/seo' },
+  openGraph: { title: 'SEO · runs-at.dev' },
 };
 
 export default function Seo() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
       <Eyebrow>Docs / SEO</Eyebrow>
-      <DocTitle>SEO on a runs-on.dev name</DocTitle>
+      <DocTitle>SEO on a runs-at.dev name</DocTitle>
       <Lede>
         To a search engine, your name is its own site. It gets indexed on its own, ranks on its
         own, and starts with none of the registry&apos;s reputation.
@@ -21,7 +21,7 @@ export default function Seo() {
 
       <Section title="A subdomain is its own site">
         <p className="text-sm leading-relaxed sm:text-base">
-          Nothing about sitting under runs-on.dev helps or hurts you. The name has to earn its own
+          Nothing about sitting under runs-at.dev helps or hurts you. The name has to earn its own
           links like any other host. That cuts both ways, and which way depends entirely on which
           record type you use.
         </p>
@@ -61,15 +61,15 @@ export default function Seo() {
       <Section title="robots.txt and sitemaps are per host">
         <p className="text-sm leading-relaxed sm:text-base">
           This is the one that catches people. <C>robots.txt</C> is scoped to a single hostname.
-          The registry&apos;s <C>runs-on.dev/robots.txt</C> says nothing at all about your name, and
+          The registry&apos;s <C>runs-at.dev/robots.txt</C> says nothing at all about your name, and
           you cannot inherit it, edit it, or be blocked by it. Serve your own, and reference the
           sitemap by its full URL on your own host.
         </p>
-        <Code>{`# https://you.runs-on.dev/robots.txt
+        <Code>{`# https://you.runs-at.dev/robots.txt
 User-Agent: *
 Allow: /
 
-Sitemap: https://you.runs-on.dev/sitemap.xml`}</Code>
+Sitemap: https://you.runs-at.dev/sitemap.xml`}</Code>
         <p className="text-sm leading-relaxed sm:text-base">
           A name with no hosting has no <C>robots.txt</C> of its own and returns 404 for it, which
           crawlers read as no restrictions.
@@ -78,13 +78,13 @@ Sitemap: https://you.runs-on.dev/sitemap.xml`}</Code>
 
       <Section title="Pick one canonical">
         <p className="text-sm leading-relaxed sm:text-base">
-          If the same pages live at both <C>you.runs-on.dev</C> and your own domain, search engines
+          If the same pages live at both <C>you.runs-at.dev</C> and your own domain, search engines
           have to guess which is the real address, and they will split the signals while they do
           it. Say it explicitly on every page.
         </p>
-        <Code>{`<link rel="canonical" href="https://you.runs-on.dev/about">`}</Code>
+        <Code>{`<link rel="canonical" href="https://you.runs-at.dev/about">`}</Code>
         <p className="text-sm leading-relaxed sm:text-base">
-          If the runs-on.dev name is the only home for the content, point it at itself. If it
+          If the runs-at.dev name is the only home for the content, point it at itself. If it
           mirrors a site you already run, point it at that site instead, and be consistent on every
           page rather than mixing the two.
         </p>
@@ -92,8 +92,8 @@ Sitemap: https://you.runs-on.dev/sitemap.xml`}</Code>
 
       <Section title="Verifying in Search Console and Bing">
         <p className="text-sm leading-relaxed sm:text-base">
-          Add <C>https://you.runs-on.dev</C> as its own property. It will not appear under a
-          property for runs-on.dev, and you cannot verify the registry domain itself. A URL-prefix
+          Add <C>https://you.runs-at.dev</C> as its own property. It will not appear under a
+          property for runs-at.dev, and you cannot verify the registry domain itself. A URL-prefix
           property verified by an HTML file or meta tag is simplest when you are hosting real
           content. To verify by DNS instead, a <C>TXT</C> record on your own name works.
         </p>
@@ -120,7 +120,7 @@ Sitemap: https://you.runs-on.dev/sitemap.xml`}</Code>
       <Section title="HTTPS is already handled">
         <p className="text-sm leading-relaxed sm:text-base">
           <C>.dev</C> is on the HSTS preload list as a whole TLD, with force-https and
-          include-subdomains set. Browsers upgrade every request to a runs-on.dev name before it
+          include-subdomains set. Browsers upgrade every request to a runs-at.dev name before it
           leaves the machine, and the registry sends <C>Strict-Transport-Security</C> on top of
           that.
         </p>
@@ -142,15 +142,15 @@ Sitemap: https://you.runs-on.dev/sitemap.xml`}</Code>
 
       <Section title="One limitation worth knowing">
         <p className="text-sm leading-relaxed sm:text-base">
-          runs-on.dev is not on the{' '}
+          runs-at.dev is not on the{' '}
           <a className="text-(--color-signal) underline" href="https://publicsuffix.org">
             Public Suffix List
           </a>{' '}
-          yet. Until it is, a cookie scoped to <C>.runs-on.dev</C> is readable by every other name
+          yet. Until it is, a cookie scoped to <C>.runs-at.dev</C> is readable by every other name
           in the registry.
         </p>
         <Warning>
-          Scope your cookies to <C>you.runs-on.dev</C> and nothing broader, and do not put session
+          Scope your cookies to <C>you.runs-at.dev</C> and nothing broader, and do not put session
           tokens or anything else sensitive in a cookie set above your own host.
         </Warning>
       </Section>

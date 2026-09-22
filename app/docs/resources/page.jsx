@@ -3,9 +3,9 @@ import { C, Eyebrow, DocTitle, Lede, DocList } from '../components.jsx';
 
 export const metadata = {
   title: 'Resources',
-  description: 'Where to find the runs-on.dev registry, the record schema, how to report abuse, and where the policy lives.',
-  alternates: { canonical: 'https://runs-on.dev/docs/resources' },
-  openGraph: { title: 'Resources · runs-on.dev' },
+  description: 'Where to find the runs-at.dev registry, the record schema, how to report abuse, and where the policy lives.',
+  alternates: { canonical: 'https://runs-at.dev/docs/resources' },
+  openGraph: { title: 'Resources · runs-at.dev' },
 };
 
 export default function Resources() {
@@ -22,8 +22,8 @@ export default function Resources() {
         </p>
         <DocList
           items={[
-            { href: 'https://github.com/zordhalo/runs-on.dev', label: 'zordhalo/runs-on.dev', note: 'the registry, the app, and this site' },
-            { href: 'https://github.com/zordhalo/runs-on.dev/tree/main/domains', label: 'domains/', note: 'every claimed record, one file per name' },
+            { href: 'https://github.com/preetmendpara/runs-at.dev', label: 'preetmendpara/runs-at.dev', note: 'the registry, the app, and this site' },
+            { href: 'https://github.com/preetmendpara/runs-at.dev/tree/main/domains', label: 'domains/', note: 'every claimed record, one file per name' },
           ]}
         />
       </Section>
@@ -36,8 +36,8 @@ export default function Resources() {
         </p>
         <DocList
           items={[
-            { href: 'https://github.com/zordhalo/runs-on.dev/blob/main/lib/schema.js', label: 'lib/schema.js', note: 'validateRecord, the source of truth' },
-            { href: 'https://github.com/zordhalo/runs-on.dev/blob/main/schema/record.schema.json', label: 'schema/record.schema.json', note: 'the JSON Schema mirror' },
+            { href: 'https://github.com/preetmendpara/runs-at.dev/blob/main/lib/schema.js', label: 'lib/schema.js', note: 'validateRecord, the source of truth' },
+            { href: 'https://github.com/preetmendpara/runs-at.dev/blob/main/schema/record.schema.json', label: 'schema/record.schema.json', note: 'the JSON Schema mirror' },
           ]}
         />
       </Section>
@@ -62,14 +62,14 @@ export default function Resources() {
       <Section title="Report abuse">
         <Quote>
           If a subdomain is phishing, impersonating someone, or serving malware, email{' '}
-          <a className="text-(--color-signal) underline" href="mailto:abuse@runs-on.dev">abuse@runs-on.dev</a>{' '}
+          <a className="text-(--color-signal) underline" href="mailto:abuse@runs-at.dev">abuse@runs-at.dev</a>{' '}
           and it will be reclaimed.
         </Quote>
       </Section>
 
       <Section title="Policy">
         <p className="text-sm leading-relaxed sm:text-base">
-          What names cost, what forfeits one, and what happens if runs-on.dev shuts down.
+          What names cost, what forfeits one, and what happens if runs-at.dev shuts down.
         </p>
         <DocList items={[{ href: '/policy', label: 'Policy' }]} />
       </Section>

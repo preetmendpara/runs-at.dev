@@ -23,7 +23,7 @@ export const metadata = {
   robots: { index: false },
 };
 
-const ZONE = 'runs-on.dev';
+const ZONE = 'runs-at.dev';
 const TOKEN = () => process.env.CARD_TOKEN ?? process.env.REGISTRY_TOKEN;
 
 // Every load spends a registry read, five DNS lookups, and one outbound
@@ -52,23 +52,23 @@ function flattenTxt(records) {
 const STUCK_ADVICE = {
   'vercel-app-url': (name) => ({
     title: 'The CNAME points at a deployment URL',
-    body: `Vercel decides what to serve from the hostname, and a .vercel.app address is not registered as serving ${name}.runs-on.dev. Add ${name}.runs-on.dev as a domain on your Vercel project, then use the custom-domain target it shows you instead of the deployment URL.`,
+    body: `Vercel decides what to serve from the hostname, and a .vercel.app address is not registered as serving ${name}.runs-at.dev. Add ${name}.runs-at.dev as a domain on your Vercel project, then use the custom-domain target it shows you instead of the deployment URL.`,
   }),
   'vercel-no-challenge': (name) => ({
     title: 'The Vercel ownership challenge is missing',
-    body: `runs-on.dev belongs to the registry, not to you, so Vercel needs proof you control this specific name before it will serve it. In your project's domain settings, copy the vc-domain-verify TXT value it offers and add it on /manage as a subdomain record with label _vercel and type TXT.`,
+    body: `runs-at.dev belongs to the registry, not to you, so Vercel needs proof you control this specific name before it will serve it. In your project's domain settings, copy the vc-domain-verify TXT value it offers and add it on /manage as a subdomain record with label _vercel and type TXT.`,
   }),
   'vercel-awaiting-verification': (name) => ({
     title: 'DNS is right, Vercel just has not re-checked',
-    body: `The CNAME and the _vercel TXT are both published, which means everything on this side is done. Vercel often needs one nudge: remove and re-add ${name}.runs-on.dev in your project's domain settings to force a fresh verification check.`,
+    body: `The CNAME and the _vercel TXT are both published, which means everything on this side is done. Vercel often needs one nudge: remove and re-add ${name}.runs-at.dev in your project's domain settings to force a fresh verification check.`,
   }),
   'platform-default-host': (name) => ({
     title: 'The platform does not know about this hostname',
-    body: `DNS points at your platform, but nothing there is configured to answer for ${name}.runs-on.dev. Add it as a custom domain where your site is hosted — GitHub Pages puts it under repo Settings → Pages, Netlify and Cloudflare Pages under domain settings.`,
+    body: `DNS points at your platform, but nothing there is configured to answer for ${name}.runs-at.dev. Add it as a custom domain where your site is hosted — GitHub Pages puts it under repo Settings → Pages, Netlify and Cloudflare Pages under domain settings.`,
   }),
   unknown: (name) => ({
     title: 'Your host is not answering for this name yet',
-    body: `The name resolves and holds a certificate, but the registry's own page is still what visitors get, which means the provider has not taken ownership of the hostname. Add ${name}.runs-on.dev as a custom domain wherever the site is hosted.`,
+    body: `The name resolves and holds a certificate, but the registry's own page is still what visitors get, which means the provider has not taken ownership of the hostname. Add ${name}.runs-at.dev as a custom domain wherever the site is hosted.`,
   }),
 };
 
@@ -93,7 +93,7 @@ export default async function DebugPage({ params }) {
     return (
       <main className="mx-auto max-w-2xl px-6 py-16">
         <p className="font-(family-name:--font-mono) text-xs tracking-[0.14em] text-(--color-muted) uppercase">Debug</p>
-        <h1 className="mt-2 font-(family-name:--font-display) text-2xl font-medium text-(--color-ink)">{name}.runs-on.dev</h1>
+        <h1 className="mt-2 font-(family-name:--font-display) text-2xl font-medium text-(--color-ink)">{name}.runs-at.dev</h1>
         <p className="mt-4 text-sm leading-relaxed text-(--color-muted)">
           Too many checks on this name in the last minute. Live DNS answers change on
           the scale of minutes anyway — reload shortly.
@@ -121,7 +121,7 @@ export default async function DebugPage({ params }) {
     return (
       <main className="mx-auto max-w-2xl px-6 py-16">
         <p className="font-(family-name:--font-mono) text-xs tracking-[0.14em] text-(--color-muted) uppercase">Debug</p>
-        <h1 className="mt-2 font-(family-name:--font-display) text-2xl font-medium text-(--color-ink)">{name}.runs-on.dev</h1>
+        <h1 className="mt-2 font-(family-name:--font-display) text-2xl font-medium text-(--color-ink)">{name}.runs-at.dev</h1>
         <p className="mt-4 text-sm leading-relaxed text-(--color-muted)">
           The registry could not be read just now, so there is nothing trustworthy to
           report. Reload in a moment — a claimed name is not "not claimed" because a
@@ -135,13 +135,13 @@ export default async function DebugPage({ params }) {
     return (
       <main className="mx-auto max-w-2xl px-6 py-16">
         <p className="font-(family-name:--font-mono) text-xs tracking-[0.14em] text-(--color-muted) uppercase">Debug</p>
-        <h1 className="mt-2 font-(family-name:--font-display) text-2xl font-medium text-(--color-ink)">{name}.runs-on.dev</h1>
+        <h1 className="mt-2 font-(family-name:--font-display) text-2xl font-medium text-(--color-ink)">{name}.runs-at.dev</h1>
         <p className="mt-4 text-sm leading-relaxed text-(--color-muted)">
           This name is not claimed, so there is no record to check: the wildcard serves a
           claim page for it and DNS points nowhere in particular.
         </p>
         <Link href={`/?claim=${encodeURIComponent(name)}`} className="mt-4 inline-block font-(family-name:--font-mono) text-sm text-(--color-signal) underline">
-          claim {name}.runs-on.dev →
+          claim {name}.runs-at.dev →
         </Link>
       </main>
     );
@@ -202,7 +202,7 @@ export default async function DebugPage({ params }) {
       <p className="font-(family-name:--font-mono) text-xs tracking-[0.14em] text-(--color-muted) uppercase">Debug</p>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <h1 className="font-(family-name:--font-display) text-2xl font-medium tracking-tight text-(--color-ink)">
-          {name}.runs-on.dev
+          {name}.runs-at.dev
         </h1>
         <span
           className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-(family-name:--font-mono) text-xs"

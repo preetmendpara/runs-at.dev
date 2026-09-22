@@ -6,7 +6,7 @@ import {
 import { planDnsChanges, planZoneVerificationRecords } from '../lib/dns.js';
 import { Resolver } from 'node:dns/promises';
 
-const DOMAIN = 'runs-on.dev';
+const DOMAIN = 'runs-at.dev';
 const TIMEOUT_MS = 10_000;
 const CONCURRENCY = 8;
 
@@ -15,13 +15,13 @@ const CONCURRENCY = 8;
 // The title check is what separates the two worlds — a verified name is
 // served BY the provider ON our hostname, so the hostname alone can't tell
 // them apart, but the provider's page never carries the card's
-// "<name> (name.runs-on.dev)" title.
+// "<name> (name.runs-at.dev)" title.
 async function probe(name) {
   try {
-    const res = await fetch(`https://${name}.runs-on.dev/`, {
+    const res = await fetch(`https://${name}.runs-at.dev/`, {
       redirect: 'follow',
       signal: AbortSignal.timeout(TIMEOUT_MS),
-      headers: { 'user-agent': 'runs-on-dev-health-check (github.com/zordhalo/runs-on.dev)' },
+      headers: { 'user-agent': 'runs-at-dev-health-check (github.com/preetmendpara/runs-at.dev)' },
     });
     const body = await res.text();
     const title = /<title[^>]*>([^<]*)<\/title>/i.exec(body)?.[1]?.trim() ?? '';
@@ -137,9 +137,9 @@ if (drift.length > 0) {
   // wrong that could not already. The alarm moves with it -- if the repair
   // fails, that job goes red, which is the signal that actually needs a
   // person. Exiting 0 here is what lets the repair job run at all.
-  // The last label before the domain is the claim: `arpitraj.runs-on.dev` and
-  // `_vercel.arpitraj.runs-on.dev` both belong to `arpitraj`. The zone mirror
-  // at `_vercel.runs-on.dev` belongs to no claim and yields `_vercel`, so the
+  // The last label before the domain is the claim: `arpitraj.runs-at.dev` and
+  // `_vercel.arpitraj.runs-at.dev` both belong to `arpitraj`. The zone mirror
+  // at `_vercel.runs-at.dev` belongs to no claim and yields `_vercel`, so the
   // result is intersected with the registry -- sync-dns rebuilds the mirror on
   // every run regardless of which names it was given, so repairing any real
   // name repairs the mirror alongside it.
@@ -246,7 +246,7 @@ async function closeRecoveredIssues(statusRows) {
       await api(`/issues/${number}/comments`, {
         method: 'POST',
         body: JSON.stringify({
-          body: `\`${name}.runs-on.dev\` is serving your site now, so this is resolved. `
+          body: `\`${name}.runs-at.dev\` is serving your site now, so this is resolved. `
             + 'Closed automatically by the daily health check — reopen if it regresses.',
         }),
       });
@@ -312,7 +312,7 @@ async function openStuckIssues(statusRows, allClaims) {
       const res = await api('/issues', {
         method: 'POST',
         body: JSON.stringify({
-          title: `${name}.runs-on.dev is not serving your site yet`,
+          title: `${name}.runs-at.dev is not serving your site yet`,
           body,
           labels: [STUCK_LABEL],
         }),

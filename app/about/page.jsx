@@ -3,9 +3,9 @@ import { Section, Quote } from '../components/Section.jsx';
 export const metadata = {
   title: 'About',
   description:
-    'runs-on.dev is a free subdomain registry, not a top-level domain. What that means, why it exists, and who runs it.',
-  alternates: { canonical: 'https://runs-on.dev/about' },
-  openGraph: { title: 'About · runs-on.dev' },
+    'runs-at.dev is a free subdomain registry, not a top-level domain. What that means, why it exists, and who runs it.',
+  alternates: { canonical: 'https://runs-at.dev/about' },
+  openGraph: { title: 'About · runs-at.dev' },
 };
 
 export default function About() {
@@ -15,8 +15,8 @@ export default function About() {
 
       <Section title="What this is">
         <p className="text-sm leading-relaxed">
-          runs-on.dev gives away subdomains under one domain that Advance Labs registered. Sign
-          in with GitHub, claim a name like <code className="slit-inline bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-(--color-ash)">you.runs-on.dev</code>, and
+          runs-at.dev gives away subdomains under one domain, runs-at.dev. Sign
+          in with GitHub, claim a name like <code className="slit-inline bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-(--color-ash)">you.runs-at.dev</code>, and
           it's live within seconds. No DNS panel, no yearly renewal on your end.
         </p>
       </Section>
@@ -29,9 +29,9 @@ export default function About() {
           distinctive-looking address for a side project.
         </p>
         <Quote>
-          runs-on.dev gets the same feeling, a name that isn't <code className="slit-inline bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-(--color-ash)">vercel.app</code> or
+          runs-at.dev gets the same feeling, a name that isn't <code className="slit-inline bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-(--color-ash)">vercel.app</code> or
           <code className="slit-inline bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-(--color-ash)"> github.io</code>, for the price of one domain: about $10 a year. Every
-          name you claim lives under runs-on.dev, which Advance Labs registered and answers
+          name you claim lives under runs-at.dev, which its operator registered and answers
           for.
         </Quote>
       </Section>
@@ -45,32 +45,34 @@ export default function About() {
           <a className="text-(--color-signal) underline" href="https://www.is-a.dev">is-a.dev</a>,{' '}
           <a className="text-(--color-signal) underline" href="https://js.org">js.org</a>, and{' '}
           <a className="text-(--color-signal) underline" href="https://eu.org">eu.org</a> all did it first, and
-          runs-on.dev exists because that pattern is worth having more than once.
+          runs-at.dev exists because that pattern is worth having more than once.
         </p>
       </Section>
 
       <Section title="Who runs it">
         <p className="text-sm leading-relaxed">
-          <a className="text-(--color-signal) underline" href="https://advancelabs.dev">Advance Labs</a> is the registrant
-          of runs-on.dev and the party responsible for what runs under it. Advance Labs builds
-          and ships its own software products; this registry is one of them, operated the same
-          way it operates everything else: in the open, with the source and the rules on
-          GitHub. See the <a className="text-(--color-signal) underline" href="/policy">policy</a> for what that
-          responsibility actually covers, and Advance Labs's own guide on{' '}
-          <a
-            className="text-(--color-signal) underline"
-            href="https://advancelabs.dev/guides/custom-domain-ending-without-icann"
-          >
-            picking a custom domain ending without going through ICANN
-          </a>
-          .
+          runs-at.dev is registered and operated by{' '}
+          <a className="text-(--color-signal) underline" href="https://github.com/preetmendpara">@preetmendpara</a>,
+          the party responsible for what runs under it. It is operated in the open, with the
+          source and the rules on GitHub. See the{' '}
+          <a className="text-(--color-signal) underline" href="/policy">policy</a> for what that
+          responsibility actually covers.
+        </p>
+      </Section>
+
+      <Section title="Credits">
+        <p className="text-sm leading-relaxed">
+          runs-at.dev is an independent service built on the open-source{' '}
+          <a className="text-(--color-signal) underline" href="https://github.com/zordhalo/runs-on.dev">runs-on.dev</a>{' '}
+          registry by Advance Labs Inc, used and modified under the GNU Affero General Public
+          License v3. It is not affiliated with or endorsed by runs-on.dev or Advance Labs.
         </p>
       </Section>
 
       <Section title="The source">
         <p className="text-sm leading-relaxed">
           Every claim, every hosting record, and every rule CI enforces lives in the public
-          repo: <a className="text-(--color-signal) underline" href="https://github.com/zordhalo/runs-on.dev">github.com/zordhalo/runs-on.dev</a>.
+          repo: <a className="text-(--color-signal) underline" href="https://github.com/preetmendpara/runs-at.dev">github.com/preetmendpara/runs-at.dev</a>.
           Nothing about how a name gets claimed or reclaimed happens outside git history.
         </p>
       </Section>

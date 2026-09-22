@@ -1,13 +1,13 @@
 # Policy
 
-`runs-on.dev` is a free subdomain registry. Anyone with a GitHub account can
-claim a name like `you.runs-on.dev` and point it at their own hosting. This
+`runs-at.dev` is a free subdomain registry. Anyone with a GitHub account can
+claim a name like `you.runs-at.dev` and point it at their own hosting. This
 page explains the terms in plain language.
 
 ## Names are free, and may be reclaimed
 
 Claiming a name costs nothing, and there is no guarantee it stays yours
-forever. Advance Labs reserves the right to reclaim any name, including a
+forever. The operator reserves the right to reclaim any name, including a
 name that has gone dormant (no working site, an expired record, an inactive
 owner). Free registries only stay usable if abandoned names come back into
 circulation.
@@ -34,23 +34,16 @@ Every account holds one name. The one exception is a short, public list of
 names the registry maintainer holds for their own open-source projects, on
 top of their personal name. The list lives in `MAINTAINER_PROJECT_NAMES` in
 [`lib/claim.js`](./lib/claim.js). Each entry covers one account and one
-name, so it can't be used to take any other name. Current entries:
-
-- `clatterbox` (@zordhalo): [Clatterbox](https://github.com/zordhalo/clatterbox),
-  an open-source keyboard-sound app.
-- `ninebrains` (@zordhalo): [Ninebrains](https://github.com/Advance-Labs/ninebrains),
-  an open-source desktop workbench for running coding agents in parallel.
-- `gdg` (@zordhalo): [Bean Bash](https://github.com/GDG-on-Campus-Seneca-Polytechnic/info/tree/main/sessions/2026-fall/2026-09-23-info-session/bean-bash),
-  the audience trivia game for GDG on Campus @ Seneca Polytechnic's events.
+name, so it can't be used to take any other name. Current entries: none.
 
 ## Who is responsible
 
-Advance Labs is the registrant of `runs-on.dev` and answers for what every
+The operator, [@preetmendpara](https://github.com/preetmendpara), is the registrant of `runs-at.dev` and answers for what every
 subdomain serves. That is why the policy above exists and why it is
 enforced without much ceremony: the registrant is on the hook for abuse
 happening under the domain, so abuse gets removed.
 
 ## Reporting abuse
 
-Email **abuse@runs-on.dev** with the subdomain in question and what it is
+Email **abuse@runs-at.dev** with the subdomain in question and what it is
 doing. Reports are how dormant and abusive names get found. Use it.

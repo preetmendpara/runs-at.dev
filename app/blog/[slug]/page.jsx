@@ -15,13 +15,13 @@ export async function generateMetadata({ params }) {
 
   // Optional featured media from frontmatter, absolute-ized for crawlers.
   const media = {};
-  if (post.image) media.images = [{ url: new URL(post.image, 'https://runs-on.dev').toString() }];
-  if (post.video) media.videos = [{ url: new URL(post.video, 'https://runs-on.dev').toString() }];
+  if (post.image) media.images = [{ url: new URL(post.image, 'https://runs-at.dev').toString() }];
+  if (post.video) media.videos = [{ url: new URL(post.video, 'https://runs-at.dev').toString() }];
 
   return {
     title: post.title,
     description: post.description,
-    alternates: { canonical: `https://runs-on.dev/blog/${post.slug}` },
+    alternates: { canonical: `https://runs-at.dev/blog/${post.slug}` },
     openGraph: {
       type: 'article',
       title: post.title,
@@ -60,8 +60,8 @@ export default async function BlogPost({ params }) {
     description: post.description,
     datePublished: post.date,
     dateModified: updated ?? post.date,
-    author: { '@type': 'Organization', name: post.author, url: 'https://advancelabs.dev' },
-    mainEntityOfPage: `https://runs-on.dev/blog/${post.slug}`,
+    author: { '@type': 'Organization', name: post.author, url: 'https://github.com/preetmendpara' },
+    mainEntityOfPage: `https://runs-at.dev/blog/${post.slug}`,
     keywords: post.tags.join(', '),
   };
 

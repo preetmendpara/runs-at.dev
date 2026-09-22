@@ -2,7 +2,7 @@
 
 ## The flow
 
-1. Go to [runs-on.dev](https://runs-on.dev).
+1. Go to [runs-at.dev](https://runs-at.dev).
 2. Sign in with GitHub (`app/api/auth/github/route.js` starts the OAuth
    flow; `.../callback/route.js` completes it and sets a signed session
    cookie).
@@ -22,7 +22,7 @@ to overwrite a file that already exists. That's what stops two people
 claiming the same name in a race: whoever's request lands first wins, and
 the second gets `409 taken`. See `putRecord` in `lib/registry.js`.
 
-Once the file exists, the name resolves immediately: `*.runs-on.dev` is a
+Once the file exists, the name resolves immediately: `*.runs-at.dev` is a
 wildcard DNS record, so there's nothing to provision. You get a profile
 card built from your GitHub account until you point the name at your own
 hosting (see the main [README](../README.md#point-it-at-your-own-hosting)).

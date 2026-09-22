@@ -3,9 +3,9 @@ import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record } from '../../components.
 
 export const metadata = {
   title: 'URL redirect',
-  description: 'Point name.runs-on.dev at any link with a URL record, no hosting required.',
-  alternates: { canonical: 'https://runs-on.dev/docs/guides/url-redirect' },
-  openGraph: { title: 'URL redirect · runs-on.dev' },
+  description: 'Point name.runs-at.dev at any link with a URL record, no hosting required.',
+  alternates: { canonical: 'https://runs-at.dev/docs/guides/url-redirect' },
+  openGraph: { title: 'URL redirect · runs-at.dev' },
 };
 
 export default function UrlRedirectGuide() {
@@ -17,7 +17,7 @@ export default function UrlRedirectGuide() {
 
       <Section title="What you'll end up with">
         <p className="text-sm leading-relaxed sm:text-base">
-          Visiting <C>you.runs-on.dev</C> sends the browser to any absolute <C>http://</C> or{' '}
+          Visiting <C>you.runs-at.dev</C> sends the browser to any absolute <C>http://</C> or{' '}
           <C>https://</C> URL you choose, a project page, a GitHub profile, a link-in-bio, anything.
           The redirect is served by the app itself, not DNS.
         </p>
@@ -36,7 +36,7 @@ export default function UrlRedirectGuide() {
         <ApplyNote />
 
         <ol className="list-decimal space-y-2 pl-6 text-sm leading-relaxed sm:text-base">
-          <li>Fork <a className="text-(--color-signal) underline" href="https://github.com/zordhalo/runs-on.dev">the registry</a>.</li>
+          <li>Fork <a className="text-(--color-signal) underline" href="https://github.com/preetmendpara/runs-at.dev">the registry</a>.</li>
           <li>
             Edit <C>domains/you.json</C>, setting <C>records</C> to the block above with your own
             target URL.
@@ -52,7 +52,7 @@ export default function UrlRedirectGuide() {
 
       <Section title="How to tell it worked">
         <p className="text-sm leading-relaxed sm:text-base">
-          Visit <C>https://you.runs-on.dev</C>. It should redirect (HTTP 307) to your target URL
+          Visit <C>https://you.runs-at.dev</C>. It should redirect (HTTP 307) to your target URL
           within a few seconds of the pull request merging.
         </p>
       </Section>

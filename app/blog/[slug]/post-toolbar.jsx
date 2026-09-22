@@ -171,7 +171,7 @@ const panelClass =
   'absolute right-0 top-[calc(100%+6px)] z-50 w-60 rounded-lg border border-(--color-rule) bg-(--color-paper) p-1.5 shadow-xl';
 
 export default function PostToolbar({ slug, title, description, markdown, headings = [], back = null, forward = null }) {
-  const url = `https://runs-on.dev/blog/${slug}`;
+  const url = `https://runs-at.dev/blog/${slug}`;
 
   const [openMenu, setOpenMenu] = useState(null); // 'copy' | 'toc' | null
   // Per-copy tick feedback: which control fired ('page', 'share', or a menu

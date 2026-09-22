@@ -9,7 +9,7 @@ function notFound(slug) {
     {
       error: 'not_found',
       detail: `no API endpoint at /api/${(slug ?? []).join('/')}`,
-      hint: 'the endpoint list lives in the OpenAPI spec: https://runs-on.dev/openapi.json',
+      hint: 'the endpoint list lives in the OpenAPI spec: https://runs-at.dev/openapi.json',
     },
     { status: 404, headers: { 'content-type': 'application/json; charset=utf-8' } },
   );

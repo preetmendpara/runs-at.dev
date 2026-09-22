@@ -1,5 +1,5 @@
 {
-  "resource": "https://runs-on.dev",
+  "resource": "https://runs-at.dev",
   "authorization_servers": [
     "https://github.com"
   ],
@@ -14,5 +14,5 @@
   "bearer_methods_supported": [
     "header"
   ],
-  "resource_documentation": "https://runs-on.dev/openapi.json"
+  "resource_documentation": "https://runs-at.dev/openapi.json"
 }

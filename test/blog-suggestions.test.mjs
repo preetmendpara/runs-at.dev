@@ -9,7 +9,7 @@ const pr = (number, title, { labels = [], files = [], url } = {}) => ({
   title,
   labels: labels.map((l) => ({ name: l })),
   files,
-  url: url ?? `https://github.com/zordhalo/runs-on.dev/pull/${number}`,
+  url: url ?? `https://github.com/preetmendpara/runs-at.dev/pull/${number}`,
 });
 
 test('registry churn and housekeeping are never suggested', () => {

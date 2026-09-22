@@ -1,4 +1,4 @@
-// Spam comment moderation for the runs-on.dev registry.
+// Spam comment moderation for the runs-at.dev registry.
 //
 // Runs from .github/workflows/moderate.yml on a schedule and on new comment
 // events. See lib/moderation.js for the patterns and the tombstone format.

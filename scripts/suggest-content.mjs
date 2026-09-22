@@ -12,7 +12,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { generateSuggestions } from '../lib/blog-suggestions.js';
 
-const REPO = process.env.GITHUB_REPOSITORY ?? 'zordhalo/runs-on.dev';
+const REPO = process.env.GITHUB_REPOSITORY ?? 'preetmendpara/runs-at.dev';
 const STATE_FILE = 'content/suggestions/state.json';
 const SUGGESTIONS_DIR = 'content/suggestions';
 const PER_PAGE = 50;

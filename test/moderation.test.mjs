@@ -18,8 +18,8 @@ const comment = (extra = {}) => ({
   id: 101,
   body: 'try https://www.go-live.me/ instead',
   user: { login: 'someone', id: 42 },
-  html_url: 'https://github.com/zordhalo/runs-on.dev/pull/61#issuecomment-101',
-  issue_url: 'https://api.github.com/repos/zordhalo/runs-on.dev/issues/61',
+  html_url: 'https://github.com/preetmendpara/runs-at.dev/pull/61#issuecomment-101',
+  issue_url: 'https://api.github.com/repos/preetmendpara/runs-at.dev/issues/61',
   created_at: '2026-09-07T12:00:00Z',
   updated_at: '2026-09-07T12:05:00Z',
   ...extra,
@@ -44,7 +44,7 @@ test('the log records which rule fired, not just that one did', () => {
 });
 
 test('the owner and the bot are exempt so a report can quote the link', () => {
-  assert.equal(isExempt('zordhalo'), true);
+  assert.equal(isExempt('preetmendpara'), true);
   assert.equal(isExempt('github-actions[bot]'), true);
   assert.equal(isExempt('someone'), false);
 });

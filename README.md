@@ -1,35 +1,35 @@
 <p align="center">
-  <a href="https://runs-on.dev">
+  <a href="https://runs-at.dev">
     <picture>
-      <source media="(prefers-color-scheme: light)" srcset="https://runs-on.dev/opengraph-image">
-      <img src="https://runs-on.dev/banner-dark" alt="runs-on.dev" width="820">
+      <source media="(prefers-color-scheme: light)" srcset="https://runs-at.dev/opengraph-image">
+      <img src="https://runs-at.dev/banner-dark" alt="runs-at.dev" width="820">
     </picture>
   </a>
 </p>
 
-<h1 align="center">runs-on.dev</h1>
+<h1 align="center">runs-at.dev</h1>
 
 <p align="center">
-  Free subdomains for developers. Claim <code>yourname.runs-on.dev</code> in seconds,
+  Free subdomains for developers. Claim <code>yourname.runs-at.dev</code> in seconds,
   then point it wherever you like.
 </p>
 
 <p align="center">
-  <a href="https://runs-on.dev"><b>Claim a name</b></a>
+  <a href="https://runs-at.dev"><b>Claim a name</b></a>
   &nbsp;·&nbsp;
-  <a href="https://runs-on.dev/docs/quickstart">Quickstart</a>
+  <a href="https://runs-at.dev/docs/quickstart">Quickstart</a>
   &nbsp;·&nbsp;
-  <a href="https://runs-on.dev/docs/guides">Guides</a>
+  <a href="https://runs-at.dev/docs/guides">Guides</a>
   &nbsp;·&nbsp;
-  <a href="https://runs-on.dev/docs/records">Records</a>
+  <a href="https://runs-at.dev/docs/records">Records</a>
   &nbsp;·&nbsp;
-  <a href="https://runs-on.dev/policy">Policy</a>
+  <a href="https://runs-at.dev/policy">Policy</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/zordhalo/runs-on.dev/stargazers"><img alt="stars" src="https://img.shields.io/github/stars/zordhalo/runs-on.dev?label=stars&color=1b4dff"></a>
-  <a href="https://github.com/zordhalo/runs-on.dev/tree/main/domains"><img alt="names claimed" src="https://img.shields.io/github/directory-file-count/zordhalo/runs-on.dev/domains?type=file&extension=json&label=names%20claimed&color=1b4dff"></a>
-  <a href="https://github.com/zordhalo/runs-on.dev/actions/workflows/test.yml"><img alt="tests" src="https://github.com/zordhalo/runs-on.dev/actions/workflows/test.yml/badge.svg"></a>
+  <a href="https://github.com/preetmendpara/runs-at.dev/stargazers"><img alt="stars" src="https://img.shields.io/github/stars/preetmendpara/runs-at.dev?label=stars&color=1b4dff"></a>
+  <a href="https://github.com/preetmendpara/runs-at.dev/tree/main/domains"><img alt="names claimed" src="https://img.shields.io/github/directory-file-count/preetmendpara/runs-at.dev/domains?type=file&extension=json&label=names%20claimed&color=1b4dff"></a>
+  <a href="https://github.com/preetmendpara/runs-at.dev/actions/workflows/test.yml"><img alt="tests" src="https://github.com/preetmendpara/runs-at.dev/actions/workflows/test.yml/badge.svg"></a>
   <a href="./LICENSE"><img alt="license: AGPL-3.0" src="https://img.shields.io/badge/license-AGPL--3.0-informational"></a>
 </p>
 
@@ -57,18 +57,18 @@ evaluation fee alone is $227,000, before you've built or run a registry to
 back it. That's not a plausible way to get a custom-looking address for a
 side project.
 
-`runs-on.dev` gets the same feeling: a distinctive ending instead of
+`runs-at.dev` gets the same feeling: a distinctive ending instead of
 `vercel.app` or `github.io`, for the price of one domain, about $10 a
 year, by giving away subdomains under it. This is a subdomain registry,
-not a TLD. Every name you claim lives under `runs-on.dev`, which Advance
-Labs registered and is responsible for. Saying that plainly, instead of
+not a TLD. Every name you claim lives under `runs-at.dev`, which its
+operator registered and is responsible for. Saying that plainly, instead of
 dressing it up as something bigger, is the whole basis for trusting it.
 There's prior art doing exactly this: [is-a.dev](https://www.is-a.dev),
 [js.org](https://js.org), [eu.org](https://eu.org).
 
 ## Claim a name
 
-Go to [runs-on.dev](https://runs-on.dev), sign in with GitHub, and type
+Go to [runs-at.dev](https://runs-at.dev), sign in with GitHub, and type
 the name you want. If it's available, claiming it writes a record to
 `domains/<name>.json` in this repo, as shown above, and the name is live
 within seconds. One name per GitHub account. See
@@ -82,7 +82,7 @@ GitHub account. To point it at your own site, forward email, or a plain
 redirect instead, there are two ways to change its record.
 
 **From the site.** Sign in and open
-[runs-on.dev/manage](https://runs-on.dev/manage). Pick a record type, fill
+[runs-at.dev/manage](https://runs-at.dev/manage). Pick a record type, fill
 it in, and save. That writes a commit to `domains/<name>.json` in this
 repository, exactly as a merged pull request would, and DNS follows within
 seconds. The form offers the record types in the combinations DNS actually
@@ -130,7 +130,7 @@ Vercel, the shortest path from claim to a live custom domain:
 "records": { "CNAME": "cname.vercel-dns.com" }
 ```
 
-Add `you.runs-on.dev` as a custom domain on the Vercel project; it shows
+Add `you.runs-at.dev` as a custom domain on the Vercel project; it shows
 you this same CNAME target.
 
 A Bluesky handle, which needs no hosting at all, just a subdomain entry:
@@ -146,24 +146,9 @@ coexist with anything else: [docs/records.md](./docs/records.md).
 
 </details>
 
-## Built on runs-on.dev
-
-**[Overlap](https://overlap.runs-on.dev)** — finds meeting times for people
-spread across time zones. Share one link, everyone sets their hours once, and
-the page shows when you can all meet, with sleep treated as a hard constraint
-rather than as free time. Open source, AGPL-3.0:
-[zordhalo/overlap](https://github.com/zordhalo/overlap). Write-up:
-[the first thing built on runs-on.dev](/blog/2026-09-20-overlap-scheduling-across-time-zones).
-
-It runs on a claimed name like any other, which is the point: `domains/overlap.json`
-is an ordinary record, and the name resolved with a valid certificate before any
-DNS was configured for it.
-
-If you build something on a name from here, open a PR adding it to this list.
-
 ## How it works
 
-A single wildcard `*.runs-on.dev` DNS record points every possible
+A single wildcard `*.runs-at.dev` DNS record points every possible
 subdomain at one Vercel project, so an unclaimed or record-less name still
 resolves with a valid HTTPS certificate and gets served the profile-card
 page. Claiming a name is therefore a git commit, not a DNS write. Pointing
@@ -208,7 +193,7 @@ Running your own copy under a domain you own means:
   and add it to Vercel (or adapt `scripts/sync-dns.mjs` and `lib/dns.js`
   for a different DNS provider).
 - Change `ROOT` in `proxy.js` and the hostname literals in `app/page.jsx`
-  and `app/sites/[name]/page.jsx` from `runs-on.dev` to your domain.
+  and `app/sites/[name]/page.jsx` from `runs-at.dev` to your domain.
 - Create your own GitHub OAuth app and set `GITHUB_CLIENT_ID` /
   `GITHUB_CLIENT_SECRET`.
 - Review `data/reserved-*.json` and adjust `lib/eligibility.js` for your
@@ -228,7 +213,7 @@ The claim flow needs a signed-in GitHub session, and the session and
 OAuth cookies are set `Secure` (see `app/api/auth/github/route.js` and
 `.../callback/route.js`). A `Secure` cookie is dropped by the browser over
 plain HTTP, so the GitHub sign-in flow cannot be exercised on
-`http://localhost`. This is correct for production: `runs-on.dev` is on
+`http://localhost`. This is correct for production: `runs-at.dev` is on
 the HSTS preload list, so it's always HTTPS there, and a cookie that only
 ever travels over HTTPS shouldn't get a `Secure`-free code path just for
 local convenience.
@@ -293,6 +278,12 @@ new; credit to [is-a.dev](https://www.is-a.dev) for the prior art, and to
 
 ---
 
-Operated by [Advance Labs](https://advancelabs.dev), which registered
-`runs-on.dev` and is the party responsible for what runs under it. See
+Operated by [@preetmendpara](https://github.com/preetmendpara), who registered
+`runs-at.dev` and is the party responsible for what runs under it.
+
+runs-at.dev is an independent service built on the open-source
+[runs-on.dev](https://github.com/zordhalo/runs-on.dev) registry by Advance Labs Inc,
+used and modified under the GNU Affero General Public License v3 (see
+[LICENSE](./LICENSE) and [NOTICE](./NOTICE)). It is not affiliated with or
+endorsed by runs-on.dev or Advance Labs. See
 [POLICY.md](./POLICY.md).
