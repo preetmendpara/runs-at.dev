@@ -25,17 +25,6 @@ export default async function Footer() {
         <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-[14px] text-(--color-ink)">
-              runs-at.dev, a free subdomain registry by{' '}
-              <a className="text-(--color-ink) underline" href="https://github.com/preetmendpara">
-                @preetmendpara
-              </a>
-              {' '}· based on{' '}
-              <a className="text-(--color-ink) underline" href="https://github.com/zordhalo/runs-on.dev">
-                runs-on.dev
-              </a>{' '}
-              (AGPL-3.0)
-            </p>
-            <p className="mt-2 text-[14px] text-(--color-ink)">
               <a className="text-(--color-ink) underline" href="mailto:abuse@runs-at.dev">
                 abuse@runs-at.dev
               </a>
