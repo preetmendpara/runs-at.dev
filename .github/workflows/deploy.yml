@@ -69,6 +69,16 @@ jobs:
             echo "::error::empty:$missing. The IDs belong under Settings > Secrets and variables > Actions > Variables, the token under Secrets."
             exit 1
           fi
+          # A pasted space, newline or quote makes the lookup URL malformed
+          # (curl exits 3) and the CLI reports it as a missing project.
+          bad=''
+          for pair in "VERCEL_ORG_ID=$VERCEL_ORG_ID" "VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID"; do
+            case "${pair#*=}" in *[!A-Za-z0-9_]*) bad="$bad ${pair%%=*}" ;; esac
+          done
+          if [ -n "$bad" ]; then
+            echo "::error::extra characters in:$bad. Re-enter the value with only the ID itself: no spaces, quotes or line breaks."
+            exit 1
+          fi
           # Personal scopes have no team_ id; the CLI omits teamId for them too.
           case "$VERCEL_ORG_ID" in team_*) scope="?teamId=$VERCEL_ORG_ID" ;; *) scope='' ;; esac
           status=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $VERCEL_TOKEN" \
