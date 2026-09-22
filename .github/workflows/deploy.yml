@@ -53,6 +53,33 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci
+      # `vercel pull` links the checkout from VERCEL_ORG_ID + VERCEL_PROJECT_ID
+      # and reports any failed lookup as "Could not retrieve Project Settings",
+      # whatever the cause. Ask the API first so the log says which value is
+      # wrong. Nothing secret is printed.
+      - name: Check Vercel project access
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          missing=''
+          [ -n "$VERCEL_TOKEN" ] || missing="$missing VERCEL_TOKEN(secret)"
+          [ -n "$VERCEL_ORG_ID" ] || missing="$missing VERCEL_ORG_ID(variable)"
+          [ -n "$VERCEL_PROJECT_ID" ] || missing="$missing VERCEL_PROJECT_ID(variable)"
+          if [ -n "$missing" ]; then
+            echo "::error::empty:$missing. The IDs belong under Settings > Secrets and variables > Actions > Variables, the token under Secrets."
+            exit 1
+          fi
+          # Personal scopes have no team_ id; the CLI omits teamId for them too.
+          case "$VERCEL_ORG_ID" in team_*) scope="?teamId=$VERCEL_ORG_ID" ;; *) scope='' ;; esac
+          status=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID$scope")
+          case "$status" in
+            200) echo "Vercel project found (org id starts ${VERCEL_ORG_ID%%_*}_, project id starts ${VERCEL_PROJECT_ID%%_*}_)." ;;
+            401) echo "::error::Vercel rejected VERCEL_TOKEN (401): expired, revoked, or pasted incompletely."; exit 1 ;;
+            403) echo "::error::Vercel refused VERCEL_TOKEN for that scope (403): the token is invalid or expired, is scoped to a different account/team, or VERCEL_ORG_ID is wrong."; exit 1 ;;
+            404) echo "::error::No project $VERCEL_PROJECT_ID under that scope (404): VERCEL_PROJECT_ID is wrong, or VERCEL_ORG_ID names a different account/team."; exit 1 ;;
+            *) echo "::error::Vercel API answered $status."; exit 1 ;;
+          esac
       - run: npx vercel pull --yes --environment=production --token='${{ secrets.VERCEL_TOKEN }}'
       - run: npx vercel build --prod --token='${{ secrets.VERCEL_TOKEN }}'
       - run: npx vercel deploy --prebuilt --prod --token='${{ secrets.VERCEL_TOKEN }}'
