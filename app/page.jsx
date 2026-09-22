@@ -109,7 +109,7 @@ export default async function Home() {
         <StatusBadge tone="live" pulse>Free forever · live in seconds</StatusBadge>
 
         <p className="mt-5 font-(family-name:--font-mono) text-xs tracking-[0.04em] text-(--color-muted)">
-          {registryList.length} names claimed · {placement.resolved} on the public claim map ·
+          {registryList.length} {registryList.length === 1 ? 'name' : 'names'} claimed · {placement.resolved} on the public claim map ·
           one per GitHub account · open source
         </p>
 

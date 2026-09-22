@@ -4,6 +4,7 @@ import './globals.css';
 import Footer from './components/Footer.jsx';
 import Nav from './components/Nav.jsx';
 import EdgePicker from './edge-picker.jsx';
+import { publishedPosts } from '../lib/blog.js';
 import { Analytics } from '@vercel/analytics/next';
 
 // Satoshi stands in for Aeonik (per the style reference's own substitute
@@ -91,9 +92,12 @@ export default function RootLayout({ children }) {
       </head>
       <body suppressHydrationWarning>
         <Nav />
-        {children}
-        <Footer />
-        <EdgePicker />
+        {/* Right padding on phones keeps text clear of the edge dock. */}
+        <div className="pr-10 sm:pr-0">
+          {children}
+          <Footer />
+        </div>
+        <EdgePicker hideBlog={publishedPosts().length === 0} />
         <Analytics />
       </body>
     </html>

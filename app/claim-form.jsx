@@ -178,7 +178,7 @@ export default function ClaimForm({ signedIn }) {
 
       <div
         key={animKey}
-        className="record-block slit-bar-l mx-auto mt-8 max-w-full overflow-x-auto py-3 pr-6 pl-5 text-left font-(family-name:--font-mono) text-[12px] whitespace-pre sm:max-w-md sm:text-[13px]"
+        className="record-block slit-bar-l mx-auto mt-8 max-w-full overflow-x-auto py-3 pr-6 pl-5 text-left font-(family-name:--font-mono) text-[12px] whitespace-pre-wrap break-words sm:max-w-md sm:whitespace-pre sm:text-[13px]"
         style={{ '--bar': negative ? 'var(--flag)' : 'var(--slit-bar)' }}
       >
         <p className="record-field text-(--color-muted)">domains/{displayName}.json</p>

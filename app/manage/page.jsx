@@ -40,7 +40,7 @@ export default async function Manage() {
 
   if (names.length === 0) {
     return (
-      <Shell>
+      <Shell login={session.login}>
         <p className="text-sm leading-relaxed text-(--color-ash)">
           @{session.login} does not own a name yet.{' '}
           <a className="text-(--color-ink) underline" href="/">
@@ -58,7 +58,7 @@ export default async function Manage() {
   const unreadable = names.filter((_, i) => !records[i]);
 
   return (
-    <Shell>
+    <Shell login={session.login}>
       {records.map((record, i) =>
         record ? (
           // Per name, not per account: the badge is that name's card. Sits
@@ -87,7 +87,7 @@ export default async function Manage() {
   );
 }
 
-function Shell({ children }) {
+function Shell({ children, login }) {
   return (
     <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20">
       <p className="meta">Manage</p>
@@ -98,6 +98,14 @@ function Shell({ children }) {
         Record changes save straight to the registry and DNS follows within seconds. A
         deploy token uploads a static site to your name without a browser.
       </p>
+      {login && (
+        <form action="/api/auth/signout" method="post" className="mt-4 text-sm text-(--color-muted)">
+          Signed in as @{login} ·{' '}
+          <button type="submit" className="cursor-pointer text-(--color-ink) underline">
+            Sign out
+          </button>
+        </form>
+      )}
       <div className="mt-12 space-y-12">{children}</div>
     </main>
   );

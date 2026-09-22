@@ -91,3 +91,13 @@ test('readCookie matches whole names only', () => {
   assert.equal(readCookie('', 'a'), undefined);
   assert.equal(readCookie(null, 'a'), undefined);
 });
+
+test('sign-out expires the __Host-session and returns home', async () => {
+  const { POST: signout } = await import('../app/api/auth/signout/route.js');
+  const res = await signout();
+  assert.equal(res.status, 303);
+  assert.equal(res.headers.get('location'), '/');
+  const [cookie] = res.headers.getSetCookie();
+  assert.ok(cookie.startsWith(`${SESSION_COOKIE}=;`) && cookie.includes('Max-Age=0'));
+  assertHostCookie(cookie);
+});

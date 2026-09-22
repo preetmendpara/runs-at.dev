@@ -2,9 +2,11 @@
 // links at 14px uppercase smoke, and the single filled pill action at right.
 // Its bottom edge is a slit of light fading at both ends; no sticky, no fill.
 import Wordmark from './wordmark.jsx';
+import { publishedPosts } from '../../lib/blog.js';
 
+// Blog is listed only once there is a post to read.
 const LINKS = [
-  { href: '/blog', label: 'Blog' },
+  ...(publishedPosts().length > 0 ? [{ href: '/blog', label: 'Blog' }] : []),
   { href: '/docs', label: 'Docs' },
   { href: '/stats', label: 'Stats' },
   { href: '/faq', label: 'FAQ' },

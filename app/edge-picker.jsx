@@ -138,10 +138,10 @@ function savePos(value) {
   }
 }
 
-export default function EdgePicker() {
+export default function EdgePicker({ hideBlog = false }) {
   const router = useRouter();
   const pathname = usePathname();
-  const items = ROUTES;
+  const items = hideBlog ? ROUTES.filter((r) => r.id !== 'blog') : ROUTES;
   const itemCount = items.length;
 
   const initialIndex = routeIndexFor(pathname);

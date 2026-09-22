@@ -1,8 +1,10 @@
 import { REPO_URL } from '../../lib/repo.js';
 import { getStarCount } from '../../lib/stars.js';
+import { publishedPosts } from '../../lib/blog.js';
 
+// Blog is listed only once there is a post to read.
 const LINKS = [
-  { href: '/blog', label: 'Blog' },
+  ...(publishedPosts().length > 0 ? [{ href: '/blog', label: 'Blog' }] : []),
   { href: '/docs', label: 'Docs' },
   { href: '/stats', label: 'Stats' },
   { href: '/faq', label: 'FAQ' },
