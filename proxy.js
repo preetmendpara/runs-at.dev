@@ -22,6 +22,21 @@ export function proxy(request) {
   // asking for a post's .md wants THAT post, not the site-wide index.
   const apexLike =
     host === ROOT || host === `www.${ROOT}` || host.endsWith('.vercel.app') || host === 'localhost';
+  // Card door for the Cloudflare Worker (cloudflare/worker.js). runs-at.dev's
+  // DNS stays on Cloudflare, and Vercel only issues wildcard certificates for
+  // zones on its own nameservers, so *.runs-at.dev is answered by the Worker,
+  // which fetches runs-at.dev/_card/<name>. Checked before the markdown
+  // rewrite, which would otherwise swallow it. Anyone may open this path
+  // directly: it serves the same public card as <name>.runs-at.dev.
+  const card = request.nextUrl.pathname.match(/^\/_card\/([^/]+)\/?$/);
+  if (card && apexLike) {
+    const name = card[1].toLowerCase();
+    // Same guard as the wildcard branch below: every card render spends a
+    // GitHub request, so refuse bad names first.
+    if (!validateName(name).ok) return new NextResponse('not found', { status: 404 });
+    return NextResponse.rewrite(new URL(`/sites/${name}`, request.url));
+  }
+
   const md = request.nextUrl.pathname.match(/^\/blog\/([a-z0-9]+(?:-[a-z0-9]+)*)\.md$/);
   if (md && apexLike) {
     return NextResponse.rewrite(new URL(`/blog/${md[1]}/llms-md`, request.url));

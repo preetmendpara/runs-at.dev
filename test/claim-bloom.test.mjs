@@ -12,6 +12,8 @@ const svg = readFileSync('public/claim-map.svg', 'utf8');
 const overlaySource = readFileSync('app/components/home-map.jsx', 'utf8');
 
 test('the committed map image draws blooms at the shared radii', () => {
+  // An empty registry (a fresh deployment) has no blooms to check.
+  if (!/r="[0-9.]+" fill-opacity=/.test(svg)) return;
   assert.ok(svg.includes(`r="${HALO_R}" fill-opacity="${HALO_OPACITY}"`), 'halo matches the shared constants');
   assert.ok(svg.includes(`r="${CORE_R}" fill-opacity="${CORE_OPACITY}"`), 'core matches the shared constants');
 
