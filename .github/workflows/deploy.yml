@@ -53,10 +53,8 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci
-      # `vercel pull` links the checkout from VERCEL_ORG_ID + VERCEL_PROJECT_ID
-      # and reports any failed lookup as "Could not retrieve Project Settings",
-      # whatever the cause. Ask the API first so the log says which value is
-      # wrong. Nothing secret is printed.
+      # Ask the API first so the log says which value is empty or wrong.
+      # Nothing secret is printed.
       - name: Check Vercel project access
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -92,12 +90,10 @@ jobs:
             404) echo "::error::No project $VERCEL_PROJECT_ID under that scope (404): VERCEL_PROJECT_ID is wrong, or VERCEL_ORG_ID names a different account/team."; exit 1 ;;
             *) echo "::error::Vercel API answered $status."; exit 1 ;;
           esac
-      # Link explicitly instead of letting the CLI derive it. The CLI's own
-      # lookup failed with "Could not retrieve Project Settings" even though
-      # the project was reachable, which is what an org id naming a different
-      # account than the owner (a user id instead of the team id) produces.
-      # The owner comes from the project itself, so the link is always right;
-      # a mismatch with VERCEL_ORG_ID is reported so the variable can be fixed.
+      # Link explicitly: the owner and name come from the project itself, so
+      # the link is right even if VERCEL_ORG_ID is not, and a mismatch is
+      # reported so the variable can be fixed. The project name in the link
+      # is what lets `vercel deploy` skip its remote lookups (see below).
       - name: Link Vercel project
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -117,6 +113,13 @@ jobs:
             fs.writeFileSync(".vercel/project.json", JSON.stringify({ orgId: p.accountId, projectId: p.id, projectName: p.name }));
             console.log("Linked to Vercel project " + p.name + ".");
           '
-      - run: npx vercel pull --yes --environment=production --token='${{ secrets.VERCEL_TOKEN }}'
-      - run: npx vercel build --prod --token='${{ secrets.VERCEL_TOKEN }}'
-      - run: npx vercel deploy --prebuilt --prod --token='${{ secrets.VERCEL_TOKEN }}'
+      # Deploy the source and let Vercel build it with the project's own
+      # settings and environment variables, as a dashboard deploy does.
+      #
+      # Not `vercel pull` + `vercel build` + `deploy --prebuilt`: pull (CLI
+      # 59.25.0) also fetches the owning team (GET /teams/<id>) and turns a
+      # 403 there into "Could not retrieve Project Settings", with no fallback,
+      # even when the project itself is readable. `vercel build` cannot run
+      # without what pull downloads. `vercel deploy` skips both lookups when
+      # the link names the project, which the step above writes.
+      - run: npx vercel deploy --prod --yes --token='${{ secrets.VERCEL_TOKEN }}'
