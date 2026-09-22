@@ -21,8 +21,7 @@ import {
 } from '../lib/dns.js';
 
 const DOMAIN = 'runs-at.dev';
-const changed = (process.env.CHANGED_FILES ?? '').split('
-').filter(Boolean);
+const changed = (process.env.CHANGED_FILES ?? '').split('\n').filter(Boolean);
 
 // Which DNS host holds the zone. runs-at.dev lives on Cloudflare; the Vercel
 // path is kept from the upstream runs-on.dev code so either one works.
