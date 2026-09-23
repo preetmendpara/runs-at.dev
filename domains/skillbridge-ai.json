@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "skillbridge-ai.vercel-dns.com"
   },
-  "country": "IN"
+  "country": "IN",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=skillbridge-ai.runs-at.dev,9b574014634bfba5b98e"
+      ]
+    }
+  }
 }
