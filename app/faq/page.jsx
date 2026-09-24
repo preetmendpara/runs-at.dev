@@ -10,7 +10,7 @@ export const metadata = {
 const faqs = [
   {
     q: 'Is this really free?',
-    a: 'Yes. Claiming a name costs nothing and there is no paid tier. The operator pays the ~$10/year for runs-at.dev itself; you never pay to claim, hold, or point a name.',
+    a: 'Yes. Claiming a name costs nothing and there is no paid tier. The operator pays for runs-at.dev itself; you never pay to claim, hold, or point a name.',
   },
   {
     q: 'Is it a TLD?',
@@ -18,7 +18,7 @@ const faqs = [
   },
   {
     q: 'Who owns my name?',
-    a: 'The operator (@preetmendpara) owns runs-at.dev. You are the recorded owner of your claimed record (domains/<name>.json), and only you can edit or remove it by pull request, but the name itself is granted, not sold or transferred to you.',
+    a: 'The operator (@preetmendpara) owns runs-at.dev. You are the recorded owner of your claimed record (domains/<name>.json), and only you can change or remove it: edit it on the manage page, or by pull request if you prefer. The name itself is granted, not sold or transferred to you.',
   },
   {
     q: 'Can you take it away?',
@@ -26,7 +26,7 @@ const faqs = [
   },
   {
     q: 'What happens if the project shuts down?',
-    a: 'Names would stop resolving. This runs on a wildcard DNS record and a GitHub Actions pipeline that the operator runs; if the operator stops paying for or maintaining runs-at.dev, every *.runs-at.dev name goes down with it. The registry is open source, so anyone could fork it and stand up their own domain, but that is a fork, not a guaranteed continuation of this one.',
+    a: 'Names would stop resolving. The service runs on a domain the operator pays for, DNS and a small script at Cloudflare, hosting at Vercel, and a GitHub Actions pipeline that publishes each claim; if the operator stops paying for or maintaining runs-at.dev, every *.runs-at.dev name goes down with it. The registry is open source, so anyone could fork it and stand up their own domain, but that is a fork, not a guaranteed continuation of this one.',
   },
   {
     q: 'Can I use it for a commercial project?',

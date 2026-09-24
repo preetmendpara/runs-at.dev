@@ -12,6 +12,11 @@ name that has gone dormant (no working site, an expired record, an inactive
 owner). Free registries only stay usable if abandoned names come back into
 circulation.
 
+## Best effort, no guarantee
+
+This is a free, best-effort service with no uptime guarantee. Treat it as you
+would any other free infrastructure you did not pay for.
+
 ## What forfeits a name immediately
 
 The following forfeit a name on sight, no warning required:
@@ -24,17 +29,10 @@ The following forfeit a name on sight, no warning required:
 - **Illegal content**: anything unlawful to host or distribute.
 
 If your name is doing any of these, expect it to be pulled without notice.
-A maintainer removes it by deleting its `domains/<name>.json` file in a
-pull request; owners can release a name the same way. See
-[README.md](./README.md#what-ci-enforces) for the mechanics.
-
-## Maintainer project names
-
-Every account holds one name. The one exception is a short, public list of
-names the registry maintainer holds for their own open-source projects, on
-top of their personal name. The list lives in `MAINTAINER_PROJECT_NAMES` in
-[`lib/claim.js`](./lib/claim.js). Each entry covers one account and one
-name, so it can't be used to take any other name. Current entries: none.
+A maintainer removes it by deleting its `domains/<name>.json` file. Owners
+can release their own name at any time from the
+[manage page](https://runs-at.dev/manage), or by pull request if they prefer.
+See [README.md](./README.md#the-rules) for what CI enforces.
 
 ## Who is responsible
 

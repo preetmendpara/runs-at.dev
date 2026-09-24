@@ -2,7 +2,7 @@ import { Section, Quote } from '../components/Section.jsx';
 
 export const metadata = {
   title: 'Privacy',
-  description: 'What runs-at.dev stores, what it never tracks, and what is public by design. No analytics, no cookies beyond sign-in, no hidden data.',
+  description: 'What runs-at.dev stores, what it never tracks, and what is public by design. One sign-in cookie, privacy-friendly page counts, and no hidden data.',
   alternates: { canonical: 'https://runs-at.dev/privacy' },
   openGraph: { title: 'Privacy · runs-at.dev' },
 };
@@ -15,8 +15,8 @@ export default function Privacy() {
         What is stored, what is not
       </h1>
       <p className="mt-4 max-w-[600px] text-[16px] leading-[1.5] text-(--color-muted)">
-        The short version: no analytics, no visitor tracking, no hidden database. Your record is a
-        public file you can read, and this page is the full list of what the site keeps.
+        The short version: no visitor tracking, no hidden database. Your record is a public file
+        you can read, and this page is the full list of what the site keeps.
       </p>
 
       <Section title="Public by design">
@@ -31,9 +31,12 @@ export default function Privacy() {
       <Section title="Sign-in and the session cookie">
         <p className="text-sm leading-relaxed sm:text-base">
           Signing in runs through GitHub OAuth. The site stores a single signed, HttpOnly cookie
-          holding your login and a few public profile facts, expiring after 24 hours. There is no
-          account record on this side: the cookie plus GitHub is the whole identity. Sign out (or
-          wait a day) and nothing about you remains on the server.
+          holding your login and a few public profile facts, expiring after 24 hours. Two more
+          cookies exist only during sign-in: one that checks the sign-in started here, and one that
+          remembers which name you were claiming. Both last ten minutes and are cleared the moment
+          you land back on the site. There is no account record on this side: the cookie plus
+          GitHub is the whole identity. Sign out (or wait a day) and nothing about you remains on
+          the server.
         </p>
       </Section>
 
@@ -48,11 +51,15 @@ export default function Privacy() {
         </p>
       </Section>
 
-      <Section title="What is never collected">
+      <Section title="What is and is not collected">
         <p className="text-sm leading-relaxed sm:text-base">
-          No analytics scripts. No visitor fingerprinting. No advertising cookies. No location
-          lookups on page views. Browsing this site leaves nothing behind but your own browser
-          cache.
+          No visitor fingerprinting. No advertising cookies. No location lookups on page views. No
+          profile built from how you browse.
+        </p>
+        <p className="text-sm leading-relaxed sm:text-base">
+          One thing is counted: the site uses Vercel Analytics, which records page views without
+          cookies and without identifying visitors. It tells the operator which pages get used; it
+          cannot follow a person across pages, sites, or visits.
         </p>
         <Quote>
           One exception to &ldquo;nothing&rdquo;: like any host, the deployment platform keeps
@@ -64,10 +71,12 @@ export default function Privacy() {
       <Section title="Third parties the site talks to">
         <p className="text-sm leading-relaxed sm:text-base">
           GitHub&rsquo;s API (your public profile fills the sign-in session and the profile card),
-          live DNS resolvers (to answer the &ldquo;did it work?&rdquo; panel), and the hosting
-          platform itself. Static-site deployments store your uploaded files with the platform&rsquo;s
-          blob storage, tied to your name. None of these receive anything beyond what is needed to
-          answer your request.
+          live DNS resolvers (to answer the &ldquo;is it working?&rdquo; panel), Vercel (which
+          hosts the site and counts page views), and Cloudflare (which runs the DNS for
+          runs-at.dev and answers every claimed name before passing the request on). A visit to any
+          <code className="rounded-[4px] border border-(--color-rule) bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-[0.9em]">*.runs-at.dev</code> name
+          therefore passes through Cloudflare. None of these receive anything beyond what is needed
+          to answer your request.
         </p>
       </Section>
 
