@@ -52,8 +52,9 @@ serves the built-in profile card instead of pointing anywhere else.
 
 | Type | Shape | Notes |
 | --- | --- | --- |
-| `CNAME` | a single hostname string | Cannot appear alongside `A`, `TXT`, or `MX`. |
+| `CNAME` | a single hostname string | Cannot appear alongside `A`, `AAAA`, `TXT`, or `MX`. |
 | `A` | a non-empty array of IPv4 addresses | One DNS record is created per address. |
+| `AAAA` | a non-empty array of IPv6 addresses | One DNS record is created per address. Cannot coexist with `CNAME`. |
 | `TXT` | a non-empty array of strings, each up to 255 characters | One DNS record per string. |
 | `MX` | a non-empty array (max 5) of `{ "priority": 0-65535, "value": "<hostname>" }` | Cannot appear alongside `CNAME`; may coexist with `A` and `TXT`. |
 | `URL` | a single absolute `http://` or `https://` string | Cannot appear alongside any other record type. No DNS record is created; see [URL redirects](#url-redirects) below. |

@@ -491,3 +491,27 @@ test('rejects a subdomain CNAME pointing at its own hostname', () => {
 test('a CNAME to another runs-at.dev name is still allowed', () => {
   assert.equal(validateRecord({ ...valid, records: { CNAME: 'someone-else.runs-at.dev' } }).ok, true);
 });
+
+// AAAA was added to lib/schema.js and the mirror together; this is what keeps
+// the published file from silently falling behind the check that runs.
+test('the JSON Schema mirror and lib/schema.js agree on AAAA', () => {
+  assert.ok(mirror.$defs.records.properties.AAAA, 'records declares AAAA');
+  assert.ok(mirror.$defs.subdomainRecords.properties.AAAA, 'subdomains declare AAAA');
+
+  // Every "CNAME/URL cannot coexist with ..." list must name AAAA, or the
+  // mirror would accept a pair lib/schema.js rejects.
+  const lists = [];
+  const walk = (node) => {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node.anyOf) && node.anyOf.every((entry) => entry.required)) {
+      lists.push(node.anyOf.flatMap((entry) => entry.required));
+    }
+    Object.values(node).forEach(walk);
+  };
+  walk(mirror);
+  assert.ok(lists.length >= 3);
+  for (const list of lists) assert.ok(list.includes('AAAA'), `coexistence list misses AAAA: ${list}`);
+
+  assert.equal(validateRecord({ ...valid, records: { AAAA: ['2606:4700:3037::6815:7eb'] } }).ok, true);
+  assert.equal(validateRecord({ ...valid, records: { CNAME: 'you.github.io', AAAA: ['::1'] } }).ok, false);
+});

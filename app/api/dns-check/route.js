@@ -58,9 +58,11 @@ export async function GET(request) {
   const record = await safe(() => getRecord(name, { token, fetchImpl }), null);
   if (!record) return Response.json({ error: 'not_found' }, { status: 404 });
 
-  const [cname, a, txtName, txtVercelLabel, txtVercelZone, servingProbe] = await Promise.all([
+  const [cname, a, aaaa, mx, txtName, txtVercelLabel, txtVercelZone, servingProbe] = await Promise.all([
     safe(() => dns.resolveCname(`${name}.${ZONE}`), []),
     safe(() => dns.resolve4(`${name}.${ZONE}`), []),
+    safe(() => dns.resolve6(`${name}.${ZONE}`), []),
+    safe(() => dns.resolveMx(`${name}.${ZONE}`), []),
     safe(() => dns.resolveTxt(`${name}.${ZONE}`), []),
     safe(() => dns.resolveTxt(`_vercel.${name}.${ZONE}`), []),
     // The zone-level host the mirror publishes to: reading it here is what
@@ -75,6 +77,8 @@ export async function GET(request) {
       name,
       cname,
       a,
+      aaaa,
+      mx,
       txt: {
         name: flattenTxt(txtName),
         vercelLabel: flattenTxt(txtVercelLabel),
