@@ -7,7 +7,7 @@ import {
   SUBDOMAIN_TYPES, buildSubdomains, subdomainsToRows,
   buildProfile, profileToRows,
 } from '../../lib/record-fields.js';
-import { siteStatus, friendlyError, CHECK_SCHEDULE_MS } from '../../lib/manage-status.js';
+import { siteStatus, friendlyError, featureCards, CHECK_SCHEDULE_MS } from '../../lib/manage-status.js';
 
 const MAX_SUBDOMAINS = 10;
 const MAX_LINKS = 8;
@@ -173,6 +173,12 @@ export default function RecordForm({ name, record }) {
   const [bio, setBio] = useState(record.profile?.bio ?? '');
   const [linkRows, setLinkRows] = useState(() => profileToRows(record.profile));
   const site = useSiteCheck(name);
+  // Which option's editor is open. Null on arrival: the page opens on a
+  // status summary, not on a wall of inputs.
+  const [editing, setEditing] = useState(null);
+  // The moment of the last successful save. Inside the publishing window a
+  // name still answering with the card is mid-publish, not broken.
+  const [savedAt, setSavedAt] = useState(null);
 
   // What the record held when the page loaded, not what the form currently
   // builds: the point is to warn that saving in a mode that drops records the
@@ -238,7 +244,7 @@ export default function RecordForm({ name, record }) {
       setStatus(body.unchanged ? 'unchanged' : 'saved');
       // Only a real change needs watching: an unchanged save publishes
       // nothing, so re-checking would spend the rate limit for no reason.
-      if (!body.unchanged) site.recheckAfterSave();
+      if (!body.unchanged) { setSavedAt(Date.now()); site.recheckAfterSave(); }
       return;
     }
     setErrors(friendlyError(res.status, body));
@@ -253,54 +259,76 @@ export default function RecordForm({ name, record }) {
     ? { label: 'Checking…', tone: 'checking' }
     : siteStatus(site.check, modeOf(record.records));
 
+  const savedMode = modeOf(record.records);
+  const cards = featureCards({
+    savedMode,
+    records: record.records ?? {},
+    check: site.check,
+    savedAt,
+  });
+
+  // The payload the form would send, against the record as committed: what
+  // "unsaved changes" means, without a dirty flag on every input.
+  const pending = JSON.stringify({
+    records: buildRecords(mode, { cname, url, a, txt, mx }),
+    subdomains: buildSubdomains(subRows),
+    profile: buildProfile({ name: displayName, bio, linkRows }) ?? null,
+  });
+  const committed = JSON.stringify({
+    records: record.records ?? {},
+    subdomains: record.subdomains ?? {},
+    profile: record.profile ?? null,
+  });
+  const dirty = pending !== committed;
+
+  function openEditor(id) {
+    if (dirty && editing && id !== editing) {
+      const leave = window.confirm('You have unsaved changes. Discard them and switch?');
+      if (!leave) return;
+    }
+    setEditing(id);
+    selectProvider(id);
+  }
+
+  // Cancel returns the form to the committed record, so closing an editor
+  // never leaves values on screen that the registry does not hold.
+  function closeEditor() {
+    setEditing(null);
+    setStatus(null);
+    setErrors([]);
+    setMode(savedMode);
+    setCname(record.records?.CNAME ?? '');
+    setUrl(record.records?.URL ?? '');
+    setA((record.records?.A ?? []).join('\n'));
+    setTxt((record.records?.TXT ?? []).join('\n'));
+    setMx(mxToLines(record.records?.MX));
+    setSubRows(subdomainsToRows(record.subdomains));
+  }
+
   return (
     <form onSubmit={save} className="slit-frame rounded-lg">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 slit-bottom px-6 py-5 sm:px-8">
-        <div>
-          <p className="font-(family-name:--font-mono) text-xs text-(--color-muted)">domains/{name}.json</p>
-          <h2 className="mt-1.5 text-[23px] leading-[1.07] font-normal tracking-[-0.004em] text-(--color-ink)">{name}.runs-at.dev</h2>
-        </div>
-        <span className="inline-flex items-center gap-2 slit-frame rounded-[4px] bg-(--color-badge) px-3.5 py-2 font-(family-name:--font-mono) text-[12px] tracking-[0.05em] text-(--color-muted) uppercase">
-          <span
-            aria-hidden="true"
-            className={`inline-block h-1.5 w-1.5 rounded-full ${statusPill.tone === 'live' ? 'pulse-dot' : ''}`}
-            style={{
-              background:
-                statusPill.tone === 'live' ? '#98ff38'
-                : statusPill.tone === 'waiting' ? '#eab308'
-                : statusPill.tone === 'down' ? '#ff5c5c'
-                : '#9c9c9c',
-            }}
-          />
-          {statusPill.label}
-        </span>
-      </div>
+      <NameHeader name={name} site={site} status={statusPill} justSaved={status === 'saved'} />
 
-      {/* Provider tiles. Icon strokes sit in Compass Gold, the reference's
-          reserved icon color; the active tile is traced in white instead. */}
-      <div className="px-6 py-6 sm:px-10">
-        <p className="text-[14px] text-(--color-ink)">Where does your name go?</p>
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-6">
-          {PROVIDERS.map((p) => (
-            <button key={p.id} type="button" onClick={() => selectProvider(p.id)}
-              className={`slit-frame flex flex-col items-center gap-2.5 rounded-lg p-4 text-center sm:p-5 ${mode === p.id ? 'slit-frame-bright' : ''}`}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={mode === p.id ? 'text-(--color-ink)' : 'text-(--color-gold)'}>
-                <path d={p.icon} />
-              </svg>
-              <span className={`text-[11px] tracking-[0.02em] uppercase ${mode === p.id ? 'text-(--color-ink)' : 'text-(--color-muted)'}`}>{p.label}</span>
-            </button>
+      <div className="px-6 py-6 sm:px-8">
+        <p className="text-[14px] text-(--color-ink)">What this name does</p>
+        <p className="mt-1.5 text-xs leading-relaxed text-(--color-muted)">
+          One of these at a time. Picking another replaces what this name does now.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {cards.map((card) => (
+            <FeatureCard key={card.id} card={card} open={editing === card.id} onSelect={() => openEditor(card.id)} />
           ))}
         </div>
-        <p className="mt-3 text-xs leading-relaxed text-(--color-muted)">{PROVIDERS.find((p) => p.id === mode)?.hint}</p>
       </div>
 
-      {/* Mode-specific section. The profile editor lives outside this
-          switch (further down) because `profile` and `records` are
-          independent keys — gating the bio behind this mode meant anyone
-          with a CNAME who wanted to edit their bio silently lost their
-          records. */}
+      {editing && (
+        <div className="slit-top">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 sm:px-8">
+            <p className="text-[14px] text-(--color-ink)">
+              Editing: {cards.find((c) => c.id === editing)?.title}
+            </p>
+            <button type="button" onClick={closeEditor} className="btn-ghost px-4 py-2 text-xs">Cancel</button>
+          </div>
       {mode === 'card' && (
         <div className="slit-top px-6 py-5 sm:px-8">
           <p className="text-[14px] text-(--color-ink)">Profile card</p>
@@ -415,6 +443,9 @@ export default function RecordForm({ name, record }) {
         </div>
       )}
 
+        </div>
+      )}
+
       {/* Profile card fields. Always available, whatever the records mode:
           `profile` is its own key on the record and is served by the card, so
           editing a bio must never require touching where the name points. */}
@@ -447,6 +478,7 @@ export default function RecordForm({ name, record }) {
         </div>
       </div>
 
+
       {/* Save */}
       <div className="flex flex-wrap items-center gap-4 slit-top px-6 py-5 sm:px-8">
         <button type="submit" disabled={status === 'saving'} className="btn-pill">
@@ -461,15 +493,88 @@ export default function RecordForm({ name, record }) {
         {errors.length > 0 && <ul className="mt-2 space-y-1 font-(family-name:--font-mono) text-xs text-(--color-flag)">{errors.map((e) => <li key={e}>{e}</li>)}</ul>}
       </div>
 
-      {/* What the name is doing, on arrival and after every check — not only
-          after a save, which left an owner returning the next day with no way
-          to ask whether their site was still up. */}
-      <CheckPanel name={name} site={site} status={statusPill} justSaved={status === 'saved'} />
 
       {/* Danger zone: release the name back to the pool */}
       <SwapZone name={name} />
       <ReleaseZone name={name} />
     </form>
+  );
+}
+
+// ── Name header ──────────────────────────────────────────────
+// Everything an owner arrives wanting: which name this is, what it is doing
+// right now, and the three actions that answer "is it working?" -- visiting
+// it, checking again, and the full readout at /debug/<name>.
+function NameHeader({ name, site, status, justSaved }) {
+  const checking = site.phase === 'checking';
+  return (
+    <div className="slit-bottom px-6 py-5 sm:px-8">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 className="text-[23px] leading-[1.07] font-normal tracking-[-0.004em] text-(--color-ink)">{name}.runs-at.dev</h2>
+          <p className="mt-1 font-(family-name:--font-mono) text-xs text-(--color-muted)">domains/{name}.json</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <a href={`https://${name}.runs-at.dev`} target="_blank" rel="noopener noreferrer" className="btn-ghost px-4 py-2 text-xs">Visit</a>
+          <button type="button" onClick={site.run} disabled={checking} className="btn-ghost px-4 py-2 text-xs">
+            {checking ? 'Checking…' : 'Check now'}
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <span
+          aria-hidden="true"
+          className={`inline-block h-2 w-2 rounded-full ${status.tone === 'live' ? 'pulse-dot' : ''}`}
+          style={{
+            background:
+              status.tone === 'live' ? '#98ff38'
+              : status.tone === 'waiting' ? '#eab308'
+              : status.tone === 'down' ? '#ff5c5c'
+              : '#9c9c9c',
+          }}
+        />
+        <span className={`text-[14px] ${status.tone === 'down' ? 'text-(--color-flag)' : 'text-(--color-ink)'}`}>{status.label}</span>
+      </div>
+      {status.detail && <p className="mt-1.5 max-w-[600px] text-xs leading-relaxed text-(--color-muted)">{status.detail}</p>}
+      {justSaved && (
+        <p className="mt-2 max-w-[600px] text-xs leading-relaxed text-(--color-muted)">
+          Saved. DNS usually publishes within a minute or two; this rechecks on its own.
+        </p>
+      )}
+      {site.note && <p className="mt-2 text-xs text-(--color-muted)">{site.note}</p>}
+      <p className="mt-3 flex flex-wrap items-center gap-3 font-(family-name:--font-mono) text-xs text-(--color-muted)">
+        {site.checkedAt && !checking && <span>{'// last checked '}{new Date(site.checkedAt).toLocaleTimeString()}</span>}
+        <a href={`/debug/${name}`} className="underline transition-colors hover:text-(--color-ink)">Detailed check</a>
+      </p>
+    </div>
+  );
+}
+
+// ── Feature card ─────────────────────────────────────────────
+// One of the four things a name can do. Only the one in use carries a
+// verdict; the other three have nothing to be live or broken about.
+function FeatureCard({ card, open, onSelect }) {
+  const { status } = card;
+  const dot =
+    status.tone === 'live' ? '#98ff38'
+    : status.tone === 'waiting' ? '#eab308'
+    : status.tone === 'attention' ? '#ff5c5c'
+    : '#5a5a5a';
+  return (
+    <div className={`slit-frame rounded-lg p-4 ${open ? 'slit-frame-bright' : ''}`}>
+      <div className="flex items-center gap-2">
+        <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: dot }} />
+        <p className="text-[14px] text-(--color-ink)">{card.title}</p>
+      </div>
+      <p className={`mt-2 text-xs ${status.tone === 'attention' ? 'text-(--color-flag)' : 'text-(--color-muted)'}`}>
+        {status.label}{card.summary ? ` · ${card.summary}` : ''}
+      </p>
+      <p className="mt-2 text-xs leading-relaxed text-(--color-muted)">{status.detail ?? card.description}</p>
+      <button type="button" onClick={onSelect} className="btn-ghost mt-3 px-3 py-1.5 text-xs">
+        {open ? 'Editing…' : card.action}
+      </button>
+    </div>
   );
 }
 
@@ -730,40 +835,5 @@ function TextArea({ label, value, onChange, placeholder, hint }) {
       <textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={2} spellCheck={false} className={`mt-2 ${INPUT} resize-y`} />
       {hint && <span className="mt-1.5 block text-xs text-(--color-muted)">{hint}</span>}
     </label>
-  );
-}
-
-// ── Check panel ──────────────────────────────────────────────
-function CheckPanel({ name, site, status, justSaved }) {
-  const checking = site.phase === 'checking';
-  return (
-    <div className="slit-top px-6 py-5 sm:px-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[14px] text-(--color-ink)">Is it working?</p>
-        <div className="flex flex-wrap items-center gap-3">
-          <button type="button" onClick={site.run} disabled={checking} className="btn-ghost px-4 py-2 text-xs">
-            {checking ? 'Checking…' : 'Check now'}
-          </button>
-          <a href={`/debug/${name}`} className="font-(family-name:--font-mono) text-xs text-(--color-muted) underline transition-colors hover:text-(--color-ink)">
-            Detailed check
-          </a>
-        </div>
-      </div>
-
-      <p className={`mt-3 text-[14px] ${status.tone === 'down' ? 'text-(--color-flag)' : 'text-(--color-ink)'}`}>{status.label}</p>
-      {status.detail && <p className="mt-1.5 max-w-[600px] text-xs leading-relaxed text-(--color-muted)">{status.detail}</p>}
-
-      {justSaved && (
-        <p className="mt-3 max-w-[600px] text-xs leading-relaxed text-(--color-muted)">
-          Saved. DNS usually publishes within a minute or two, and this panel rechecks on its own for the next minute and a half.
-        </p>
-      )}
-      {site.note && <p className="mt-3 text-xs text-(--color-muted)">{site.note}</p>}
-      {site.checkedAt && !checking && (
-        <p className="mt-3 font-(family-name:--font-mono) text-xs text-(--color-muted)">
-          {'// last checked '}{new Date(site.checkedAt).toLocaleTimeString()}
-        </p>
-      )}
-    </div>
   );
 }

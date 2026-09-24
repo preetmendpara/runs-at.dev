@@ -46,18 +46,35 @@ function Snippet({ label, note, value }) {
   );
 }
 
+// Collapsed by default: a snippet to paste elsewhere is a thing an owner
+// comes looking for, not something that should sit between them and whether
+// their name works.
 export default function BadgeZone({ name }) {
   const [theme, setTheme] = useState('light');
+  const [open, setOpen] = useState(false);
   const snippets = badgeSnippets(name, theme);
+
+  if (!open) {
+    return (
+      <section className="slit-frame mt-6 rounded-lg px-6 py-4 sm:px-8">
+        <button type="button" onClick={() => setOpen(true)} className="btn-ghost px-4 py-2 text-xs">
+          Share badge
+        </button>
+      </section>
+    );
+  }
 
   return (
     <section className="slit-frame mt-6 rounded-lg">
-      <div className="slit-bottom px-6 py-5 sm:px-8">
-        <p className="meta">Badge</p>
-        <p className="mt-2 text-sm leading-relaxed text-(--color-muted)">
-          A card for {name}.runs-at.dev you can put on a page you own. It links back to your
-          name and updates itself when you change your record.
-        </p>
+      <div className="slit-bottom flex flex-wrap items-start justify-between gap-3 px-6 py-5 sm:px-8">
+        <div>
+          <p className="meta">Badge</p>
+          <p className="mt-2 max-w-[520px] text-sm leading-relaxed text-(--color-muted)">
+            A card for {name}.runs-at.dev you can put on a page you own. It links back to your
+            name and updates itself when you change your record.
+          </p>
+        </div>
+        <button type="button" onClick={() => setOpen(false)} className="btn-ghost px-4 py-2 text-xs">Hide</button>
       </div>
 
       <div className="px-6 py-5 sm:px-8">

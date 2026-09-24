@@ -73,3 +73,77 @@ test('the post-save schedule stays inside the rate limit', () => {
   assert.ok(withinFirstMinute < 10, 'leaves room for Check now and a second tab');
   assert.deepEqual([...CHECK_SCHEDULE_MS].sort((x, y) => x - y), CHECK_SCHEDULE_MS);
 });
+
+// ── Feature cards ────────────────────────────────────────────
+import { featureCards, PUBLISHING_WINDOW_MS } from '../lib/manage-status.js';
+
+const cards = (over = {}) => featureCards({ savedMode: 'card', records: {}, check: null, now: 1_000_000, ...over });
+const byId = (list, id) => list.find((c) => c.id === id);
+
+test('exactly one card is in use, and it matches the saved record', () => {
+  const list = cards({ savedMode: 'cname', records: { CNAME: 'you.github.io' } });
+  assert.equal(list.filter((c) => c.inUse).length, 1);
+  assert.equal(byId(list, 'cname').inUse, true);
+  assert.equal(byId(list, 'cname').summary, 'you.github.io');
+  for (const id of ['card', 'url', 'advanced']) {
+    assert.equal(byId(list, id).status.label, 'Not in use');
+    assert.equal(byId(list, id).status.detail, null, `${id} carries no verdict`);
+  }
+});
+
+test('the four options always appear, in a fixed order', () => {
+  assert.deepEqual(cards().map((c) => c.id), ['card', 'cname', 'url', 'advanced']);
+});
+
+test('a working name reads Live on its own card only', () => {
+  const list = cards({ savedMode: 'cname', records: { CNAME: 'you.github.io' }, check: { serving: { status: 'ok', title: 'My site' } } });
+  assert.equal(byId(list, 'cname').status.tone, 'live');
+  assert.match(byId(list, 'cname').status.detail, /My site/);
+  assert.equal(byId(list, 'cname').action, 'Change');
+});
+
+test('a card answer on a pointed name needs attention and offers the fix', () => {
+  const list = cards({ savedMode: 'cname', records: { CNAME: 'you.github.io' }, check: { serving: { status: 'stuck' } } });
+  assert.equal(byId(list, 'cname').status.label, 'Needs attention');
+  assert.equal(byId(list, 'cname').action, 'Fix this');
+});
+
+// The most common false alarm: DNS is committed but the sync workflow has
+// not published it yet, so the name still answers with the card.
+test('a save made moments ago reads as publishing, not as broken', () => {
+  const now = 1_000_000;
+  const list = cards({ savedMode: 'cname', records: { CNAME: 'you.github.io' }, check: { serving: { status: 'stuck' } }, savedAt: now - 30_000, now });
+  assert.equal(byId(list, 'cname').status.tone, 'waiting');
+  assert.match(byId(list, 'cname').status.detail, /minute or two/);
+});
+
+test('past the publishing window the same answer is a problem again', () => {
+  const now = 1_000_000;
+  const list = cards({ savedMode: 'cname', records: { CNAME: 'you.github.io' }, check: { serving: { status: 'stuck' } }, savedAt: now - PUBLISHING_WINDOW_MS - 1, now });
+  assert.equal(byId(list, 'cname').status.tone, 'attention');
+});
+
+test('the profile card in use is live and edits its own details', () => {
+  const list = cards({ savedMode: 'card', check: { serving: { status: 'card' } } });
+  assert.equal(byId(list, 'card').status.tone, 'live');
+  assert.equal(byId(list, 'card').action, 'Edit card details');
+});
+
+test('a redirect names where it sends people', () => {
+  const list = cards({ savedMode: 'url', records: { URL: 'https://example.com' }, check: { serving: { status: 'redirect', finalUrl: 'https://example.com' } } });
+  assert.equal(byId(list, 'url').summary, 'https://example.com');
+  assert.equal(byId(list, 'url').status.tone, 'live');
+});
+
+test('DNS records counts what is published and manages them', () => {
+  const list = cards({ savedMode: 'advanced', records: { A: ['1.2.3.4'], TXT: ['a', 'b'] }, check: { serving: { status: 'ok' } } });
+  assert.equal(byId(list, 'advanced').summary, '3 records');
+  assert.equal(byId(list, 'advanced').action, 'Manage records');
+  assert.equal(featureCards({ savedMode: 'advanced', records: { A: ['1.2.3.4'] } })[3].summary, '1 record');
+});
+
+test('before the first check nothing is declared broken', () => {
+  const list = cards({ savedMode: 'cname', records: { CNAME: 'you.github.io' }, check: null });
+  assert.equal(byId(list, 'cname').status.tone, 'checking');
+  assert.notEqual(byId(list, 'cname').action, 'Fix this');
+});
