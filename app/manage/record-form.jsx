@@ -266,7 +266,7 @@ export default function RecordForm({ name, record }) {
   // whether a profile-card answer is the point or the problem.
   const statusPill = site.phase === 'checking' && !site.check
     ? { label: 'Checking…', tone: 'checking' }
-    : siteStatus(site.check, modeOf(record.records));
+    : siteStatus(site.check, modeOf(record.records), record.records);
 
   const savedMode = modeOf(record.records);
   const cards = featureCards({

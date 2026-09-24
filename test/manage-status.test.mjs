@@ -289,3 +289,64 @@ test('an underscore label reads the same way', () => {
   assert.match(text, /_vercel\.preet\.runs-at\.dev/);
   assert.match(text, /is not affected/);
 });
+
+// ── Records that publish DNS without pointing the name anywhere ──
+//
+// A TXT verification code or an MX for email changes nothing a visitor sees,
+// so the profile card answering is correct. Reporting "needs attention" sent
+// an owner looking for a fault that did not exist, and contradicted
+// lib/health.js, which already classifies these as 'card'.
+const cardAnswer = { serving: { status: 'card' } };
+
+test('a name with only TXT or MX records is live, not broken', () => {
+  for (const records of [
+    { TXT: ['runs-at-test=hello'] },
+    { MX: [{ priority: 10, value: 'mx.example.com' }] },
+    { TXT: ['v=spf1 -all'], MX: [{ priority: 10, value: 'mx.example.com' }] },
+  ]) {
+    const status = siteStatus(cardAnswer, 'advanced', records);
+    assert.equal(status.tone, 'live', JSON.stringify(records));
+    assert.match(status.detail, /still see your profile card/);
+
+    const card = featureCards({ savedMode: 'advanced', records, check: cardAnswer }).find((c) => c.inUse);
+    assert.equal(card.status.label, 'Live', JSON.stringify(records));
+    assert.notEqual(card.action, 'Fix this');
+  }
+});
+
+test('a name pointed at a site still reports a card answer as a problem', () => {
+  for (const [mode, records] of [
+    ['cname', { CNAME: 'you.github.io' }],
+    ['advanced', { A: ['203.0.113.10'] }],
+    ['advanced', { AAAA: ['2606:4700:3037::6815:7eb'] }],
+    ['advanced', { A: ['203.0.113.10'], TXT: ['v=spf1 -all'] }],
+  ]) {
+    assert.equal(siteStatus(cardAnswer, mode, records).tone, 'waiting', mode + JSON.stringify(records));
+    const card = featureCards({ savedMode: mode, records, check: cardAnswer }).find((c) => c.inUse);
+    assert.equal(card.status.label, 'Needs attention');
+  }
+});
+
+test('a working site and a redirect are unaffected', () => {
+  assert.equal(siteStatus({ serving: { status: 'ok' } }, 'advanced', { A: ['203.0.113.10'] }).tone, 'live');
+  assert.equal(siteStatus({ serving: { status: 'redirect' } }, 'url', { URL: 'https://example.com' }).tone, 'live');
+  assert.equal(siteStatus({ serving: { status: 'down' } }, 'cname', { CNAME: 'you.github.io' }).tone, 'down');
+});
+
+test('callers that pass no records keep their old behaviour', () => {
+  assert.equal(siteStatus(cardAnswer, 'card').tone, 'live');
+  assert.equal(siteStatus(cardAnswer, 'cname').tone, 'waiting');
+});
+
+// The page and the daily health check must not disagree about the same name.
+test('the page agrees with the health check on TXT-only and pointed names', async () => {
+  const { classifyClaim } = await import('../lib/health.js');
+  const probe = { ok: true, finalHost: 'preet.runs-at.dev', title: 'preet (preet.runs-at.dev)' };
+  const txtOnly = { name: 'preet', records: { TXT: ['runs-at-test=hello'] } };
+  assert.equal(classifyClaim(txtOnly, probe), 'card');
+  assert.equal(siteStatus({ serving: { status: 'card' } }, 'advanced', txtOnly.records).tone, 'live');
+
+  const pointed = { name: 'preet', records: { CNAME: 'you.github.io' } };
+  assert.equal(classifyClaim(pointed, probe), 'stuck');
+  assert.equal(siteStatus({ serving: { status: 'stuck' } }, 'cname', pointed.records).tone, 'waiting');
+});
