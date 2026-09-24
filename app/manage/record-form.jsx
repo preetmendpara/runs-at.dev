@@ -484,7 +484,7 @@ export default function RecordForm({ name, record }) {
             </div>
           ))}
           {linkRows.length < MAX_LINKS && (
-            <button type="button" onClick={() => { setLinkRows((rows) => [...rows, { label: '', url: '' }]); setStatus(null); }} className="press slit-frame rounded-[4px] px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a link</button>
+            <button type="button" onClick={() => { setLinkRows((rows) => [...rows, { label: '', url: '' }]); setStatus(null); }} className="slit-frame rounded-[4px] px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a link</button>
           )}
         </div>
       </div>
@@ -522,7 +522,7 @@ function NameHeader({ name, site, status, justSaved }) {
     <div className="slit-bottom px-6 py-5 sm:px-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="font-(family-name:--font-mono) text-[23px] leading-[1.07] font-normal text-(--color-ink)">{name}.runs-at.dev</h2>
+          <h2 className="text-[23px] leading-[1.07] font-normal tracking-[-0.004em] text-(--color-ink)">{name}.runs-at.dev</h2>
           <p className="mt-1 font-(family-name:--font-mono) text-xs text-(--color-muted)">domains/{name}.json</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -539,10 +539,10 @@ function NameHeader({ name, site, status, justSaved }) {
           className={`inline-block h-2 w-2 rounded-full ${status.tone === 'live' ? 'pulse-dot' : ''}`}
           style={{
             background:
-              status.tone === 'live' ? 'var(--pulse)'
-              : status.tone === 'waiting' ? 'var(--blue)'
-              : status.tone === 'down' ? 'var(--flag)'
-              : 'var(--muted)',
+              status.tone === 'live' ? '#98ff38'
+              : status.tone === 'waiting' ? '#eab308'
+              : status.tone === 'down' ? '#ff5c5c'
+              : '#9c9c9c',
           }}
         />
         <span className={`text-[14px] ${status.tone === 'down' ? 'text-(--color-flag)' : 'text-(--color-ink)'}`}>{status.label}</span>
@@ -568,10 +568,10 @@ function NameHeader({ name, site, status, justSaved }) {
 function FeatureCard({ card, open, onSelect }) {
   const { status } = card;
   const dot =
-    status.tone === 'live' ? 'var(--pulse)'
-    : status.tone === 'waiting' ? 'var(--blue)'
-    : status.tone === 'attention' ? 'var(--flag)'
-    : 'var(--iron)';
+    status.tone === 'live' ? '#98ff38'
+    : status.tone === 'waiting' ? '#eab308'
+    : status.tone === 'attention' ? '#ff5c5c'
+    : '#5a5a5a';
   return (
     <div className={`slit-frame rounded-lg p-4 ${open ? 'slit-frame-bright' : ''}`}>
       <div className="flex items-center gap-2">
@@ -832,7 +832,7 @@ function SubdomainRecords({ name, subRows, setRow, addRow, removeRow }) {
         </div>
       ))}
       {subRows.length < MAX_SUBDOMAINS && (
-        <button type="button" onClick={addRow} className="press mt-4 slit-frame rounded-[4px] px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a subdomain record</button>
+        <button type="button" onClick={addRow} className="mt-4 slit-frame rounded-[4px] px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a subdomain record</button>
       )}
     </div>
   );
@@ -861,15 +861,12 @@ const TYPE_HELP = {
   MX: 'Where email for this name is delivered. Lower priority numbers are tried first.',
 };
 
-// Tokens, not hexes: the same four meanings the status badges use. Waiting
-// states (publishing, missing) are informational blue rather than yellow,
-// which sat too close to the amber accent to read as a status.
 const VERDICT_COLOR = {
-  published: 'var(--pulse)',
-  publishing: 'var(--blue)',
-  missing: 'var(--blue)',
-  different: 'var(--flag)',
-  unknown: 'var(--iron)',
+  published: '#98ff38',
+  publishing: '#eab308',
+  missing: '#eab308',
+  different: '#ff5c5c',
+  unknown: '#5a5a5a',
 };
 
 function blankRow() {
@@ -933,7 +930,7 @@ function RecordTable({ name, rows, setRows, verdicts, onCheck, checking }) {
       {/* Desktop: a table. Phones get the same rows as cards below. */}
       {rows.length > 0 && (
         <div className="mt-5 hidden sm:block">
-          <table className="dns-table w-full text-left">
+          <table className="w-full text-left">
             <thead>
               <tr className="meta">
                 <th className="py-2 pr-3 font-normal">Type</th>
@@ -948,23 +945,23 @@ function RecordTable({ name, rows, setRows, verdicts, onCheck, checking }) {
               {rows.map((row) => {
                 const verdict = verdictFor(row.id);
                 return (
-                  <tr key={row.id} className="row-in slit-top align-top">
-                    <td className="py-2.5 pr-3"><span className="dns-type">{row.type}</span></td>
-                    <td className="py-2.5 pr-3 break-all text-(--color-muted)">{hostOf(row.label, name)}</td>
-                    <td className="py-2.5 pr-3 break-all text-(--color-ink)">
+                  <tr key={row.id} className="slit-top align-top">
+                    <td className="py-3 pr-3 text-(--color-ink)">{row.type}</td>
+                    <td className="py-3 pr-3 break-all text-(--color-muted)">{hostOf(row.label, name)}</td>
+                    <td className="py-3 pr-3 break-all text-(--color-ink)">
                       {row.value}
                       {verdict && (
                         <span className="mt-1 flex items-center gap-1.5 text-(--color-muted)">
-                          <span aria-hidden="true" className="verdict-dot inline-block h-1.5 w-1.5 rounded-full" style={{ background: VERDICT_COLOR[verdict.state] }} />
+                          <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: VERDICT_COLOR[verdict.state] }} />
                           {verdict.text}
                         </span>
                       )}
                     </td>
-                    <td className="py-2.5 pr-3 text-(--color-muted)">5 min</td>
-                    <td className="py-2.5 pr-3 text-(--color-muted)">{row.type === 'MX' ? row.priority : '—'}</td>
-                    <td className="py-2.5 text-right whitespace-nowrap">
+                    <td className="py-3 pr-3 text-(--color-muted)">5 min</td>
+                    <td className="py-3 pr-3 text-(--color-muted)">{row.type === 'MX' ? row.priority : '—'}</td>
+                    <td className="py-3 text-right whitespace-nowrap">
                       <button type="button" onClick={() => startEdit(row)} className="underline text-(--color-muted) hover:text-(--color-ink)">Edit</button>
-                      <button type="button" onClick={() => setConfirming(row)} className="ml-3 underline text-(--color-muted) transition-colors hover:text-(--color-flag)">Delete</button>
+                      <button type="button" onClick={() => setConfirming(row)} className="ml-3 underline text-(--color-flag) hover:opacity-80">Delete</button>
                     </td>
                   </tr>
                 );
@@ -979,12 +976,12 @@ function RecordTable({ name, rows, setRows, verdicts, onCheck, checking }) {
         {rows.map((row) => {
           const verdict = verdictFor(row.id);
           return (
-            <div key={row.id} className="row-in slit-frame rounded-lg p-3">
+            <div key={row.id} className="slit-frame rounded-lg p-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-(family-name:--font-mono) text-xs text-(--color-ink)">{row.type}</span>
                 {verdict && (
                   <span className="flex items-center gap-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted)">
-                    <span aria-hidden="true" className="verdict-dot inline-block h-1.5 w-1.5 rounded-full" style={{ background: VERDICT_COLOR[verdict.state] }} />
+                    <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: VERDICT_COLOR[verdict.state] }} />
                     {verdict.text}
                   </span>
                 )}
@@ -996,7 +993,7 @@ function RecordTable({ name, rows, setRows, verdicts, onCheck, checking }) {
               <p className="mt-1 font-(family-name:--font-mono) text-xs text-(--color-muted)">TTL 5 min</p>
               <div className="mt-3 flex items-center gap-3 font-(family-name:--font-mono) text-xs">
                 <button type="button" onClick={() => startEdit(row)} className="underline text-(--color-muted)">Edit</button>
-                <button type="button" onClick={() => setConfirming(row)} className="underline text-(--color-muted)">Delete</button>
+                <button type="button" onClick={() => setConfirming(row)} className="underline text-(--color-flag)">Delete</button>
               </div>
             </div>
           );
@@ -1012,14 +1009,14 @@ function RecordTable({ name, rows, setRows, verdicts, onCheck, checking }) {
             {' '}It is removed when you save.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={() => remove(confirming)} className="press slit-frame slit-frame-flag rounded-[4px] px-4 py-2 font-(family-name:--font-mono) text-xs text-(--color-flag)">Delete record</button>
+            <button type="button" onClick={() => remove(confirming)} className="slit-frame slit-frame-flag rounded-[4px] px-4 py-2 font-(family-name:--font-mono) text-xs text-(--color-flag)">Delete record</button>
             <button type="button" onClick={() => setConfirming(null)} className="btn-ghost px-4 py-2 text-xs">Keep it</button>
           </div>
         </div>
       )}
 
       {draft && (
-        <div className="panel-in slit-frame mt-4 rounded-lg p-4">
+        <div className="slit-frame mt-4 rounded-lg p-4">
           <p className="text-[14px] text-(--color-ink)">{rows.some((r) => r.id === draft.id) ? 'Edit record' : 'Add record'}</p>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">

@@ -142,8 +142,8 @@ export default function ClaimForm({ signedIn }) {
         Subdomain name
       </label>
       <div
-        className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-0 font-(family-name:--font-display) leading-[1.05] font-normal tracking-[0] text-(--color-ink)"
-        style={{ fontSize: `calc(clamp(1.75rem, 6.5vw, 3.5rem) * ${heroScale})` }}
+        className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-0 font-(family-name:--font-display) leading-[1.05] font-normal tracking-[-0.011em] text-(--color-ink)"
+        style={{ fontSize: `calc(clamp(2.5rem, 7vw, 3.94rem) * ${heroScale})` }}
       >
         <span className="relative inline-flex flex-nowrap items-baseline">
           <span aria-hidden="true" className="text-(--color-muted)">[</span>
@@ -156,8 +156,11 @@ export default function ClaimForm({ signedIn }) {
             autoCapitalize="off"
             spellCheck={false}
             size={1}
-            style={{ width: inputWidth ? `${inputWidth}px` : undefined }}
-            className={`claim-underline ${negative ? 'claim-underline-flag' : ''} bg-transparent text-[0.94em] caret-(--color-ink) outline-none placeholder:text-(--color-muted)/70`}
+            style={{
+              width: inputWidth ? `${inputWidth}px` : undefined,
+              '--edge': negative ? 'var(--flag)' : 'rgba(243, 243, 243, 0.9)',
+            }}
+            className="claim-underline bg-transparent text-[0.94em] caret-(--color-ink) outline-none placeholder:text-(--color-muted)/70"
           />
           {/* Measures the input's width. Its font MUST match the input exactly,
               including text-[0.94em], or the brackets stop hugging the text. */}

@@ -1,5 +1,4 @@
 import { cookies } from 'next/headers';
-import Reveal from '../motion/reveal.jsx';
 import { readSession, SESSION_COOKIE } from '../../lib/session.js';
 import { getOwnerIndex } from '../../lib/owners.js';
 import { getRecord } from '../../lib/registry.js';
@@ -93,31 +92,23 @@ export default async function Manage() {
 function Shell({ children, login }) {
   return (
     <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20">
-      <Reveal immediate stagger>
-        <p className="meta">Manage</p>
-        <h1 className="mt-3 text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
-          Your name
-        </h1>
-        <p className="mt-4 max-w-[540px] text-[16px] leading-[1.5] text-(--color-muted)">
-          Changes save straight to the public registry, and DNS follows within a minute or two. The
-          panel under each name tells you whether it is working.
-        </p>
-        {login && (
-          <form
-            action="/api/auth/signout"
-            method="post"
-            className="mt-4 text-sm text-(--color-muted)"
-          >
-            Signed in as @{login} ·{' '}
-            <button type="submit" className="cursor-pointer text-(--color-ink) underline">
-              Sign out
-            </button>
-          </form>
-        )}
-      </Reveal>
-      <Reveal immediate delay={0.2} stagger className="mt-12 space-y-12">
-        {children}
-      </Reveal>
+      <p className="meta">Manage</p>
+      <h1 className="mt-3 text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
+        Your name
+      </h1>
+      <p className="mt-4 max-w-[540px] text-[16px] leading-[1.5] text-(--color-muted)">
+        Changes save straight to the public registry, and DNS follows within a minute
+        or two. The panel under each name tells you whether it is working.
+      </p>
+      {login && (
+        <form action="/api/auth/signout" method="post" className="mt-4 text-sm text-(--color-muted)">
+          Signed in as @{login} ·{' '}
+          <button type="submit" className="cursor-pointer text-(--color-ink) underline">
+            Sign out
+          </button>
+        </form>
+      )}
+      <div className="mt-12 space-y-12">{children}</div>
     </main>
   );
 }

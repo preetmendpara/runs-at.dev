@@ -17,7 +17,7 @@ export default function OwnedName({ name, record }) {
       </p>
 
       <h2 className="mt-3 text-[34px] leading-[1.03] tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
-        <span className="font-(family-name:--font-mono) underline decoration-(--color-blue) decoration-2 underline-offset-[8px]">{name}.runs-at.dev</span> is yours
+        <span className="underline decoration-(--color-blue) decoration-2 underline-offset-[8px]">{name}.runs-at.dev</span> is yours
       </h2>
 
       {pointing ? (

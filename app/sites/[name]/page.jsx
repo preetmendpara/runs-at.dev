@@ -1,5 +1,4 @@
 import { notFound, redirect } from 'next/navigation';
-import Reveal from '../../motion/reveal.jsx';
 import { getRecord } from '../../../lib/registry.js';
 import { isValidRedirectUrl } from '../../../lib/schema.js';
 import { cardMetadata } from '../../../lib/metadata.js';
@@ -21,10 +20,7 @@ async function githubProfile(login) {
     // is a malformed credential GitHub answers with 401, not an anonymous
     // request — the same trap lib/claim-banner.jsx guards against.
     headers: CARD_TOKEN
-      ? {
-          Accept: 'application/vnd.github+json',
-          Authorization: `Bearer ${CARD_TOKEN}`,
-        }
+      ? { Accept: 'application/vnd.github+json', Authorization: `Bearer ${CARD_TOKEN}` }
       : { Accept: 'application/vnd.github+json' },
     next: { revalidate: 3600 },
   });
@@ -105,21 +101,11 @@ export default async function Site({ params }) {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-16 sm:py-24">
-      <Reveal
-        immediate
-        as="p"
-        duration={0.5}
-        className="font-(family-name:--font-mono) text-xs tracking-[0.08em] text-(--color-muted) uppercase"
-      >
+      <p className="font-(family-name:--font-mono) text-xs tracking-[0.08em] text-(--color-muted) uppercase">
         domains/{name}.json
-      </Reveal>
+      </p>
 
-      <Reveal
-        immediate
-        delay={0.1}
-        duration={0.6}
-        className="slit-frame lift mt-5 rounded-lg bg-(--color-card) p-6 sm:p-8"
-      >
+      <div className="slit-frame mt-5 rounded-lg bg-(--color-card) p-6 sm:p-8">
         <div className="flex items-center gap-5">
           {profile?.avatar_url && (
             <span className="slit-frame inline-block shrink-0 rounded-full p-[3px]">
@@ -139,7 +125,7 @@ export default async function Site({ params }) {
                   href={`https://${name}.runs-at.dev`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-(family-name:--font-mono) text-[23px] leading-[1.07] font-normal text-(--color-ink) underline decoration-(--color-blue) decoration-2 underline-offset-[6px] sm:text-[34px]"
+                  className="text-[23px] leading-[1.07] font-normal tracking-[-0.004em] text-(--color-ink) underline decoration-(--color-blue) decoration-2 underline-offset-[6px] sm:text-[34px] sm:tracking-[-0.005em]"
                 >
                   {name}.runs-at.dev
                 </a>
@@ -155,9 +141,7 @@ export default async function Site({ params }) {
           </div>
         </div>
 
-        {bio && (
-          <p className="mt-5 max-w-[540px] text-[16px] leading-[1.5] text-(--color-ash)">{bio}</p>
-        )}
+        {bio && <p className="mt-5 max-w-[540px] text-[16px] leading-[1.5] text-(--color-ash)">{bio}</p>}
 
         {links.length > 0 && (
           <ul className="mt-6 space-y-12">
@@ -170,9 +154,7 @@ export default async function Site({ params }) {
                   className="slit-frame flex items-center justify-between rounded-lg px-4 py-3 font-(family-name:--font-mono) text-sm text-(--color-ink) transition-colors"
                 >
                   <span className="truncate">{link.label}</span>
-                  <span aria-hidden className="ml-3 shrink-0 text-(--color-muted)">
-                    ↗
-                  </span>
+                  <span aria-hidden className="ml-3 shrink-0 text-(--color-muted)">↗</span>
                 </a>
               </li>
             ))}
@@ -224,7 +206,7 @@ export default async function Site({ params }) {
             </dd>
           </div>
         </dl>
-      </Reveal>
+      </div>
 
       <p className="mt-6 text-sm text-(--color-muted)">
         This name is registered on{' '}
@@ -280,20 +262,15 @@ function editDistance(a, b) {
 
 async function findSimilarNames(attempted) {
   try {
-    const res = await fetch(
-      'https://api.github.com/repos/preetmendpara/runs-at.dev/contents/domains',
-      {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          ...((process.env.CARD_TOKEN ?? process.env.REGISTRY_TOKEN)
-            ? {
-                Authorization: `Bearer ${process.env.CARD_TOKEN ?? process.env.REGISTRY_TOKEN}`,
-              }
-            : {}),
-        },
-        next: { revalidate: 300 },
+    const res = await fetch('https://api.github.com/repos/preetmendpara/runs-at.dev/contents/domains', {
+      headers: {
+        Accept: 'application/vnd.github+json',
+        ...(process.env.CARD_TOKEN ?? process.env.REGISTRY_TOKEN
+          ? { Authorization: `Bearer ${process.env.CARD_TOKEN ?? process.env.REGISTRY_TOKEN}` }
+          : {}),
       },
-    );
+      next: { revalidate: 300 },
+    });
     if (!res.ok) return [];
     const entries = await res.json();
     const claimed = entries
@@ -316,11 +293,9 @@ async function ClaimPage({ name }) {
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col items-center px-6 py-24 text-center">
-      <StatusBadge tone="live" pulse>
-        Available
-      </StatusBadge>
+      <StatusBadge tone="live" pulse>Available</StatusBadge>
 
-      <h1 className="mt-7 font-(family-name:--font-mono) text-[34px] leading-[1.03] font-normal text-(--color-ink) sm:text-[44px]">
+      <h1 className="mt-7 text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
         {name}.runs-at.dev
       </h1>
 
@@ -328,7 +303,10 @@ async function ClaimPage({ name }) {
         This name isn&rsquo;t claimed yet. It could be yours in seconds, free, forever.
       </p>
 
-      <a href={`/api/auth/github?claim=${encodeURIComponent(name)}`} className="btn-pill mt-8">
+      <a
+        href={`/api/auth/github?claim=${encodeURIComponent(name)}`}
+        className="btn-pill mt-8"
+      >
         Claim {name}.runs-at.dev
         <span aria-hidden="true">→</span>
       </a>
