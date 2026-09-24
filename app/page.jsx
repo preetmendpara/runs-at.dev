@@ -5,6 +5,7 @@ import JsonLd from './components/JsonLd.jsx';
 import { Section, Quote } from './components/Section.jsx';
 import { Divider, StatusBadge } from './components/ui.jsx';
 import Reveal from './motion/reveal.jsx';
+import HeroStage from './3d/hero-stage.jsx';
 import HomeMap from './components/home-map.jsx';
 import { CLAIM_GEO } from './components/claim-geo.js';
 import { geoPlacement } from '../lib/geo-placement.js';
@@ -127,32 +128,38 @@ export default async function Home() {
 
       {/* Hero: the claim line IS the display headline, set at 63px weight 400
           with negative tracking. Centered stack, then the dot-map world below. */}
-      <section id="claim" className="mx-auto max-w-[1200px] px-6 pt-20 pb-16 text-center sm:pt-28">
-        <Reveal immediate duration={0.5}>
-          <StatusBadge tone="live" pulse>
-            Free forever · live in seconds
-          </StatusBadge>
-        </Reveal>
-
-        <Reveal
-          immediate
-          delay={0.08}
-          duration={0.5}
-          as="p"
-          className="mt-5 font-(family-name:--font-mono) text-xs tracking-[0.04em] text-(--color-muted)"
+      <HeroStage>
+        <section
+          id="claim"
+          data-scene-region
+          className="mx-auto max-w-[1200px] px-6 pt-20 pb-16 text-center sm:pt-28"
         >
-          {registryList.length} {registryList.length === 1 ? 'name' : 'names'} claimed ·{' '}
-          {placement.resolved} on the public claim map · one per GitHub account · open source
-        </Reveal>
+          <Reveal immediate duration={0.5}>
+            <StatusBadge tone="live" pulse>
+              Free forever · live in seconds
+            </StatusBadge>
+          </Reveal>
 
-        <Reveal immediate delay={0.16} duration={0.7} className="mt-8 flex justify-center">
-          {owned ? (
-            <OwnedName name={owned.name} record={owned.record} />
-          ) : (
-            <ClaimForm signedIn={Boolean(session)} />
-          )}
-        </Reveal>
-      </section>
+          <Reveal
+            immediate
+            delay={0.08}
+            duration={0.5}
+            as="p"
+            className="mt-5 font-(family-name:--font-mono) text-xs tracking-[0.04em] text-(--color-muted)"
+          >
+            {registryList.length} {registryList.length === 1 ? 'name' : 'names'} claimed ·{' '}
+            {placement.resolved} on the public claim map · one per GitHub account · open source
+          </Reveal>
+
+          <Reveal immediate delay={0.16} duration={0.7} className="mt-8 flex justify-center">
+            {owned ? (
+              <OwnedName name={owned.name} record={owned.record} />
+            ) : (
+              <ClaimForm signedIn={Boolean(session)} />
+            )}
+          </Reveal>
+        </section>
+      </HeroStage>
 
       {/* Full-bleed dot-matrix world map carrying the claim heat. The base
           world is a static image (keeps ~1600 elements out of the HTML);

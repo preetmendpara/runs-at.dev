@@ -679,3 +679,48 @@ a {
     animation: none !important;
   }
 }
+
+/* ── 3D stage ────────────────────────────────────────────────────────
+   The WebGL layer behind the homepage hero. Hidden until its first frame
+   exists, then faded in, so it never shows as an empty rectangle while
+   three.js starts. The mask fades the bottom edge into the page instead of
+   ending the particle field on a hard line above the map. */
+.three-stage {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+}
+.three-stage[data-ready='true'] {
+  opacity: 1;
+}
+
+/* Hover label for a node. Real DOM positioned by drei's <Html>, so it is set
+   in the site's own mono face at native resolution. */
+.three-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  animation: field-in 0.2s ease both;
+}
+.three-label-name {
+  color: var(--ink);
+}
+.three-label-note {
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .three-stage {
+    transition: none;
+  }
+  .three-label {
+    animation: none;
+  }
+}

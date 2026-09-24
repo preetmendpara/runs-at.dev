@@ -142,6 +142,7 @@ export default function ClaimForm({ signedIn }) {
         Subdomain name
       </label>
       <div
+        data-scene-anchor
         className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-0 font-(family-name:--font-mono) leading-[1.05] font-normal tracking-[0] text-(--color-ink)"
         style={{ fontSize: `calc(clamp(1.75rem, 6.5vw, 3.5rem) * ${heroScale})` }}
       >
