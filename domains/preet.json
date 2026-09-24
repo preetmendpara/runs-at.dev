@@ -4,7 +4,9 @@
     "github": "preetmendpara"
   },
   "claimedAt": "2026-09-22T07:22:50.791Z",
-  "records": {},
+  "records": {
+    "CNAME": "carverse.preetmendpara1111.workers.dev"
+  },
   "country": "IN",
   "profile": {
     "name": "preet"
