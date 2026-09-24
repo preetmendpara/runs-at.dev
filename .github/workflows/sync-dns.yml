@@ -52,11 +52,11 @@ jobs:
       # The push range below is still diffed from the event's own SHAs, which
       # are ancestors of the tip. fetch-depth 0 is also what the sweep's
       # released-name lookup reads.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: main
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
       - id: changed

@@ -29,10 +29,10 @@ jobs:
       # re-trigger workflows, which is fine here, but the deploy key is what the
       # other committing workflows use and branch protection is configured for
       # it. See sync-owners.yml.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ssh-key: ${{ secrets.REGISTRY_DEPLOY_KEY }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
 

@@ -66,10 +66,10 @@ jobs:
       # org-only, and this repo is user-owned). A push authenticated by the
       # default GITHUB_TOKEN is rejected with GH006 even though the workflow
       # has contents: write.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ssh-key: ${{ secrets.REGISTRY_DEPLOY_KEY }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
 

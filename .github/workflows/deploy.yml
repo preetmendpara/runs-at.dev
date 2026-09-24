@@ -48,8 +48,8 @@ jobs:
     # commands: those read the link written by "Link Vercel project", so an
     # org id naming the wrong account cannot override it.
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
       - run: npm ci
@@ -117,9 +117,9 @@ jobs:
       # settings and environment variables, as a dashboard deploy does.
       #
       # Not `vercel pull` + `vercel build` + `deploy --prebuilt`: pull (CLI
-      # 59.25.0) also fetches the owning team (GET /teams/<id>) and turns a
+      # 59.26.0) also fetches the owning team (GET /teams/<id>) and turns a
       # 403 there into "Could not retrieve Project Settings", with no fallback,
       # even when the project itself is readable. `vercel build` cannot run
       # without what pull downloads. `vercel deploy` skips both lookups when
       # the link names the project, which the step above writes.
-      - run: npx vercel deploy --prod --yes --token='${{ secrets.VERCEL_TOKEN }}'
+      - run: npx vercel@59.26.0 deploy --prod --yes --token='${{ secrets.VERCEL_TOKEN }}'
