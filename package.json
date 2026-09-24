@@ -14,8 +14,6 @@
     "prebuild": "node scripts/generate-claim-map-svg.mjs"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.8",
-    "@react-three/fiber": "^9.8.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.8.0",
     "canvas-confetti": "^1.9.4",
@@ -25,8 +23,7 @@
     "marked": "^18.0.13",
     "next": "^16.3.2",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "three": "^0.182.0"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

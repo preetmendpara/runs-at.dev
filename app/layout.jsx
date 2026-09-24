@@ -1,5 +1,5 @@
 import localFont from 'next/font/local';
-import { IBM_Plex_Mono } from 'next/font/google';
+import { Bitcount_Prop_Single, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 import Footer from './components/Footer.jsx';
 import Nav from './components/Nav.jsx';
@@ -21,9 +21,18 @@ const satoshi = localFont({
   display: 'swap',
 });
 
-// IBM Plex Mono is the registry's own voice: headings, captions, labels and
-// fine print all render in it, so a record and the heading above it are set
-// in the same face. Body copy stays Satoshi.
+// Bitcount Prop Single (Google Fonts) is the heading voice: a pixel-matrix
+// face that rhymes with the dot-map hero. Every h1/h2/h3 renders in it (see
+// the heading rule in globals.css); body copy stays Satoshi.
+const bitcount = Bitcount_Prop_Single({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-bitcount',
+  display: 'swap',
+});
+
+// IBM Plex Mono is the technical voice: hostnames, records, captions, labels
+// and fine print. Headings are Bitcount, body copy is Satoshi.
 const mono = IBM_Plex_Mono({
   subsets: ['latin'],
   weight: ['400', '500'],
@@ -75,7 +84,7 @@ export default function RootLayout({ children }) {
     // raises a mismatch warning on every page load for those visitors. The
     // markup itself is deterministic; this silences only that attribute-level
     // noise on the two elements extensions touch, nothing deeper.
-    <html lang="en" suppressHydrationWarning style={{ backgroundColor: '#0b0d0f' }} className={`${satoshi.variable} ${mono.variable}`}>
+    <html lang="en" suppressHydrationWarning style={{ backgroundColor: '#0b0d0f' }} className={`${satoshi.variable} ${bitcount.variable} ${mono.variable}`}>
       <head>
         <meta name="theme-color" content="#0b0d0f" />
         <meta name="theme-color" content="#0b0d0f" media="(prefers-color-scheme: light)" />
