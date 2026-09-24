@@ -484,7 +484,7 @@ export default function RecordForm({ name, record }) {
             </div>
           ))}
           {linkRows.length < MAX_LINKS && (
-            <button type="button" onClick={() => { setLinkRows((rows) => [...rows, { label: '', url: '' }]); setStatus(null); }} className="slit-frame rounded-[4px] px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a link</button>
+            <button type="button" onClick={() => { setLinkRows((rows) => [...rows, { label: '', url: '' }]); setStatus(null); }} className="press slit-frame rounded-[4px] px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a link</button>
           )}
         </div>
       </div>
@@ -832,7 +832,7 @@ function SubdomainRecords({ name, subRows, setRow, addRow, removeRow }) {
         </div>
       ))}
       {subRows.length < MAX_SUBDOMAINS && (
-        <button type="button" onClick={addRow} className="mt-4 slit-frame rounded-[4px] px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a subdomain record</button>
+        <button type="button" onClick={addRow} className="press mt-4 slit-frame rounded-[4px] px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a subdomain record</button>
       )}
     </div>
   );
@@ -945,14 +945,14 @@ function RecordTable({ name, rows, setRows, verdicts, onCheck, checking }) {
               {rows.map((row) => {
                 const verdict = verdictFor(row.id);
                 return (
-                  <tr key={row.id} className="slit-top align-top">
+                  <tr key={row.id} className="row-in slit-top align-top">
                     <td className="py-3 pr-3 text-(--color-ink)">{row.type}</td>
                     <td className="py-3 pr-3 break-all text-(--color-muted)">{hostOf(row.label, name)}</td>
                     <td className="py-3 pr-3 break-all text-(--color-ink)">
                       {row.value}
                       {verdict && (
                         <span className="mt-1 flex items-center gap-1.5 text-(--color-muted)">
-                          <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: VERDICT_COLOR[verdict.state] }} />
+                          <span aria-hidden="true" className="verdict-dot inline-block h-1.5 w-1.5 rounded-full" style={{ background: VERDICT_COLOR[verdict.state] }} />
                           {verdict.text}
                         </span>
                       )}
@@ -976,12 +976,12 @@ function RecordTable({ name, rows, setRows, verdicts, onCheck, checking }) {
         {rows.map((row) => {
           const verdict = verdictFor(row.id);
           return (
-            <div key={row.id} className="slit-frame rounded-lg p-3">
+            <div key={row.id} className="row-in slit-frame rounded-lg p-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-(family-name:--font-mono) text-xs text-(--color-ink)">{row.type}</span>
                 {verdict && (
                   <span className="flex items-center gap-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted)">
-                    <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: VERDICT_COLOR[verdict.state] }} />
+                    <span aria-hidden="true" className="verdict-dot inline-block h-1.5 w-1.5 rounded-full" style={{ background: VERDICT_COLOR[verdict.state] }} />
                     {verdict.text}
                   </span>
                 )}
@@ -1009,14 +1009,14 @@ function RecordTable({ name, rows, setRows, verdicts, onCheck, checking }) {
             {' '}It is removed when you save.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={() => remove(confirming)} className="slit-frame slit-frame-flag rounded-[4px] px-4 py-2 font-(family-name:--font-mono) text-xs text-(--color-flag)">Delete record</button>
+            <button type="button" onClick={() => remove(confirming)} className="press slit-frame slit-frame-flag rounded-[4px] px-4 py-2 font-(family-name:--font-mono) text-xs text-(--color-flag)">Delete record</button>
             <button type="button" onClick={() => setConfirming(null)} className="btn-ghost px-4 py-2 text-xs">Keep it</button>
           </div>
         </div>
       )}
 
       {draft && (
-        <div className="slit-frame mt-4 rounded-lg p-4">
+        <div className="panel-in slit-frame mt-4 rounded-lg p-4">
           <p className="text-[14px] text-(--color-ink)">{rows.some((r) => r.id === draft.id) ? 'Edit record' : 'Add record'}</p>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">

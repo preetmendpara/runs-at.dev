@@ -436,10 +436,30 @@ a {
 
 /* The claim-line input's underline: a horizontal slit under the name,
    thickening on focus. --edge recolors it for the negative state. */
+/* The claim underline carries the availability verdict: ink while a name is
+   free or untested, flag once it is refused. Registering the colour as a
+   typed custom property is what makes that flip animatable at all -- an
+   unregistered var jumps, because the gradient it feeds cannot interpolate.
+   Same idiom as --slit-line and --edge-color above. Its own name rather than
+   the shared --edge, so registering a type here cannot affect the slit inputs
+   that also read --edge. */
+@property --claim-edge {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #edf1f5;
+}
 .claim-underline {
   border: 0;
-  background: linear-gradient(90deg, transparent, var(--edge, rgba(243, 243, 243, 0.9)) 12%, var(--edge, rgba(243, 243, 243, 0.9)) 88%, transparent) bottom / 100% 2px no-repeat;
-  transition: background-size 0.15s ease;
+  /* Literal colours, not var(--ink) / var(--flag): a registered custom
+     property whose value is a var() reference is invalid at computed-value
+     time and silently falls back to initial-value, which drops the verdict
+     colour entirely. These two must stay in step with --ink and --flag. */
+  --claim-edge: #edf1f5;
+  background: linear-gradient(90deg, transparent, var(--claim-edge) 12%, var(--claim-edge) 88%, transparent) bottom / 100% 2px no-repeat;
+  transition: background-size 0.15s ease, --claim-edge 0.2s ease;
+}
+.claim-underline-flag {
+  --claim-edge: #d97757;
 }
 .claim-underline:focus-visible {
   background-size: 100% 3px;
@@ -546,4 +566,114 @@ a {
 }
 .pulse-dot {
   animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+/* ── Motion ──────────────────────────────────────────────────────────
+   Elements handed to <Reveal> are held invisible until GSAP takes them,
+   so nothing paints at full opacity and then fades in.
+
+   The hold is gated on .js-motion, which an inline script in layout.jsx
+   adds before first paint and removes again after a few seconds. That
+   ordering is what keeps content from depending on a script: with JS off
+   or blocked the class never lands, and if the motion chunk fails to load
+   the failsafe drops it, so in every failure mode the page ends up
+   readable rather than blank. */
+.js-motion [data-reveal] {
+  opacity: 0;
+}
+
+/* Interaction feedback. Transform and opacity only -- both composite, so a
+   hover never costs a layout. Kept here rather than per-component so the
+   press/hover weight is the same on every control. */
+.press {
+  transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.press:active {
+  transform: translateY(1px);
+}
+
+/* Cards that respond to a pointer. Gated on a hover-capable pointer so a
+   tap on a phone never leaves a card stuck in its lifted state. */
+@media (hover: hover) and (pointer: fine) {
+  .lift {
+    transition: transform 0.2s ease;
+  }
+  .lift:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Reduced motion gets the end state, not a faster version of the journey.
+     !important is load-bearing: GSAP writes inline styles, and this has to
+     win against them if the setting is flipped mid-session. */
+  [data-reveal],
+  [data-reveal] > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .lift:hover,
+  .press:active {
+    transform: none !important;
+  }
+}
+
+/* Nav scroll state. The bar itself never moves or resizes: only the rule
+   under it firms up once the page has left the top, which is enough to
+   separate the nav from content scrolling beneath it without pushing that
+   content around. */
+[data-nav] > header {
+  transition: background-color 0.2s ease;
+}
+[data-nav][data-scrolled='true'] > header {
+  background-color: color-mix(in srgb, var(--paper) 96%, transparent);
+  --slit-line: var(--slit-frame-hi);
+}
+
+/* DNS table rows arrive in sequence. A <tr> cannot be wrapped in the Reveal
+   component without breaking table semantics, so the stagger is CSS here,
+   the same shape the claim form's record fields already use. Capped at six:
+   past that the last row would wait longer than the reveal itself. */
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.row-in {
+  animation: row-in 0.32s ease both;
+}
+.row-in:nth-child(1) { animation-delay: 0ms; }
+.row-in:nth-child(2) { animation-delay: 45ms; }
+.row-in:nth-child(3) { animation-delay: 90ms; }
+.row-in:nth-child(4) { animation-delay: 135ms; }
+.row-in:nth-child(5) { animation-delay: 180ms; }
+.row-in:nth-child(n + 6) { animation-delay: 225ms; }
+
+/* The verification dot changes colour as a row goes publishing -> published.
+   Transitioning the colour rather than swapping it is what makes the state
+   read as the same row progressing instead of a new row appearing. */
+.verdict-dot {
+  transition: background-color 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row-in {
+    animation: none !important;
+  }
+}
+
+/* The record editor opening. It is mounted on demand, so a plain entrance is
+   enough -- no height animation, which would force layout on every frame and
+   fight the browser over a panel whose height it already knows. */
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.panel-in {
+  animation: panel-in 0.28s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-in {
+    animation: none !important;
+  }
 }

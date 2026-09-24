@@ -4,6 +4,7 @@ import OwnedName from './owned-name.jsx';
 import JsonLd from './components/JsonLd.jsx';
 import { Section, Quote } from './components/Section.jsx';
 import { Divider, StatusBadge } from './components/ui.jsx';
+import Reveal from './motion/reveal.jsx';
 import HomeMap from './components/home-map.jsx';
 import { CLAIM_GEO } from './components/claim-geo.js';
 import { geoPlacement } from '../lib/geo-placement.js';
@@ -51,13 +52,34 @@ const websiteJsonLd = {
 };
 
 const LINKS = [
-  { href: '/docs/quickstart', label: 'Quickstart', note: 'claim a name, end to end' },
-  { href: '/docs/guides', label: 'Guides', note: 'point it at your own hosting' },
-  { href: '/docs/records', label: 'Record reference', note: 'every field, every rule' },
-  { href: '/openapi.json', label: 'API', note: 'OpenAPI spec for programmatic access' },
+  {
+    href: '/docs/quickstart',
+    label: 'Quickstart',
+    note: 'claim a name, end to end',
+  },
+  {
+    href: '/docs/guides',
+    label: 'Guides',
+    note: 'point it at your own hosting',
+  },
+  {
+    href: '/docs/records',
+    label: 'Record reference',
+    note: 'every field, every rule',
+  },
+  {
+    href: '/openapi.json',
+    label: 'API',
+    note: 'OpenAPI spec for programmatic access',
+  },
   { href: '/about', label: 'About', note: 'what this is and is not' },
   { href: '/faq', label: 'FAQ', note: 'straight answers' },
-  { href: 'https://github.com/preetmendpara/runs-at.dev', label: 'GitHub', note: 'the registry itself', external: true },
+  {
+    href: 'https://github.com/preetmendpara/runs-at.dev',
+    label: 'GitHub',
+    note: 'the registry itself',
+    external: true,
+  },
 ];
 
 // Only for a signed-in visitor: this page is the highest-traffic route on the
@@ -106,20 +128,30 @@ export default async function Home() {
       {/* Hero: the claim line IS the display headline, set at 63px weight 400
           with negative tracking. Centered stack, then the dot-map world below. */}
       <section id="claim" className="mx-auto max-w-[1200px] px-6 pt-20 pb-16 text-center sm:pt-28">
-        <StatusBadge tone="live" pulse>Free forever · live in seconds</StatusBadge>
+        <Reveal immediate duration={0.5}>
+          <StatusBadge tone="live" pulse>
+            Free forever · live in seconds
+          </StatusBadge>
+        </Reveal>
 
-        <p className="mt-5 font-(family-name:--font-mono) text-xs tracking-[0.04em] text-(--color-muted)">
-          {registryList.length} {registryList.length === 1 ? 'name' : 'names'} claimed · {placement.resolved} on the public claim map ·
-          one per GitHub account · open source
-        </p>
+        <Reveal
+          immediate
+          delay={0.08}
+          duration={0.5}
+          as="p"
+          className="mt-5 font-(family-name:--font-mono) text-xs tracking-[0.04em] text-(--color-muted)"
+        >
+          {registryList.length} {registryList.length === 1 ? 'name' : 'names'} claimed ·{' '}
+          {placement.resolved} on the public claim map · one per GitHub account · open source
+        </Reveal>
 
-        <div className="mt-8 flex justify-center">
+        <Reveal immediate delay={0.16} duration={0.7} className="mt-8 flex justify-center">
           {owned ? (
             <OwnedName name={owned.name} record={owned.record} />
           ) : (
             <ClaimForm signedIn={Boolean(session)} />
           )}
-        </div>
+        </Reveal>
       </section>
 
       {/* Full-bleed dot-matrix world map carrying the claim heat. The base
@@ -160,7 +192,8 @@ export default async function Home() {
               <div className="slit-top slit-dim pt-3">
                 <dt className="meta mb-1">open</dt>
                 <dd className="text-(--color-ink)">
-                  AGPL-3.0, end to end. Every rule, every record, and the whole app are public on GitHub.
+                  AGPL-3.0, end to end. Every rule, every record, and the whole app are public on
+                  GitHub.
                 </dd>
               </div>
             </dl>
@@ -170,22 +203,27 @@ export default async function Home() {
         <Section title="Where to go next">
           {/* Link grid, service-cell style: each cell outlined by its own
               fading slit (open corners), brightening on hover. */}
-          <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 sm:gap-16 lg:grid-cols-3">
+          <Reveal
+            stagger
+            className="grid grid-cols-1 gap-12 sm:grid-cols-2 sm:gap-16 lg:grid-cols-3"
+          >
             {LINKS.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                className="slit-frame group rounded-lg p-6 transition-colors hover:bg-(--color-card)"
+                className="slit-frame lift group rounded-lg p-6 transition-colors hover:bg-(--color-card)"
               >
                 <p className="text-[14px] tracking-[0.01em] text-(--color-ink) uppercase transition-colors group-hover:text-(--color-muted)">
                   {link.label}
-                  <span aria-hidden="true" className="ml-2 text-(--color-muted)">↗</span>
+                  <span aria-hidden="true" className="ml-2 text-(--color-muted)">
+                    ↗
+                  </span>
                 </p>
                 <p className="mt-2 text-[14px] leading-relaxed text-(--color-muted)">{link.note}</p>
               </a>
             ))}
-          </div>
+          </Reveal>
         </Section>
 
         <Section title="Report abuse">

@@ -6,6 +6,7 @@ import Nav from './components/Nav.jsx';
 import EdgePicker from './edge-picker.jsx';
 import { publishedPosts } from '../lib/blog.js';
 import { Analytics } from '@vercel/analytics/next';
+import SmoothScroll from './motion/smooth-scroll.jsx';
 
 // Satoshi carries body copy at weight 400: geometric, slightly warm, and
 // readable at paragraph length. Self-hosted from Fontshare (SIL OFL) so
@@ -80,6 +81,22 @@ export default function RootLayout({ children }) {
         <meta name="theme-color" content="#0b0d0f" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#0b0d0f" media="(prefers-color-scheme: dark)" />
         <meta name="color-scheme" content="dark" />
+        {/* Runs before first paint, so reveal targets are already hidden by
+            the time anything renders and never flash at full opacity. It is
+            inline and tiny on purpose: a deferred bundle would land after
+            the paint it is meant to beat.
+
+            The timeout is the failsafe. If the motion chunk never arrives --
+            blocked, offline, a bad deploy -- nothing would ever reveal these
+            elements, and the page would read as blank. Dropping the class
+            restores every one of them. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "document.documentElement.classList.add('js-motion');" +
+              "setTimeout(function(){document.documentElement.classList.remove('js-motion')},5000);",
+          }}
+        />
       </head>
       <body suppressHydrationWarning>
         <Nav />
@@ -89,6 +106,7 @@ export default function RootLayout({ children }) {
           <Footer />
         </div>
         <EdgePicker hideBlog={publishedPosts().length === 0} />
+        <SmoothScroll />
         <Analytics />
       </body>
     </html>
