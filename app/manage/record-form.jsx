@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { commitUrl, shortSha } from '../../lib/repo.js';
 import {
   modeOf, mxToLines, buildRecords,
   SUBDOMAIN_TYPES, buildSubdomains, subdomainsToRows,
   buildProfile, profileToRows,
 } from '../../lib/record-fields.js';
+import { siteStatus, friendlyError, CHECK_SCHEDULE_MS } from '../../lib/manage-status.js';
 
 const MAX_SUBDOMAINS = 10;
 const MAX_LINKS = 8;
@@ -17,98 +18,65 @@ const MAX_LINKS = 8;
 const INPUT =
   'slit-input w-full bg-transparent px-3 py-2 font-(family-name:--font-mono) text-sm text-(--color-ink) placeholder:text-(--color-muted)/70';
 
-// The "did it work?" panel: polls /api/dns-check after a save and compares
-// live DNS against what was committed.
-function VerifyPanel({ name, cname, url, hasDns, vercelTxt }) {
-  const [check, setCheck] = useState(null);
+// One checker for the whole page: the badge, the panel and the Check now
+// button all read it, so a name is never described two different ways at
+// once. /api/dns-check allows 10 checks a minute per name and answers 429
+// past that; a refusal schedules one retry instead of being swallowed, which
+// is what used to leave the old panel showing "checking DNS…" forever.
+function useSiteCheck(name) {
+  const [state, setState] = useState({ phase: 'checking', check: null, checkedAt: null, note: null });
+  const timers = useRef([]);
 
+  const clearTimers = useCallback(() => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+  }, []);
+
+  const run = useCallback(async () => {
+    setState((prev) => ({ ...prev, phase: 'checking', note: null }));
+    try {
+      const res = await fetch(`/api/dns-check?name=${encodeURIComponent(name)}`);
+      if (res.status === 429) {
+        const seconds = Math.max(5, Number(res.headers.get('Retry-After')) || 10);
+        setState((prev) => ({ ...prev, phase: 'idle', note: `Checked too often. Trying again in ${seconds} seconds.` }));
+        timers.current.push(setTimeout(() => { run(); }, seconds * 1000));
+        return;
+      }
+      if (!res.ok) {
+        setState((prev) => ({ ...prev, phase: 'idle', note: 'Could not check just now. Press Check now to retry.' }));
+        return;
+      }
+      setState({ phase: 'idle', check: await res.json(), checkedAt: Date.now(), note: null });
+    } catch {
+      setState((prev) => ({ ...prev, phase: 'idle', note: 'Could not reach the checker. Press Check now to retry.' }));
+    }
+  }, [name]);
+
+  // One check on arrival, so the page always opens on the truth rather than
+  // on whatever the record file implies.
   useEffect(() => {
-    let alive = true;
-    const tick = async () => {
-      try {
-        const res = await fetch(`/api/dns-check?name=${encodeURIComponent(name)}`);
-        if (res.ok && alive) setCheck(await res.json());
-      } catch {}
-    };
-    tick();
-    const done = check && cnameOk(check, cname) && pageOk(check, { cname, url, hasDns, vercelTxt });
-    const timer = done ? null : setInterval(tick, 8000);
-    return () => { alive = false; if (timer) clearInterval(timer); };
-  }, [name, cname, url, hasDns, vercelTxt, check]);
+    run();
+    return clearTimers;
+  }, [run, clearTimers]);
 
-  if (!check) {
-    return (
-      <div className="slit-top px-6 py-4 font-(family-name:--font-mono) text-xs text-(--color-muted) sm:px-8">
-        {'// checking DNS…'}
-      </div>
-    );
-  }
-
-  const rows = [];
-  if (cname) {
-    const resolved = check.cname ?? [];
-    rows.push({
-      ok: resolved.some((r) => r.toLowerCase() === cname.toLowerCase()),
-      text: resolved.length ? `CNAME → ${resolved[0]}` : 'CNAME not visible yet',
+  // A fixed, finite schedule after a save instead of an interval that never
+  // stops: DNS needs the sync workflow to run first, and an open tab must not
+  // keep spending the rate limit all day.
+  const recheckAfterSave = useCallback(() => {
+    clearTimers();
+    CHECK_SCHEDULE_MS.forEach((delay) => {
+      timers.current.push(setTimeout(() => { run(); }, delay));
     });
-  }
-  if (vercelTxt.length > 0) {
-    const zone = check.txt?.zoneVercel ?? [];
-    const published = vercelTxt.some((v) => zone.includes(v));
-    rows.push({
-      ok: published,
-      text: published ? '_vercel TXT published at the zone' : '_vercel TXT not at the zone yet',
-    });
-  }
-  const page = pageState(check, { cname, url, hasDns });
-  rows.push({ ok: page.ok, text: page.text });
+  }, [clearTimers, run]);
 
-  return (
-    <div className="slit-top px-6 py-4 sm:px-8">
-      <p className="font-(family-name:--font-mono) text-xs text-(--color-muted)">{'// did it work?'}</p>
-      <ul className="mt-2 space-y-1.5 font-(family-name:--font-mono) text-xs">
-        {rows.map((row, i) => (
-          <li key={i} className={row.ok ? 'text-(--color-ink)' : 'text-(--color-muted)'}>
-            <span className={row.ok ? 'text-(--color-pulse)' : ''}>{row.ok ? '✓' : '…'}</span> {row.text}
-          </li>
-        ))}
-      </ul>
-      {page.hint && <p className="mt-2.5 max-w-[600px] text-xs leading-relaxed text-(--color-muted)">{page.hint}</p>}
-    </div>
-  );
-}
-
-function cnameOk(check, cname) {
-  if (!cname) return true;
-  return (check.cname ?? []).some((r) => r.toLowerCase() === cname.toLowerCase());
-}
-
-function pageOk(check, expected) {
-  return pageState(check, expected).ok;
-}
-
-function pageState(check, { cname, url, hasDns }) {
-  const status = check.serving?.status;
-  if (status === 'ok') return { ok: true, text: `serving your site: ${check.serving.title ?? ''}` };
-  if (status === 'redirect' && url) return { ok: true, text: `redirecting to ${check.serving.finalUrl ?? url}` };
-  if (status === 'card' && !hasDns && !cname) return { ok: true, text: 'serving the profile card (as picked)' };
-  if (status === 'card' || status === 'stuck') {
-    return {
-      ok: false,
-      text: 'still serving the profile card',
-      hint: cname?.includes('vercel-dns')
-        ? 'DNS is live but Vercel has not re-checked. Removing and re-adding the domain in your Vercel project settings forces a fresh check.'
-        : 'DNS may still be propagating.',
-    };
-  }
-  return { ok: false, text: 'no answer yet. DNS may still be propagating' };
+  return { ...state, run, recheckAfterSave };
 }
 
 const PROVIDERS = [
-  { id: 'card', label: 'Profile Card', hint: 'Serve a card built from your GitHub profile. No DNS needed.', icon: 'M3 10h18M7 15h.01M11 15h.01M15 15h.01M7 19h10a4 4 0 0 0 4-4V8a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v7a4 4 0 0 0 4 4Z' },
-  { id: 'cname', label: 'Custom Domain', hint: 'Point at any host your provider gave you via CNAME.', icon: 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71' },
-  { id: 'url', label: 'Redirect', hint: 'Send visitors to any URL. Simple and fast.', icon: 'M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6' },
-  { id: 'advanced', label: 'Advanced DNS', hint: 'A, TXT, and MX records. For power users.', icon: 'M4 6h16M4 12h16M4 18h16' },
+  { id: 'card', label: 'Profile card', hint: 'Show a card built from your GitHub profile. Nothing to set up.', icon: 'M3 10h18M7 15h.01M11 15h.01M15 15h.01M7 19h10a4 4 0 0 0 4-4V8a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v7a4 4 0 0 0 4 4Z' },
+  { id: 'cname', label: 'Point to my hosting', hint: 'Send visitors to a site you host somewhere else, like GitHub Pages.', icon: 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71' },
+  { id: 'url', label: 'Redirect visitors', hint: 'Forward anyone who opens your name to another web address.', icon: 'M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6' },
+  { id: 'advanced', label: 'DNS records', hint: 'Set A, TXT and MX records yourself.', icon: 'M4 6h16M4 12h16M4 18h16' },
 ];
 
 // Provider presets for CNAME mode. Each one knows the target shape the
@@ -204,27 +172,20 @@ export default function RecordForm({ name, record }) {
   const [displayName, setDisplayName] = useState(record.profile?.name ?? '');
   const [bio, setBio] = useState(record.profile?.bio ?? '');
   const [linkRows, setLinkRows] = useState(() => profileToRows(record.profile));
-  const [dnsStatus, setDnsStatus] = useState(null);
+  const site = useSiteCheck(name);
 
   // What the record held when the page loaded, not what the form currently
   // builds: the point is to warn that saving in a mode that drops records the
   // file already has — card wipes everything, redirect drops a CNAME, cname
   // drops A/TXT/MX — before the user hits Save.
   const existingTypes = Object.keys(record.records ?? {});
-  const MODE_LABEL = { card: 'Profile Card', cname: 'Custom Domain', url: 'Redirect', advanced: 'Advanced DNS' };
+  const MODE_LABEL = { card: 'Profile card', cname: 'Point to my hosting', url: 'Redirect visitors', advanced: 'DNS records' };
   // buildRecords(mode) returns exactly the types that mode can express, so
   // any record type the file holds that the mode cannot keep is one that
   // save would remove.
   const kept = new Set(Object.keys(buildRecords(mode, { cname, url, a, txt, mx })));
   const dropped = existingTypes.filter((t) => !kept.has(t));
   const willDropRecords = dropped.length > 0;
-
-  useEffect(() => {
-    fetch(`/api/dns-check?name=${encodeURIComponent(name)}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (data) setDnsStatus(data.serving?.status); })
-      .catch(() => {});
-  }, [name]);
 
   function selectProvider(id) {
     setMode(id);
@@ -272,16 +233,25 @@ export default function RecordForm({ name, record }) {
       }),
     });
     const body = await res.json().catch(() => ({}));
-    if (res.ok) { setCommit(body.commit ?? null); setStatus(body.unchanged ? 'unchanged' : 'saved'); return; }
-    setErrors(body.details ?? ['Could not save just now.']);
+    if (res.ok) {
+      setCommit(body.commit ?? null);
+      setStatus(body.unchanged ? 'unchanged' : 'saved');
+      // Only a real change needs watching: an unchanged save publishes
+      // nothing, so re-checking would spend the rate limit for no reason.
+      if (!body.unchanged) site.recheckAfterSave();
+      return;
+    }
+    setErrors(friendlyError(res.status, body));
     setStatus('error');
   }
 
   const sha = shortSha(commit);
-  const statusPill = dnsStatus === 'ok' ? { label: 'Verified', tone: 'ok' }
-    : dnsStatus === 'stuck' ? { label: 'Pending', tone: 'pending' }
-    : dnsStatus === 'redirect' ? { label: 'Redirect', tone: 'redirect' }
-    : { label: 'Card', tone: 'neutral' };
+  // The same reading everywhere on the page, refreshed by every check rather
+  // than frozen at page load. The saved mode, not the unsaved form, decides
+  // whether a profile-card answer is the point or the problem.
+  const statusPill = site.phase === 'checking' && !site.check
+    ? { label: 'Checking…', tone: 'checking' }
+    : siteStatus(site.check, modeOf(record.records));
 
   return (
     <form onSubmit={save} className="slit-frame rounded-lg">
@@ -294,12 +264,12 @@ export default function RecordForm({ name, record }) {
         <span className="inline-flex items-center gap-2 slit-frame rounded-[4px] bg-(--color-badge) px-3.5 py-2 font-(family-name:--font-mono) text-[12px] tracking-[0.05em] text-(--color-muted) uppercase">
           <span
             aria-hidden="true"
-            className={`inline-block h-1.5 w-1.5 rounded-full ${statusPill.tone === 'ok' ? 'pulse-dot' : ''}`}
+            className={`inline-block h-1.5 w-1.5 rounded-full ${statusPill.tone === 'live' ? 'pulse-dot' : ''}`}
             style={{
               background:
-                statusPill.tone === 'ok' ? '#98ff38'
-                : statusPill.tone === 'pending' ? '#eab308'
-                : statusPill.tone === 'redirect' ? '#8ea1ff'
+                statusPill.tone === 'live' ? '#98ff38'
+                : statusPill.tone === 'waiting' ? '#eab308'
+                : statusPill.tone === 'down' ? '#ff5c5c'
                 : '#9c9c9c',
             }}
           />
@@ -309,9 +279,9 @@ export default function RecordForm({ name, record }) {
 
       {/* Provider tiles. Icon strokes sit in Compass Gold, the reference's
           reserved icon color; the active tile is traced in white instead. */}
-      <div className="px-8 py-6 sm:px-10">
+      <div className="px-6 py-6 sm:px-10">
         <p className="text-[14px] text-(--color-ink)">Where does your name go?</p>
-        <div className="mt-4 grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-8">
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-6">
           {PROVIDERS.map((p) => (
             <button key={p.id} type="button" onClick={() => selectProvider(p.id)}
               className={`slit-frame flex flex-col items-center gap-2.5 rounded-lg p-4 text-center sm:p-5 ${mode === p.id ? 'slit-frame-bright' : ''}`}
@@ -491,19 +461,10 @@ export default function RecordForm({ name, record }) {
         {errors.length > 0 && <ul className="mt-2 space-y-1 font-(family-name:--font-mono) text-xs text-(--color-flag)">{errors.map((e) => <li key={e}>{e}</li>)}</ul>}
       </div>
 
-      {/* Verify panel: the "did it work?" feedback after a save, part of
-          the manage page since PR #57. */}
-      {status === 'saved' && (
-        <VerifyPanel
-          name={name}
-          cname={mode === 'cname' ? cname.trim() : null}
-          url={mode === 'url' ? url.trim() : null}
-          hasDns={mode === 'advanced'}
-          vercelTxt={subRows
-            .filter((r) => r.label.trim().toLowerCase() === '_vercel' && r.type === 'TXT')
-            .flatMap((r) => r.value.split('\n').map((v) => v.trim()).filter(Boolean))}
-        />
-      )}
+      {/* What the name is doing, on arrival and after every check — not only
+          after a save, which left an owner returning the next day with no way
+          to ask whether their site was still up. */}
+      <CheckPanel name={name} site={site} status={statusPill} justSaved={status === 'saved'} />
 
       {/* Danger zone: release the name back to the pool */}
       <SwapZone name={name} />
@@ -742,10 +703,10 @@ function SubdomainRecords({ name, subRows, setRow, addRow, removeRow }) {
         Records a provider asks for at a different name, like <code className="font-(family-name:--font-mono)">_vercel</code> for verification.
       </p>
       {subRows.map((row, i) => (
-        <div key={i} className="slit-frame mt-12 rounded-lg p-3">
+        <div key={i} className="slit-frame mt-4 rounded-lg p-3">
           <div className="flex flex-wrap items-center gap-2">
-            <input value={row.label} onChange={(e) => setRow(i, { label: e.target.value })} placeholder="_vercel" aria-label="Subdomain label" spellCheck={false} className={`w-32 ${INPUT}`} />
-            <span className="font-(family-name:--font-mono) text-xs text-(--color-muted)">.{name}.runs-at.dev</span>
+            <input value={row.label} onChange={(e) => setRow(i, { label: e.target.value })} placeholder="_vercel" aria-label="Subdomain label" spellCheck={false} className={`w-full sm:w-32 ${INPUT}`} />
+            <span className="font-(family-name:--font-mono) text-xs break-all text-(--color-muted)">.{name}.runs-at.dev</span>
             <select value={row.type} onChange={(e) => setRow(i, { type: e.target.value })} aria-label="Record type" className={`w-auto ${INPUT}`}>
               {SUBDOMAIN_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
@@ -755,7 +716,7 @@ function SubdomainRecords({ name, subRows, setRow, addRow, removeRow }) {
         </div>
       ))}
       {subRows.length < MAX_SUBDOMAINS && (
-        <button type="button" onClick={addRow} className="mt-6 slit-frame rounded-[4px] px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a subdomain record</button>
+        <button type="button" onClick={addRow} className="mt-4 slit-frame rounded-[4px] px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a subdomain record</button>
       )}
     </div>
   );
@@ -769,5 +730,40 @@ function TextArea({ label, value, onChange, placeholder, hint }) {
       <textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={2} spellCheck={false} className={`mt-2 ${INPUT} resize-y`} />
       {hint && <span className="mt-1.5 block text-xs text-(--color-muted)">{hint}</span>}
     </label>
+  );
+}
+
+// ── Check panel ──────────────────────────────────────────────
+function CheckPanel({ name, site, status, justSaved }) {
+  const checking = site.phase === 'checking';
+  return (
+    <div className="slit-top px-6 py-5 sm:px-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[14px] text-(--color-ink)">Is it working?</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <button type="button" onClick={site.run} disabled={checking} className="btn-ghost px-4 py-2 text-xs">
+            {checking ? 'Checking…' : 'Check now'}
+          </button>
+          <a href={`/debug/${name}`} className="font-(family-name:--font-mono) text-xs text-(--color-muted) underline transition-colors hover:text-(--color-ink)">
+            Detailed check
+          </a>
+        </div>
+      </div>
+
+      <p className={`mt-3 text-[14px] ${status.tone === 'down' ? 'text-(--color-flag)' : 'text-(--color-ink)'}`}>{status.label}</p>
+      {status.detail && <p className="mt-1.5 max-w-[600px] text-xs leading-relaxed text-(--color-muted)">{status.detail}</p>}
+
+      {justSaved && (
+        <p className="mt-3 max-w-[600px] text-xs leading-relaxed text-(--color-muted)">
+          Saved. DNS usually publishes within a minute or two, and this panel rechecks on its own for the next minute and a half.
+        </p>
+      )}
+      {site.note && <p className="mt-3 text-xs text-(--color-muted)">{site.note}</p>}
+      {site.checkedAt && !checking && (
+        <p className="mt-3 font-(family-name:--font-mono) text-xs text-(--color-muted)">
+          {'// last checked '}{new Date(site.checkedAt).toLocaleTimeString()}
+        </p>
+      )}
+    </div>
   );
 }

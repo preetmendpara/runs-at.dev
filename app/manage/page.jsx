@@ -4,11 +4,10 @@ import { getOwnerIndex } from '../../lib/owners.js';
 import { getRecord } from '../../lib/registry.js';
 import RecordForm from './record-form.jsx';
 import BadgeZone from './badge-zone.jsx';
-import TokenZone from './token-zone.jsx';
 
 export const metadata = {
   title: 'Manage your name · runs-at.dev',
-  description: 'Point your runs-at.dev name at your own hosting.',
+  description: 'Point your runs-at.dev name at your own hosting, or show a profile card.',
   robots: { index: false },
 };
 
@@ -80,9 +79,12 @@ export default async function Manage() {
           {unreadable.map((name) => `domains/${name}.json`).join(', ')}
         </p>
       )}
-      {/* Account-scoped, so it renders once after the per-name forms rather
-          than inside them: the token speaks for @login, not for one name. */}
-      <TokenZone login={session.login} />
+      {/* The deploy-token panel (token-zone.jsx) is deliberately not rendered.
+          Its endpoints work, but nothing in the request path ever serves an
+          uploaded site: app/sites/[name]/page.jsx renders from the record
+          alone and never reads getSite. Offering tokens and upload commands
+          for hosting that cannot answer is worse than offering nothing, so
+          the panel stays out until the serving path exists. */}
     </Shell>
   );
 }
@@ -95,8 +97,8 @@ function Shell({ children, login }) {
         Your name
       </h1>
       <p className="mt-4 max-w-[540px] text-[16px] leading-[1.5] text-(--color-muted)">
-        Record changes save straight to the registry and DNS follows within seconds. A
-        deploy token uploads a static site to your name without a browser.
+        Changes save straight to the public registry, and DNS follows within a minute
+        or two. The panel under each name tells you whether it is working.
       </p>
       {login && (
         <form action="/api/auth/signout" method="post" className="mt-4 text-sm text-(--color-muted)">
