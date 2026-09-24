@@ -404,6 +404,17 @@ a {
 .slit-input-flag:focus,
 .slit-input-flag:focus-visible { --edge-color: rgba(217, 119, 87, 0.95); }
 
+/* A <select> paints its own dropdown from its background-color, and the
+   `background` shorthand above resets that to transparent. The browser then
+   falls back to the system list colour (white) while the inherited ink stays
+   near-white, so the options read white on white. Naming the popup colours is
+   the only hook CSS gets here, because the list itself is drawn by the OS.
+   Mobile pickers ignore these and follow `color-scheme: dark` on html. */
+.slit-input option {
+  background-color: var(--color-card);
+  color: var(--color-ink);
+}
+
 /* Inline code chip: the input treatment on an inline-block token. */
 .slit-inline {
   display: inline-block;
@@ -425,89 +436,6 @@ a {
 }
 .claim-underline:focus-visible {
   background-size: 100% 3px;
-}
-
-/* ── Split-flap tiles (wordmark triple-tap easter egg) ───────────────
-   Each tile of the flap grid is two halves hinged at the tile's centre
-   line, the way a Solari board works: the top half rotates around its
-   bottom edge, the bottom half around its top edge. Each half clips a
-   full-size copy of the artwork offset so the tile shows its own slice;
-   the halves' width/height percentages are relative to the half, which is
-   why the img is 2800% x 1600% (28 x 16 half-dimensions = the whole art).
-   The stagger comes from animationDelay on the tile; .flap-in plays the
-   reveal, .flap-out plays it in reverse for the trip back. */
-
-.flap-grid {
-  display: grid;
-  perspective: 900px;
-}
-.flap-tile {
-  position: relative;
-}
-.flap-half {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 50%;
-  overflow: hidden;
-  backface-visibility: hidden;
-}
-.flap-half img {
-  position: absolute;
-  max-width: none;
-  /* width/height/left/top are inline per tile: cover-fit geometry computed
-     in claim-map.jsx. Each half clips its own slice, so the wider-than-box
-     artwork crops at the tile edges. */
-}
-.flap-top {
-  top: 0;
-  transform-origin: bottom center;
-}
-.flap-bottom {
-  bottom: 0;
-  transform-origin: top center;
-}
-
-@keyframes flap-top-in {
-  from { transform: rotateX(-90deg); }
-  to { transform: rotateX(0deg); }
-}
-@keyframes flap-bottom-in {
-  from { transform: rotateX(90deg); }
-  to { transform: rotateX(0deg); }
-}
-@keyframes flap-top-out {
-  from { transform: rotateX(0deg); }
-  to { transform: rotateX(-90deg); opacity: 0; }
-}
-@keyframes flap-bottom-out {
-  from { transform: rotateX(0deg); }
-  to { transform: rotateX(90deg); opacity: 0; }
-}
-
-/* Flip in: the bottom half swings up first, the top half follows a beat
-   later, so every tile reads as two blades closing on the new image. */
-.flap-in .flap-top {
-  animation: flap-top-in 0.3s ease-out both;
-  animation-delay: calc(var(--d) + 200ms);
-}
-.flap-in .flap-bottom {
-  animation: flap-bottom-in 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.08) both;
-  animation-delay: var(--d);
-}
-/* Resting on the artwork: no animation, both halves flat. Without this the
-   settled tiles would replay an animation whenever the class changes. */
-.flap-rest .flap-half {
-  transform: none;
-}
-/* On the way out the halves peel open and vanish, same stagger. */
-.flap-out .flap-top {
-  animation: flap-top-out 0.3s ease-in both;
-  animation-delay: var(--d);
-}
-.flap-out .flap-bottom {
-  animation: flap-bottom-out 0.3s ease-in both;
-  animation-delay: var(--d);
 }
 
 
@@ -570,10 +498,8 @@ a {
     scroll-behavior: auto !important;
   }
 
-  /* Zeroing the duration still leaves the flap stagger delays running (up
-     to 1.4s of blank tiles) and the pulse dot half-faded. Kill both:
-     reduced motion means the swap and the status dot are static. */
-  .flap-half,
+  /* Zeroing the duration still leaves the pulse dot half-faded. Kill it
+     outright: reduced motion means the status dot is static. */
   .pulse-dot {
     animation: none !important;
     animation-delay: 0s !important;
