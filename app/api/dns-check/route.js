@@ -2,7 +2,7 @@ import dns from 'node:dns/promises';
 import { validateName } from '../../../lib/name.js';
 import { getRecord } from '../../../lib/registry.js';
 import { classifyClaim } from '../../../lib/health.js';
-import { probe } from '../../../lib/dns-probe.js';
+import { probe, planLabelLookups, resolveLabels } from '../../../lib/dns-probe.js';
 import { createRateLimiter, rateLimitHeaders } from '../../../lib/throttle.js';
 
 // Node runtime for node:dns — edge has no resolver. Dynamic because the
@@ -58,7 +58,7 @@ export async function GET(request) {
   const record = await safe(() => getRecord(name, { token, fetchImpl }), null);
   if (!record) return Response.json({ error: 'not_found' }, { status: 404 });
 
-  const [cname, a, aaaa, mx, txtName, txtVercelLabel, txtVercelZone, servingProbe] = await Promise.all([
+  const [cname, a, aaaa, mx, txtName, txtVercelLabel, txtVercelZone, servingProbe, labels] = await Promise.all([
     safe(() => dns.resolveCname(`${name}.${ZONE}`), []),
     safe(() => dns.resolve4(`${name}.${ZONE}`), []),
     safe(() => dns.resolve6(`${name}.${ZONE}`), []),
@@ -70,6 +70,10 @@ export async function GET(request) {
     // trust a green checkmark they cannot see anywhere.
     safe(() => dns.resolveTxt(`_vercel.${ZONE}`), []),
     probe(name),
+    // Labels the record itself declares: the table's rows on blog, mail or
+    // _vercel get a real answer instead of "not checked". Derived from the
+    // committed record, capped, and read-only like everything else here.
+    safe(() => resolveLabels(planLabelLookups(record), name), {}),
   ]);
 
   return Response.json(
@@ -84,6 +88,7 @@ export async function GET(request) {
         vercelLabel: flattenTxt(txtVercelLabel),
         zoneVercel: flattenTxt(txtVercelZone),
       },
+      labels,
       serving: {
         status: classifyClaim(record, servingProbe),
         title: servingProbe.ok && !servingProbe.refused ? servingProbe.title : null,

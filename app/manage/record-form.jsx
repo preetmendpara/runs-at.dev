@@ -6,8 +6,9 @@ import {
   modeOf, mxToLines, buildRecords,
   SUBDOMAIN_TYPES, buildSubdomains, subdomainsToRows,
   buildProfile, profileToRows,
+  recordsToRows, rowsToRecords, validateRow, ROW_TYPES,
 } from '../../lib/record-fields.js';
-import { siteStatus, friendlyError, featureCards, CHECK_SCHEDULE_MS } from '../../lib/manage-status.js';
+import { siteStatus, friendlyError, featureCards, verifyRows, CHECK_SCHEDULE_MS } from '../../lib/manage-status.js';
 
 const MAX_SUBDOMAINS = 10;
 const MAX_LINKS = 8;
@@ -76,7 +77,7 @@ const PROVIDERS = [
   { id: 'card', label: 'Profile card', hint: 'Show a card built from your GitHub profile. Nothing to set up.', icon: 'M3 10h18M7 15h.01M11 15h.01M15 15h.01M7 19h10a4 4 0 0 0 4-4V8a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v7a4 4 0 0 0 4 4Z' },
   { id: 'cname', label: 'Point to my hosting', hint: 'Send visitors to a site you host somewhere else, like GitHub Pages.', icon: 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71' },
   { id: 'url', label: 'Redirect visitors', hint: 'Forward anyone who opens your name to another web address.', icon: 'M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6' },
-  { id: 'advanced', label: 'DNS records', hint: 'Set A, TXT and MX records yourself.', icon: 'M4 6h16M4 12h16M4 18h16' },
+  { id: 'advanced', label: 'DNS records', hint: 'Add A, AAAA, CNAME, TXT and MX records yourself.', icon: 'M4 6h16M4 12h16M4 18h16' },
 ];
 
 // Provider presets for CNAME mode. Each one knows the target shape the
@@ -179,6 +180,9 @@ export default function RecordForm({ name, record }) {
   // The moment of the last successful save. Inside the publishing window a
   // name still answering with the card is mid-publish, not broken.
   const [savedAt, setSavedAt] = useState(null);
+  // One row per published record, the shape a DNS console shows. Seeded from
+  // the committed record and folded back by rowsToRecords on save.
+  const [dnsRows, setDnsRows] = useState(() => recordsToRows(record));
 
   // What the record held when the page loaded, not what the form currently
   // builds: the point is to warn that saving in a mode that drops records the
@@ -189,7 +193,11 @@ export default function RecordForm({ name, record }) {
   // buildRecords(mode) returns exactly the types that mode can express, so
   // any record type the file holds that the mode cannot keep is one that
   // save would remove.
-  const kept = new Set(Object.keys(buildRecords(mode, { cname, url, a, txt, mx })));
+  const kept = new Set(Object.keys(
+    mode === 'advanced'
+      ? rowsToRecords(dnsRows, { keep: record.records ?? {} }).records
+      : buildRecords(mode, { cname, url, a, txt, mx }),
+  ));
   const dropped = existingTypes.filter((t) => !kept.has(t));
   const willDropRecords = dropped.length > 0;
 
@@ -233,8 +241,9 @@ export default function RecordForm({ name, record }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name,
-        records: buildRecords(mode, { cname, url, a, txt, mx }),
-        subdomains: buildSubdomains(subRows),
+        ...(mode === 'advanced'
+          ? rowsToRecords(dnsRows, { keep: record.records ?? {} })
+          : { records: buildRecords(mode, { cname, url, a, txt, mx }), subdomains: buildSubdomains(subRows) }),
         profile: buildProfile({ name: displayName, bio, linkRows }) ?? null,
       }),
     });
@@ -270,8 +279,9 @@ export default function RecordForm({ name, record }) {
   // The payload the form would send, against the record as committed: what
   // "unsaved changes" means, without a dirty flag on every input.
   const pending = JSON.stringify({
-    records: buildRecords(mode, { cname, url, a, txt, mx }),
-    subdomains: buildSubdomains(subRows),
+    ...(mode === 'advanced'
+      ? rowsToRecords(dnsRows, { keep: record.records ?? {} })
+      : { records: buildRecords(mode, { cname, url, a, txt, mx }), subdomains: buildSubdomains(subRows) }),
     profile: buildProfile({ name: displayName, bio, linkRows }) ?? null,
   });
   const committed = JSON.stringify({
@@ -303,6 +313,7 @@ export default function RecordForm({ name, record }) {
     setTxt((record.records?.TXT ?? []).join('\n'));
     setMx(mxToLines(record.records?.MX));
     setSubRows(subdomainsToRows(record.subdomains));
+    setDnsRows(recordsToRows(record));
   }
 
   return (
@@ -433,16 +444,16 @@ export default function RecordForm({ name, record }) {
       {/* Advanced DNS mode */}
       {mode === 'advanced' && (
         <div className="slit-top px-6 py-5 sm:px-8">
-          <p className="text-[14px] text-(--color-ink)">DNS records</p>
-          <div className="mt-4 space-y-4">
-            <TextArea label="A (IPv4)" value={a} onChange={(v) => { setA(v); setStatus(null); }} placeholder="76.76.21.21" hint="One address per line." />
-            <TextArea label="TXT" value={txt} onChange={(v) => { setTxt(v); setStatus(null); }} placeholder="v=spf1 -all" hint="One string per line." />
-            <TextArea label="MX" value={mx} onChange={(v) => { setMx(v); setStatus(null); }} placeholder="10 mx.example.com" hint="One per line, up to 5." />
-          </div>
-          <SubdomainRecords name={name} subRows={subRows} setRow={setRow} addRow={addRow} removeRow={removeRow} />
+          <RecordTable
+            name={name}
+            rows={dnsRows}
+            setRows={(next) => { setDnsRows(next); setStatus(null); setErrors([]); }}
+            verdicts={verifyRows(dnsRows, site.check, { savedAt })}
+            onCheck={site.run}
+            checking={site.phase === 'checking'}
+          />
         </div>
       )}
-
         </div>
       )}
 
@@ -835,5 +846,265 @@ function TextArea({ label, value, onChange, placeholder, hint }) {
       <textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={2} spellCheck={false} className={`mt-2 ${INPUT} resize-y`} />
       {hint && <span className="mt-1.5 block text-xs text-(--color-muted)">{hint}</span>}
     </label>
+  );
+}
+
+// ── DNS record table ─────────────────────────────────────────
+// What a DNS console shows: one row per published record, with the same five
+// types the registry can publish. Rows live in the form until Save, which
+// commits them through the one records API like every other change.
+const TYPE_HELP = {
+  A: 'Point your name at a server, using an IPv4 address like 203.0.113.10.',
+  AAAA: 'The same as A, but for an IPv6 address like 2606:4700:3037::6815:7eb.',
+  CNAME: 'Point your name at another address, like you.github.io. Must be the only record on its name.',
+  TXT: 'Plain text, usually a code a service gives you to prove the name is yours.',
+  MX: 'Where email for this name is delivered. Lower priority numbers are tried first.',
+};
+
+const VERDICT_COLOR = {
+  published: '#98ff38',
+  publishing: '#eab308',
+  missing: '#eab308',
+  different: '#ff5c5c',
+  unknown: '#5a5a5a',
+};
+
+function blankRow() {
+  return { id: `new-${Math.random().toString(36).slice(2, 8)}`, label: '', type: 'A', value: '', priority: 10 };
+}
+
+function hostOf(label, name) {
+  return label ? `${label}.${name}.runs-at.dev` : `${name}.runs-at.dev`;
+}
+
+function RecordTable({ name, rows, setRows, verdicts, onCheck, checking }) {
+  const [draft, setDraft] = useState(null);
+  const [error, setError] = useState(null);
+  const [confirming, setConfirming] = useState(null);
+
+  const verdictFor = (id) => verdicts.find((v) => v.id === id);
+
+  function startAdd() { setError(null); setDraft(blankRow()); }
+  function startEdit(row) { setError(null); setDraft({ ...row }); }
+
+  function commitDraft() {
+    const others = rows.filter((r) => r.id !== draft.id);
+    const problem = validateRow(draft, others);
+    if (problem) { setError(problem); return; }
+    const cleaned = draft.type === 'MX' ? draft : { ...draft, priority: undefined };
+    setRows(rows.some((r) => r.id === draft.id)
+      ? rows.map((r) => (r.id === draft.id ? cleaned : r))
+      : [...rows, cleaned]);
+    setDraft(null);
+    setError(null);
+  }
+
+  function remove(row) {
+    setRows(rows.filter((r) => r.id !== row.id));
+    setConfirming(null);
+  }
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-[14px] text-(--color-ink)">DNS records</p>
+          <p className="mt-1.5 max-w-[560px] text-xs leading-relaxed text-(--color-muted)">
+            Everything published for {name}.runs-at.dev. Changes go live within a minute or two of saving.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={onCheck} disabled={checking} className="btn-ghost px-4 py-2 text-xs">
+            {checking ? 'Checking…' : 'Check DNS'}
+          </button>
+          <button type="button" onClick={startAdd} className="btn-ghost px-4 py-2 text-xs">+ Add record</button>
+        </div>
+      </div>
+
+      {rows.length === 0 && !draft && (
+        <p className="mt-5 text-xs leading-relaxed text-(--color-muted)">
+          No records yet. Add one to point this name at a server, a service, or your email provider.
+        </p>
+      )}
+
+      {/* Desktop: a table. Phones get the same rows as cards below. */}
+      {rows.length > 0 && (
+        <div className="mt-5 hidden sm:block">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="meta">
+                <th className="py-2 pr-3 font-normal">Type</th>
+                <th className="py-2 pr-3 font-normal">Name</th>
+                <th className="py-2 pr-3 font-normal">Value</th>
+                <th className="py-2 pr-3 font-normal">TTL</th>
+                <th className="py-2 pr-3 font-normal">Pri</th>
+                <th className="py-2 font-normal" />
+              </tr>
+            </thead>
+            <tbody className="font-(family-name:--font-mono) text-xs">
+              {rows.map((row) => {
+                const verdict = verdictFor(row.id);
+                return (
+                  <tr key={row.id} className="slit-top align-top">
+                    <td className="py-3 pr-3 text-(--color-ink)">{row.type}</td>
+                    <td className="py-3 pr-3 break-all text-(--color-muted)">{hostOf(row.label, name)}</td>
+                    <td className="py-3 pr-3 break-all text-(--color-ink)">
+                      {row.value}
+                      {verdict && (
+                        <span className="mt-1 flex items-center gap-1.5 text-(--color-muted)">
+                          <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: VERDICT_COLOR[verdict.state] }} />
+                          {verdict.text}
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 pr-3 text-(--color-muted)">5 min</td>
+                    <td className="py-3 pr-3 text-(--color-muted)">{row.type === 'MX' ? row.priority : '—'}</td>
+                    <td className="py-3 text-right whitespace-nowrap">
+                      <button type="button" onClick={() => startEdit(row)} className="underline text-(--color-muted) hover:text-(--color-ink)">Edit</button>
+                      <button type="button" onClick={() => setConfirming(row)} className="ml-3 underline text-(--color-flag) hover:opacity-80">Delete</button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Phones: one card per record, nothing to scroll sideways. */}
+      <div className="mt-5 space-y-3 sm:hidden">
+        {rows.map((row) => {
+          const verdict = verdictFor(row.id);
+          return (
+            <div key={row.id} className="slit-frame rounded-lg p-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-(family-name:--font-mono) text-xs text-(--color-ink)">{row.type}</span>
+                {verdict && (
+                  <span className="flex items-center gap-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted)">
+                    <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: VERDICT_COLOR[verdict.state] }} />
+                    {verdict.text}
+                  </span>
+                )}
+              </div>
+              <p className="mt-2 font-(family-name:--font-mono) text-xs break-all text-(--color-muted)">{hostOf(row.label, name)}</p>
+              <p className="mt-1 font-(family-name:--font-mono) text-xs break-all text-(--color-ink)">
+                {row.value}{row.type === 'MX' ? ` · priority ${row.priority}` : ''}
+              </p>
+              <p className="mt-1 font-(family-name:--font-mono) text-xs text-(--color-muted)">TTL 5 min</p>
+              <div className="mt-3 flex items-center gap-3 font-(family-name:--font-mono) text-xs">
+                <button type="button" onClick={() => startEdit(row)} className="underline text-(--color-muted)">Edit</button>
+                <button type="button" onClick={() => setConfirming(row)} className="underline text-(--color-flag)">Delete</button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {confirming && (
+        <div className="slit-frame slit-frame-flag mt-4 rounded-lg p-4">
+          <p className="text-[14px] text-(--color-flag)">Delete this {confirming.type} record?</p>
+          <p className="mt-2 max-w-[560px] text-xs leading-relaxed text-(--color-muted)">
+            {hostOf(confirming.label, name)} → {confirming.value}
+            {confirming.type === 'CNAME' && '. Your name will stop serving that site and go back to the profile card.'}
+            {confirming.type === 'MX' && '. Email sent to this name will stop being delivered.'}
+            {confirming.type === 'TXT' && '. A service that checks this code may stop treating the name as yours.'}
+            {(confirming.type === 'A' || confirming.type === 'AAAA') && '. Visitors will stop reaching that server.'}
+            {' '}It is removed when you save.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" onClick={() => remove(confirming)} className="slit-frame slit-frame-flag rounded-[4px] px-4 py-2 font-(family-name:--font-mono) text-xs text-(--color-flag)">Delete record</button>
+            <button type="button" onClick={() => setConfirming(null)} className="btn-ghost px-4 py-2 text-xs">Keep it</button>
+          </div>
+        </div>
+      )}
+
+      {draft && (
+        <div className="slit-frame mt-4 rounded-lg p-4">
+          <p className="text-[14px] text-(--color-ink)">{rows.some((r) => r.id === draft.id) ? 'Edit record' : 'Add record'}</p>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="meta normal-case">type</span>
+              <select
+                value={draft.type}
+                onChange={(e) => { setDraft({ ...draft, type: e.target.value }); setError(null); }}
+                aria-label="Record type"
+                className={`mt-2 ${INPUT}`}
+              >
+                {ROW_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </label>
+
+            <label className="block">
+              <span className="meta normal-case">name</span>
+              <input
+                value={draft.label}
+                onChange={(e) => { setDraft({ ...draft, label: e.target.value }); setError(null); }}
+                placeholder={`blank for ${name}.runs-at.dev`}
+                aria-label="Record name"
+                spellCheck={false}
+                autoCapitalize="off"
+                className={`mt-2 ${INPUT}`}
+              />
+              <span className="mt-1.5 block font-(family-name:--font-mono) text-xs break-all text-(--color-muted)">
+                {hostOf(draft.label.trim().toLowerCase(), name)}
+              </span>
+            </label>
+          </div>
+
+          <p className="mt-3 max-w-[560px] text-xs leading-relaxed text-(--color-muted)">{TYPE_HELP[draft.type]}</p>
+
+          <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_140px]">
+            <label className="block">
+              <span className="meta normal-case">{draft.type === 'MX' ? 'mail server' : 'value'}</span>
+              <input
+                value={draft.value}
+                onChange={(e) => { setDraft({ ...draft, value: e.target.value }); setError(null); }}
+                placeholder={draft.type === 'A' ? '203.0.113.10' : draft.type === 'AAAA' ? '2606:4700:3037::6815:7eb' : draft.type === 'CNAME' ? 'you.github.io' : draft.type === 'MX' ? 'mx.example.com' : 'v=spf1 -all'}
+                aria-label="Record value"
+                spellCheck={false}
+                autoCapitalize="off"
+                className={`mt-2 ${INPUT}`}
+              />
+            </label>
+            {draft.type === 'MX' && (
+              <label className="block">
+                <span className="meta normal-case">priority</span>
+                <input
+                  value={draft.priority ?? ''}
+                  onChange={(e) => { setDraft({ ...draft, priority: e.target.value === '' ? '' : Number(e.target.value) }); setError(null); }}
+                  inputMode="numeric"
+                  aria-label="Priority"
+                  className={`mt-2 ${INPUT}`}
+                />
+              </label>
+            )}
+          </div>
+
+          <p className="mt-3 font-(family-name:--font-mono) text-xs text-(--color-muted)">
+            {'// TTL is 5 minutes on every record, set automatically'}
+          </p>
+
+          {error && <p className="mt-3 text-xs text-(--color-flag)">{error}</p>}
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button type="button" onClick={commitDraft} className="btn-ghost px-4 py-2 text-xs">Done</button>
+            <button type="button" onClick={() => { setDraft(null); setError(null); }} className="btn-ghost px-4 py-2 text-xs">Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {(rows.some((r) => r.type === 'MX') || rows.some((r) => r.type === 'TXT')) && (
+        <p className="mt-4 max-w-[560px] text-xs leading-relaxed text-(--color-muted)">
+          Mail and text records let other services treat this name as yours. Only add values a
+          provider gave you.
+        </p>
+      )}
+
+      <p className="mt-4 max-w-[560px] text-xs leading-relaxed text-(--color-muted)">
+        Records are saved with the button below, then published to DNS. A record can take a
+        minute or two to appear.
+      </p>
+    </div>
   );
 }

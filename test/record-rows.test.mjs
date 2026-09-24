@@ -171,3 +171,47 @@ test('AAAA cannot coexist with a CNAME on the same name', () => {
   assert.equal(out.ok, false);
   assert.ok(out.errors.some((e) => e.includes('CNAME cannot coexist')));
 });
+
+// ── Which labels the checker looks up ────────────────────────
+import { planLabelLookups, LABEL_LOOKUP_CAP } from '../lib/dns-probe.js';
+
+test('only the types a label declares are looked up', () => {
+  const plan = planLabelLookups({ subdomains: { blog: { CNAME: 'you.github.io' }, mail: { MX: [{ priority: 10, value: 'mx.example.com' }], TXT: ['v=spf1 -all'] } } });
+  assert.deepEqual(plan, [
+    { label: 'blog', type: 'CNAME' },
+    { label: 'mail', type: 'TXT' },
+    { label: 'mail', type: 'MX' },
+  ]);
+});
+
+test('a record with no subdomains plans no lookups', () => {
+  assert.deepEqual(planLabelLookups({ records: { CNAME: 'you.github.io' } }), []);
+  assert.deepEqual(planLabelLookups({}), []);
+  assert.deepEqual(planLabelLookups(null), []);
+});
+
+// The request carries only `name`, so the only way a strange hostname could
+// be built is a record written under an older rule. The grammar is re-checked
+// here rather than trusted.
+test('a label that would escape the claimed name is never looked up', () => {
+  for (const label of ['x.bob', '../bob', 'bob.runs-at.dev', 'a b', 'UPPER', '', '.']) {
+    assert.deepEqual(planLabelLookups({ subdomains: { [label]: { A: ['203.0.113.10'] } } }), [], label);
+  }
+});
+
+test('the underscore forms providers ask for are looked up', () => {
+  const plan = planLabelLookups({ subdomains: { _vercel: { TXT: ['vc-domain-verify=x,ab'] }, '_vercel.recruitment': { TXT: ['vc-domain-verify=y,cd'] } } });
+  assert.deepEqual(plan.map((p) => p.label), ['_vercel', '_vercel.recruitment']);
+});
+
+test('the plan is capped however many records a name holds', () => {
+  const subdomains = {};
+  for (let i = 0; i < 10; i++) subdomains[`l${i}`] = { A: ['203.0.113.10'], TXT: ['x'], MX: [{ priority: 10, value: 'mx.example.com' }] };
+  const plan = planLabelLookups({ subdomains });
+  assert.equal(plan.length, LABEL_LOOKUP_CAP);
+  assert.equal(LABEL_LOOKUP_CAP, 12);
+});
+
+test('an unknown record type on a label is not looked up', () => {
+  assert.deepEqual(planLabelLookups({ subdomains: { blog: { NS: ['ns1.example.com'] } } }), []);
+});

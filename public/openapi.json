@@ -167,12 +167,18 @@
           },
           "records": {
             "type": "object",
-            "description": "DNS/redirect records. CNAME (string) XOR URL (string); A and TXT are arrays; MX is an array of { priority, value }; CNAME and URL exclude each other and every other type.",
+            "description": "DNS/redirect records. CNAME (string) XOR URL (string); A, AAAA and TXT are arrays; MX is an array of { priority, value }; CNAME and URL exclude each other and every other type.",
             "properties": {
               "CNAME": {
                 "type": "string"
               },
               "A": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "AAAA": {
                 "type": "array",
                 "items": {
                   "type": "string"

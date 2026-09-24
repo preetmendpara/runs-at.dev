@@ -147,3 +147,119 @@ test('before the first check nothing is declared broken', () => {
   assert.equal(byId(list, 'cname').status.tone, 'checking');
   assert.notEqual(byId(list, 'cname').action, 'Fix this');
 });
+
+// ── Per-row verification ─────────────────────────────────────
+import { verifyRows } from '../lib/manage-status.js';
+
+const row = (over) => ({ id: 'r1', label: '', type: 'A', value: '203.0.113.10', ...over });
+
+test('a row visible in DNS reads as published', () => {
+  const [out] = verifyRows([row()], { a: ['203.0.113.10'] });
+  assert.equal(out.state, 'published');
+});
+
+test('a row missing from DNS says so, once the publishing window has passed', () => {
+  const [out] = verifyRows([row()], { a: [] });
+  assert.equal(out.state, 'missing');
+  assert.match(out.text, /Not in DNS yet/);
+});
+
+test('a row saved moments ago is publishing, not missing', () => {
+  const now = 1_000_000;
+  const [out] = verifyRows([row()], { a: [] }, { savedAt: now - 5_000, now });
+  assert.equal(out.state, 'publishing');
+});
+
+// The most useful failure to name: something else is live on that name.
+test('a different live value is reported with what DNS actually answers', () => {
+  const [out] = verifyRows([row()], { a: ['198.51.100.7'] });
+  assert.equal(out.state, 'different');
+  assert.match(out.text, /198\.51\.100\.7/);
+});
+
+test('every type the table can publish is checked', () => {
+  const check = {
+    cname: ['you.github.io'],
+    a: ['203.0.113.10'],
+    aaaa: ['2606:4700:3037::6815:7eb'],
+    mx: [{ exchange: 'mx.example.com', priority: 10 }],
+    txt: { name: ['v=spf1 -all'], vercelLabel: ['vc-domain-verify=x.runs-at.dev,ab'] },
+  };
+  const rows = [
+    row({ id: 'c', type: 'CNAME', value: 'you.github.io' }),
+    row({ id: 'a' }),
+    row({ id: 'v6', type: 'AAAA', value: '2606:4700:3037::6815:7eb' }),
+    row({ id: 'm', type: 'MX', value: 'mx.example.com', priority: 10 }),
+    row({ id: 't', type: 'TXT', value: 'v=spf1 -all' }),
+    row({ id: 'vc', label: '_vercel', type: 'TXT', value: 'vc-domain-verify=x.runs-at.dev,ab' }),
+  ];
+  for (const out of verifyRows(rows, check)) assert.equal(out.state, 'published', out.id);
+});
+
+// A label the checker does not resolve must not be drawn as broken.
+test('a row on a label that is not looked up says it was not checked', () => {
+  const [out] = verifyRows([row({ label: 'blog', type: 'CNAME', value: 'you.github.io' })], { cname: [] });
+  assert.equal(out.state, 'unknown');
+  assert.match(out.text, /Not checked/);
+});
+
+test('before the first check every row reads as checking', () => {
+  const [out] = verifyRows([row()], null);
+  assert.equal(out.state, 'unknown');
+  assert.equal(out.text, 'Checking…');
+});
+
+test('a trailing dot or different case still counts as published', () => {
+  const [out] = verifyRows([row({ type: 'CNAME', value: 'You.GitHub.io' })], { cname: ['you.github.io.'] });
+  assert.equal(out.state, 'published');
+});
+
+// ── Verification of records on labels ────────────────────────
+test('a row on a label is verified against that label, not the name', () => {
+  const check = { cname: ['someone-else.github.io'], labels: { blog: { cname: ['you.github.io'] } } };
+  const [out] = verifyRows([row({ label: 'blog', type: 'CNAME', value: 'you.github.io' })], check);
+  assert.equal(out.state, 'published');
+});
+
+test('a label whose answer differs reports what is actually live', () => {
+  const check = { labels: { blog: { cname: ['old.github.io'] } } };
+  const [out] = verifyRows([row({ label: 'blog', type: 'CNAME', value: 'you.github.io' })], check);
+  assert.equal(out.state, 'different');
+  assert.match(out.text, /old\.github\.io/);
+});
+
+test('a label with no answer yet is missing, or publishing inside the window', () => {
+  const check = { labels: { blog: { cname: [] } } };
+  const now = 1_000_000;
+  assert.equal(verifyRows([row({ label: 'blog', type: 'CNAME', value: 'you.github.io' })], check)[0].state, 'missing');
+  assert.equal(
+    verifyRows([row({ label: 'blog', type: 'CNAME', value: 'you.github.io' })], check, { savedAt: now - 1000, now })[0].state,
+    'publishing',
+  );
+});
+
+test('MX on a label compares against the mail server, not the whole answer', () => {
+  const check = { labels: { mail: { mx: [{ exchange: 'mx.example.com', priority: 10 }] } } };
+  const [out] = verifyRows([row({ label: 'mail', type: 'MX', value: 'mx.example.com', priority: 10 })], check);
+  assert.equal(out.state, 'published');
+});
+
+test('a _vercel challenge still verifies from the fixed lookup', () => {
+  const check = { txt: { vercelLabel: ['vc-domain-verify=preet.runs-at.dev,ab12'] } };
+  const [out] = verifyRows([row({ label: '_vercel', type: 'TXT', value: 'vc-domain-verify=preet.runs-at.dev,ab12' })], check);
+  assert.equal(out.state, 'published');
+});
+
+// "Not checked here" must mean exactly that: the label was not part of the
+// check, for example because the plan hit its cap.
+test('a label absent from the check still reads as not checked', () => {
+  const [out] = verifyRows([row({ label: 'blog', type: 'CNAME', value: 'you.github.io' })], { labels: {} });
+  assert.equal(out.state, 'unknown');
+  assert.match(out.text, /Not checked/);
+});
+
+test('a label that answers another type is not checked for the type it lacks', () => {
+  const check = { labels: { blog: { cname: ['you.github.io'] } } };
+  const [out] = verifyRows([row({ label: 'blog', type: 'A', value: '203.0.113.10' })], check);
+  assert.equal(out.state, 'unknown');
+});

@@ -80,8 +80,9 @@ export default function Records() {
               </tr>
             </thead>
             <tbody>
-              <Row cells={[<C key="t">CNAME</C>, 'A single hostname string.', 'Cannot appear with A, TXT, MX, or URL.']} />
-              <Row cells={[<C key="t">A</C>, 'A non-empty array of IPv4 addresses.', 'May coexist with TXT and MX. Not with CNAME or URL.']} />
+              <Row cells={[<C key="t">CNAME</C>, 'A single hostname string.', 'Cannot appear with A, AAAA, TXT, MX, or URL.']} />
+              <Row cells={[<C key="t">A</C>, 'A non-empty array of IPv4 addresses.', 'May coexist with AAAA, TXT and MX. Not with CNAME or URL.']} />
+              <Row cells={[<C key="t">AAAA</C>, 'A non-empty array of IPv6 addresses.', 'May coexist with A, TXT and MX. Not with CNAME or URL.']} />
               <Row cells={[<C key="t">TXT</C>, 'A non-empty array of strings, each up to 255 characters.', 'May coexist with A and MX. Not with CNAME or URL.']} />
               <Row cells={[<C key="t">MX</C>, <>1 to 5 entries: <C key="mx">{'{ priority: 0-65535, value: hostname }'}</C></>, 'May coexist with A and TXT. Not with CNAME or URL.']} />
               <Row cells={[<C key="t">URL</C>, 'A single absolute http:// or https:// string.', 'Must be the only key in records. No DNS record is created; see below.']} />
