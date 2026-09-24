@@ -1,22 +1,24 @@
 @import "tailwindcss";
 
-/* Hyperstudio language, from the DESIGN.md style reference: a near-black
-   canvas where type and hairline borders carve the whitespace. The site's
-   legacy token names (--paper, --card, --rule, --ink, --muted, --signal,
-   --flag) are kept and re-pointed at Hyperstudio values so every component
+/* Registrar: a cool near-black canvas read as an operator's tool rather than
+   an atmosphere. The token names are kept and re-pointed, so every component
    that already speaks them restyles in one move:
 
-     --paper  -> Obsidian #101010, the page canvas
-     --card   -> Carbon   #080808, the deepest surface (code, quotes)
-     --rule   -> Graphite #212121, the 1px structural hairline
-     --ink    -> Chalk    #f3f3f3, primary type
-     --muted  -> Smoke    #9c9c9c, secondary type
-     --signal -> White    #ffffff, the single action color (filled pills)
+     --paper  -> Obsidian #0B0D0F, the page canvas (cool, off-neutral)
+     --card   -> Carbon   #101418, the raised surface (cards, code, quotes)
+     --rule   -> Graphite #1E242B, the 1px structural hairline
+     --ink    -> Chalk    #edf1f5, primary type
+     --muted  -> Smoke    #8a97a4, secondary type
+     --signal -> Amber    #e8a33d, the single action color (filled pills)
      --flag   -> terracotta, errors on dark
 
-   Dark is the only theme. The reference is a dark system end to end, so the
-   page locks to obsidian rather than carrying a light mode it was never
-   designed for. */
+   Amber replaces white as the action color: on a cool canvas it is the one
+   hue nothing else on the page occupies, so an action never reads as just
+   another bright surface. Neutrals carry a slight blue cast so the canvas
+   and the amber sit on opposite sides of neutral rather than muddying.
+
+   Dark is the only theme; the page locks to obsidian rather than carrying a
+   light mode it was never designed for. */
 @theme inline {
   --color-paper: var(--paper);
   --color-card: var(--card);
@@ -26,17 +28,17 @@
   --color-signal: var(--signal);
   --color-flag: var(--flag);
 
-  --color-obsidian: #101010;
-  --color-carbon: #080808;
-  --color-graphite: #212121;
-  --color-chalk: #f3f3f3;
-  --color-smoke: #9c9c9c;
-  --color-ash: #c1c1c1;
-  --color-iron: #474747;
+  --color-obsidian: #0b0d0f;
+  --color-carbon: #101418;
+  --color-graphite: #1e242b;
+  --color-chalk: #edf1f5;
+  --color-smoke: #8a97a4;
+  --color-ash: #bac4ce;
+  --color-iron: #3a434d;
   --color-gold: #6f6759;
   --color-pulse: #98ff38;
   --color-blue: var(--blue);
-  --color-badge: #1a1a1a;
+  --color-badge: #151a1f;
 }
 
 @theme {
@@ -59,19 +61,19 @@
   --text-heading--line-height: 1.03;
   --text-heading-lg: 44px;
   --text-heading-lg--line-height: 1.07;
-  --text-heading-lg--letter-spacing: -0.007em;
+  --text-heading-lg--letter-spacing: 0em;
   --text-display: 63px;
   --text-display--line-height: 1.05;
-  --text-display--letter-spacing: -0.011em;
+  --text-display--letter-spacing: 0em;
 }
 
 :root {
-  --paper: #101010;
-  --card: #080808;
-  --rule: #212121;
-  --ink: #f3f3f3;
-  --muted: #9c9c9c;
-  --signal: #ffffff;
+  --paper: #0b0d0f;
+  --card: #101418;
+  --rule: #1e242b;
+  --ink: #edf1f5;
+  --muted: #8a97a4;
+  --signal: #e8a33d;
   --flag: #d97757;
   --gold: #6f6759;
   --pulse: #98ff38;
@@ -89,10 +91,11 @@
   --edge: rgba(255, 255, 255, 0.2);
   --edge-focus: rgba(255, 255, 255, 0.8);
 
-  /* The claim line and section labels speak in Input's voice (mono, tight
-     utilitarian tracking). Headings speak in Bitcount Prop (pixel matrix,
-     set via the h1/h2/h3 rule below); Satoshi carries body copy. */
-  --font-display: var(--font-bitcount), ui-sans-serif, system-ui, sans-serif;
+  /* Headings, the claim line and section labels all speak in the mono
+     voice, set via the h1/h2/h3 rule below; Satoshi carries body copy. A
+     registry whose headings render in the same face as its records reads as
+     one system rather than a display face bolted onto a tool. */
+  --font-display: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-body: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -139,12 +142,16 @@ body {
   font-family: var(--font-body);
 }
 
-/* Every heading renders in Bitcount Prop. Class-set families (the mono
-   meta labels, mono record blocks) keep winning over this element rule. */
+/* Every heading renders in the mono face. Mono carries its own rhythm, so
+   the negative tracking the old display face needed is cancelled here: at
+   heading sizes a mono set tight reads cramped rather than deliberate.
+   Class-set families (the mono meta labels, record blocks) keep winning over
+   this element rule, which now agrees with them anyway. */
 h1,
 h2,
 h3 {
   font-family: var(--font-display);
+  letter-spacing: 0;
 }
 
 ::selection {
