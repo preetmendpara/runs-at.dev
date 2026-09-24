@@ -8,7 +8,7 @@ import {
   buildProfile, profileToRows,
   recordsToRows, rowsToRecords, validateRow, ROW_TYPES,
 } from '../../lib/record-fields.js';
-import { siteStatus, friendlyError, featureCards, verifyRows, CHECK_SCHEDULE_MS } from '../../lib/manage-status.js';
+import { siteStatus, friendlyError, featureCards, verifyRows, deleteConsequence, CHECK_SCHEDULE_MS } from '../../lib/manage-status.js';
 
 const MAX_SUBDOMAINS = 10;
 const MAX_LINKS = 8;
@@ -1005,10 +1005,7 @@ function RecordTable({ name, rows, setRows, verdicts, onCheck, checking }) {
           <p className="text-[14px] text-(--color-flag)">Delete this {confirming.type} record?</p>
           <p className="mt-2 max-w-[560px] text-xs leading-relaxed text-(--color-muted)">
             {hostOf(confirming.label, name)} → {confirming.value}
-            {confirming.type === 'CNAME' && '. Your name will stop serving that site and go back to the profile card.'}
-            {confirming.type === 'MX' && '. Email sent to this name will stop being delivered.'}
-            {confirming.type === 'TXT' && '. A service that checks this code may stop treating the name as yours.'}
-            {(confirming.type === 'A' || confirming.type === 'AAAA') && '. Visitors will stop reaching that server.'}
+            {'. '}{deleteConsequence(confirming, name)}
             {' '}It is removed when you save.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">

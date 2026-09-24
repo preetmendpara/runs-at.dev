@@ -263,3 +263,29 @@ test('a label that answers another type is not checked for the type it lacks', (
   const [out] = verifyRows([row({ label: 'blog', type: 'A', value: '203.0.113.10' })], check);
   assert.equal(out.state, 'unknown');
 });
+
+// ── Delete confirmations ─────────────────────────────────────
+import { deleteConsequence } from '../lib/manage-status.js';
+
+test('deleting a record on the claimed name explains what that name loses', () => {
+  assert.match(deleteConsequence({ label: '', type: 'CNAME' }, 'preet'), /go back to the profile card/);
+  assert.match(deleteConsequence({ label: '', type: 'MX' }, 'preet'), /Email sent to preet\.runs-at\.dev/);
+  assert.match(deleteConsequence({ label: '', type: 'A' }, 'preet'), /stop reaching that server/);
+});
+
+// The bug this covers: a CNAME on `blog` was described as taking the whole
+// name back to the profile card, which is wrong in both halves.
+test('deleting a record on a label names that hostname and clears the main name', () => {
+  for (const type of ['CNAME', 'A', 'AAAA', 'TXT', 'MX']) {
+    const text = deleteConsequence({ label: 'blog', type }, 'preet');
+    assert.match(text, /blog\.preet\.runs-at\.dev/, type);
+    assert.match(text, /Your main name, preet\.runs-at\.dev, is not affected\./, type);
+    assert.ok(!/go back to the profile card/.test(text), `${type} must not claim the apex changes`);
+  }
+});
+
+test('an underscore label reads the same way', () => {
+  const text = deleteConsequence({ label: '_vercel', type: 'TXT' }, 'preet');
+  assert.match(text, /_vercel\.preet\.runs-at\.dev/);
+  assert.match(text, /is not affected/);
+});
