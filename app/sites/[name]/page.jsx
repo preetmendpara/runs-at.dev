@@ -139,7 +139,7 @@ export default async function Site({ params }) {
                   href={`https://${name}.runs-at.dev`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[23px] leading-[1.07] font-normal tracking-[-0.004em] text-(--color-ink) underline decoration-(--color-blue) decoration-2 underline-offset-[6px] sm:text-[34px] sm:tracking-[-0.005em]"
+                  className="font-(family-name:--font-mono) text-[23px] leading-[1.07] font-normal text-(--color-ink) underline decoration-(--color-blue) decoration-2 underline-offset-[6px] sm:text-[34px]"
                 >
                   {name}.runs-at.dev
                 </a>
@@ -320,7 +320,7 @@ async function ClaimPage({ name }) {
         Available
       </StatusBadge>
 
-      <h1 className="mt-7 text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
+      <h1 className="mt-7 font-(family-name:--font-mono) text-[34px] leading-[1.03] font-normal text-(--color-ink) sm:text-[44px]">
         {name}.runs-at.dev
       </h1>
 

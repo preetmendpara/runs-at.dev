@@ -93,7 +93,7 @@ export default async function DebugPage({ params }) {
     return (
       <main className="mx-auto max-w-2xl px-6 py-16">
         <p className="font-(family-name:--font-mono) text-xs tracking-[0.14em] text-(--color-muted) uppercase">Debug</p>
-        <h1 className="mt-2 font-(family-name:--font-display) text-2xl font-medium text-(--color-ink)">{name}.runs-at.dev</h1>
+        <h1 className="mt-2 font-(family-name:--font-mono) text-2xl font-medium text-(--color-ink)">{name}.runs-at.dev</h1>
         <p className="mt-4 text-sm leading-relaxed text-(--color-muted)">
           Too many checks on this name in the last minute. Live DNS answers change on
           the scale of minutes anyway — reload shortly.
@@ -121,7 +121,7 @@ export default async function DebugPage({ params }) {
     return (
       <main className="mx-auto max-w-2xl px-6 py-16">
         <p className="font-(family-name:--font-mono) text-xs tracking-[0.14em] text-(--color-muted) uppercase">Debug</p>
-        <h1 className="mt-2 font-(family-name:--font-display) text-2xl font-medium text-(--color-ink)">{name}.runs-at.dev</h1>
+        <h1 className="mt-2 font-(family-name:--font-mono) text-2xl font-medium text-(--color-ink)">{name}.runs-at.dev</h1>
         <p className="mt-4 text-sm leading-relaxed text-(--color-muted)">
           The registry could not be read just now, so there is nothing trustworthy to
           report. Reload in a moment — a claimed name is not "not claimed" because a
@@ -135,7 +135,7 @@ export default async function DebugPage({ params }) {
     return (
       <main className="mx-auto max-w-2xl px-6 py-16">
         <p className="font-(family-name:--font-mono) text-xs tracking-[0.14em] text-(--color-muted) uppercase">Debug</p>
-        <h1 className="mt-2 font-(family-name:--font-display) text-2xl font-medium text-(--color-ink)">{name}.runs-at.dev</h1>
+        <h1 className="mt-2 font-(family-name:--font-mono) text-2xl font-medium text-(--color-ink)">{name}.runs-at.dev</h1>
         <p className="mt-4 text-sm leading-relaxed text-(--color-muted)">
           This name is not claimed, so there is no record to check: the wildcard serves a
           claim page for it and DNS points nowhere in particular.
@@ -201,7 +201,7 @@ export default async function DebugPage({ params }) {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <p className="font-(family-name:--font-mono) text-xs tracking-[0.14em] text-(--color-muted) uppercase">Debug</p>
       <div className="mt-2 flex flex-wrap items-center gap-3">
-        <h1 className="font-(family-name:--font-display) text-2xl font-medium tracking-tight text-(--color-ink)">
+        <h1 className="font-(family-name:--font-mono) text-2xl font-medium text-(--color-ink)">
           {name}.runs-at.dev
         </h1>
         <span

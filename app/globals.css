@@ -91,11 +91,11 @@
   --edge: rgba(255, 255, 255, 0.2);
   --edge-focus: rgba(255, 255, 255, 0.8);
 
-  /* Headings, the claim line and section labels all speak in the mono
-     voice, set via the h1/h2/h3 rule below; Satoshi carries body copy. A
-     registry whose headings render in the same face as its records reads as
-     one system rather than a display face bolted onto a tool. */
-  --font-display: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Two voices. Satoshi carries headings, body copy and UI; IBM Plex Mono
+     carries anything technical -- hostnames, records, values, metadata --
+     through --font-mono. A hostname is set in mono even inside a heading,
+     so it always reads as something you would type, never as a title. */
+  --font-display: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -142,16 +142,18 @@ body {
   font-family: var(--font-body);
 }
 
-/* Every heading renders in the mono face. Mono carries its own rhythm, so
-   the negative tracking the old display face needed is cancelled here: at
-   heading sizes a mono set tight reads cramped rather than deliberate.
-   Class-set families (the mono meta labels, record blocks) keep winning over
-   this element rule, which now agrees with them anyway. */
-h1,
-h2,
-h3 {
-  font-family: var(--font-display);
-  letter-spacing: 0;
+/* Every heading renders in Satoshi. Class-set families (the mono .meta
+   section labels, hostname headings) have to win over this element rule,
+   and that only holds inside @layer base: Tailwind v4 puts .meta in
+   components and font-* classes in utilities, and an unlayered rule beats
+   every layer regardless of specificity. Left unlayered, this rule silently
+   overrode the font class on any heading that carried one. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
 }
 
 ::selection {

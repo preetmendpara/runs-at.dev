@@ -522,7 +522,7 @@ function NameHeader({ name, site, status, justSaved }) {
     <div className="slit-bottom px-6 py-5 sm:px-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-[23px] leading-[1.07] font-normal tracking-[-0.004em] text-(--color-ink)">{name}.runs-at.dev</h2>
+          <h2 className="font-(family-name:--font-mono) text-[23px] leading-[1.07] font-normal text-(--color-ink)">{name}.runs-at.dev</h2>
           <p className="mt-1 font-(family-name:--font-mono) text-xs text-(--color-muted)">domains/{name}.json</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

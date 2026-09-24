@@ -142,7 +142,7 @@ export default function ClaimForm({ signedIn }) {
         Subdomain name
       </label>
       <div
-        className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-0 font-(family-name:--font-display) leading-[1.05] font-normal tracking-[0] text-(--color-ink)"
+        className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-0 font-(family-name:--font-mono) leading-[1.05] font-normal tracking-[0] text-(--color-ink)"
         style={{ fontSize: `calc(clamp(1.75rem, 6.5vw, 3.5rem) * ${heroScale})` }}
       >
         <span className="relative inline-flex flex-nowrap items-baseline">
