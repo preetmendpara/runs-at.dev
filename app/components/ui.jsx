@@ -197,13 +197,19 @@ export function ContinentChart({ points, total, heading = false, selected = null
 
 // Availability / status pill: badge surface inside a graphite hairline, a
 // single pulse-green dot reserved for live/active states.
+//
+// Every tone is a token, not a hex, so the badge and the rest of the page
+// can never disagree about what 'error' looks like. Pending and redirect are
+// informational and share the blue: the yellow they used before sat almost
+// on top of the amber accent, which made an in-progress state read like a
+// highlighted control.
 const TONES = {
-  live: '#98ff38',
-  ok: '#98ff38',
-  pending: '#eab308',
-  redirect: '#8ea1ff',
-  neutral: '#9c9c9c',
-  error: '#d97757',
+  live: 'var(--pulse)',
+  ok: 'var(--pulse)',
+  pending: 'var(--blue)',
+  redirect: 'var(--blue)',
+  neutral: 'var(--muted)',
+  error: 'var(--flag)',
 };
 
 export function StatusBadge({ tone = 'neutral', pulse = false, children }) {

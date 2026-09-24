@@ -10,7 +10,7 @@
      --ink    -> Chalk    #edf1f5, primary type
      --muted  -> Smoke    #8a97a4, secondary type
      --signal -> Amber    #e8a33d, the accent: links, focus, selection
-     --flag   -> terracotta, errors on dark
+     --flag   -> Signal red #f2555a, errors on dark
 
    Amber is the accent: on a cool canvas it is the one hue nothing else on
    the page occupies, which is why it is spent sparingly -- links, focus and
@@ -74,22 +74,28 @@
   --ink: #edf1f5;
   --muted: #8a97a4;
   --signal: #e8a33d;
-  --flag: #d97757;
+  --flag: #f2555a;
   --gold: #6f6759;
   --pulse: #98ff38;
   --blue: #4d7cff;
+  /* Neutral "no verdict yet" dot: dimmer than --muted so an unknown state
+     never reads as a quiet success. Runtime copy of --color-iron, which
+     @theme inline does not emit as a variable. */
+  --iron: #3a434d;
 
-  /* Slit lines: every rule on the page is a line of light whose ends fade
-     smoothly into the canvas. Structural lines sit at --slit, row separators
-     and input edges rest dimmer and brighten on focus/hover. */
-  --slit: rgba(255, 255, 255, 0.35);
-  --slit-dim: rgba(255, 255, 255, 0.2);
-  --slit-frame: rgba(255, 255, 255, 0.22);
-  --slit-frame-hi: rgba(255, 255, 255, 0.55);
-  --slit-bright: rgba(255, 255, 255, 0.85);
-  --slit-bar: rgba(255, 255, 255, 0.6);
-  --edge: rgba(255, 255, 255, 0.2);
-  --edge-focus: rgba(255, 255, 255, 0.8);
+  /* Rules. Structural lines sit at the graphite hairline (--rule); row
+     separators a step dimmer; a hovered frame steps up to iron. Only active
+     and focused states leave the neutral scale, and they take the accent. */
+  --slit: #1e242b;
+  --slit-dim: #171c22;
+  --slit-frame: #1e242b;
+  --slit-frame-hi: #3a434d;
+  --slit-bright: #e8a33d;
+  --slit-bar: #3a434d;
+  /* Input boundary. 3:1 against both canvas and card: WCAG 1.4.11 asks that
+     for the edge that identifies a control, and a field has nothing else. */
+  --edge: #5a6571;
+  --edge-focus: #e8a33d;
 
   /* Three voices. Bitcount Prop Single (pixel matrix) carries display
      headings; Satoshi carries body copy and UI; IBM Plex Mono carries
@@ -204,7 +210,7 @@ a {
   /* Primary action. A compact control on a lifted neutral surface, not a
      coloured pill: the hierarchy comes from surface, border and weight, so
      the page's one accent (amber, --signal) stays free for what actually
-     needs to stand out. 6px radius, Satoshi at 500, sentence case as the
+     needs to stand out. 5px radius, Satoshi at 500, sentence case as the
      markup writes it.
 
      Every colour is mixed from --ink over the canvas, so the button tracks
@@ -217,7 +223,7 @@ a {
     gap: 0.5rem;
     min-height: 36px;
     border: 1px solid color-mix(in srgb, var(--ink) 26%, transparent);
-    border-radius: 6px;
+    border-radius: 5px;
     background: color-mix(in srgb, var(--ink) 8%, var(--card));
     /* A one-pixel top highlight: the control reads as raised off the page
        without a drop shadow. */
@@ -254,7 +260,7 @@ a {
     gap: 0.5rem;
     min-height: 36px;
     border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
-    border-radius: 6px;
+    border-radius: 5px;
     background: transparent;
     color: var(--muted);
     padding: 0.5rem 0.95rem;
@@ -304,24 +310,25 @@ a {
   }
 }
 
-/* ── Slit lines ──────────────────────────────────────────────────────
-   Every rule on the page is a slit: a slim line of light whose ends fade
-   smoothly into the canvas. Each edge of a frame is its own gradient, so
-   corners stay open (both adjacent edges fade before meeting). No hard
-   rectangles anywhere. */
+/* ── Rules and frames ────────────────────────────────────────────────
+   The class names are the inherited "slit" vocabulary, kept so no call
+   site changes. What they draw is now Registrar: solid 1px rules at the
+   structural hairline colour, no fading ends, no corner crossings. A rule
+   is a boundary, not an effect; the one place colour comes back is an
+   active or focused state, and that colour is the accent. */
 
-/* Standalone horizontal / vertical slit lines. */
+/* Standalone horizontal / vertical rules. */
 .slit-h {
   height: 1px;
   border: 0;
-  background: linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
+  background: var(--slit);
 }
 .slit-v {
   width: 1px;
-  background: linear-gradient(180deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
+  background: var(--slit);
 }
 
-/* Edge slits painted directly on an element, no extra markup. Composable:
+/* Edge rules painted directly on an element, no extra markup. Composable:
    .slit-top + .slit-bottom use separate longhands and stack fine. */
 .slit-top,
 .slit-bottom {
@@ -329,11 +336,11 @@ a {
   background-size: 100% 1px;
 }
 .slit-top {
-  background-image: linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
+  background-image: linear-gradient(var(--slit), var(--slit));
   background-position: 0 0;
 }
 .slit-bottom {
-  background-image: linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
+  background-image: linear-gradient(var(--slit), var(--slit));
   background-position: 0 100%;
 }
 
@@ -342,138 +349,120 @@ a {
 
 /* Both the top and bottom edge in one element (capped lists). */
 .slit-y {
-  background-image:
-    linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent),
-    linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
+  background-image: linear-gradient(var(--slit), var(--slit)), linear-gradient(var(--slit), var(--slit));
   background-repeat: no-repeat;
   background-size: 100% 1px, 100% 1px;
   background-position: 0 0, 0 100%;
 }
 
-/* Vertical accent bar (record spines, warnings): 2px slit at the left edge,
-   fading out at top and bottom. --bar recolors it (e.g. the flag). */
+/* Vertical accent bar (record spines, warnings): a solid 2px rule at the
+   left edge. --bar recolors it (e.g. the flag). */
 .slit-bar-l {
   --bar: var(--slit-bar);
-  background-image: linear-gradient(180deg, transparent, var(--bar) 20%, var(--bar) 80%, transparent);
+  background-image: linear-gradient(var(--bar), var(--bar));
   background-repeat: no-repeat;
   background-size: 2px 100%;
   background-position: 0 0;
 }
-.slit-bar-flag { --bar: rgba(217, 119, 87, 0.8); }
+.slit-bar-flag { --bar: var(--flag); }
 
-/* Card and box outlines: four slit lines whose ends overshoot the box and
-   intersect at the corners (each line crosses its neighbor, technical-
-   drawing style; every tip still fades out). The ::before drawing surface
-   extends --slit-over past the box on every side; the perpendicular lines
-   run the full extended length, so each corner is a small crossing. That
-   is why cards need generous gaps: crossings from neighbors must never
-   touch. --slit-line is the line color, registered so hover/active
-   brightening can transition. */
+/* Card and box outlines. An inset 1px shadow rather than a border: it
+   follows whatever radius the element carries (rounded-lg cards, the
+   rounded-full avatar ring) and takes no layout space, so swapping the old
+   overshooting-corner drawing for it moves nothing on the page.
+   --slit-line is registered so hover and active can transition. */
 @property --slit-line {
   syntax: '<color>';
   inherits: true;
-  initial-value: rgba(255, 255, 255, 0.22);
+  initial-value: #1e242b;
 }
 
 .slit-frame {
   --slit-line: var(--slit-frame);
-  --slit-over: 24px;
-  --slit-edge: 60px;
   position: relative;
-  transition: --slit-line 0.25s ease;
-}
-.slit-frame::before {
-  content: '';
-  position: absolute;
-  inset: calc(-1 * var(--slit-over));
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, transparent 0, var(--slit-line) var(--slit-edge), var(--slit-line) calc(100% - var(--slit-edge)), transparent 100%) 0 var(--slit-over) / 100% 1px no-repeat,
-    linear-gradient(90deg, transparent 0, var(--slit-line) var(--slit-edge), var(--slit-line) calc(100% - var(--slit-edge)), transparent 100%) 0 calc(100% - var(--slit-over)) / 100% 1px no-repeat,
-    linear-gradient(180deg, transparent 0, var(--slit-line) var(--slit-edge), var(--slit-line) calc(100% - var(--slit-edge)), transparent 100%) var(--slit-over) 0 / 1px 100% no-repeat,
-    linear-gradient(180deg, transparent 0, var(--slit-line) var(--slit-edge), var(--slit-line) calc(100% - var(--slit-edge)), transparent 100%) calc(100% - var(--slit-over)) 0 / 1px 100% no-repeat;
+  box-shadow: inset 0 0 0 1px var(--slit-line);
+  transition: --slit-line 0.2s ease;
 }
 .slit-frame:hover { --slit-line: var(--slit-frame-hi); }
-/* Selected/active frame, and the flag (danger) variant. */
-.slit-frame-bright { --slit-line: var(--slit-bright); }
+/* Selected/active frame, and the flag (danger) variant. Both are tinted
+   from their semantic token rather than a copied colour, so a palette
+   change reaches them. */
+.slit-frame-bright,
 .slit-frame-bright:hover { --slit-line: var(--slit-bright); }
-.slit-frame-flag { --slit-line: rgba(217, 119, 87, 0.5); }
-.slit-frame-flag:hover { --slit-line: rgba(217, 119, 87, 0.85); }
+.slit-frame-flag { --slit-line: color-mix(in srgb, var(--flag) 45%, transparent); }
+.slit-frame-flag:hover { --slit-line: color-mix(in srgb, var(--flag) 80%, transparent); }
 
-/* List rows separated by dim slits instead of divide-y borders: the list
-   carries .slit-rows, every child after the first paints its own top slit. */
+/* List rows separated by dim rules instead of divide-y borders: the list
+   carries .slit-rows, every child after the first paints its own top rule. */
 .slit-rows > * + * {
-  background-image: linear-gradient(90deg, transparent, var(--slit-dim) 15%, var(--slit-dim) 85%, transparent);
+  background-image: linear-gradient(var(--slit-dim), var(--slit-dim));
   background-repeat: no-repeat;
   background-size: 100% 1px;
   background-position: 0 0;
 }
 
-/* Inputs: the same slit on all four edges, painted as backgrounds so it
-   works on <input>/<select>/<textarea> (which cannot carry pseudo-elements).
-   Backgrounds cannot overflow the box, so instead of overshooting, each
-   line runs to the corner with only a tiny ramp, and the perpendicular
-   line meets it there: the lines intersect inside the corner. The
-   transparent border keeps sizing identical to the old 1px-bordered
-   fields; focus brightens the line. */
+/* Inputs: a filled field with a real 1px border. The border was already
+   1px transparent, so colouring it changes no field's size. Filled with
+   the canvas colour, a field inside a card reads as inset into it, and a
+   field on the page is still defined by its border. */
 @property --edge-color {
   syntax: '<color>';
   inherits: true;
-  initial-value: rgba(255, 255, 255, 0.2);
+  initial-value: #5a6571;
 }
 
 .slit-input {
   --edge-color: var(--edge);
-  border: 1px solid transparent;
-  background:
-    linear-gradient(90deg, transparent 0, var(--edge-color) 6px, var(--edge-color) calc(100% - 6px), transparent 100%) top / 100% 1px no-repeat,
-    linear-gradient(90deg, transparent 0, var(--edge-color) 6px, var(--edge-color) calc(100% - 6px), transparent 100%) bottom / 100% 1px no-repeat,
-    linear-gradient(180deg, transparent 0, var(--edge-color) 6px, var(--edge-color) calc(100% - 6px), transparent 100%) left / 1px 100% no-repeat,
-    linear-gradient(180deg, transparent 0, var(--edge-color) 6px, var(--edge-color) calc(100% - 6px), transparent 100%) right / 1px 100% no-repeat;
-  transition: --edge-color 0.2s ease;
+  border: 1px solid var(--edge-color);
+  border-radius: 5px;
+  background-color: var(--paper);
+  transition: --edge-color 0.2s ease, box-shadow 0.2s ease;
 }
+.slit-input::placeholder {
+  color: color-mix(in srgb, var(--muted) 75%, transparent);
+}
+.slit-input:hover { --edge-color: var(--muted); }
 .slit-input:focus,
 .slit-input:focus-visible {
   --edge-color: var(--edge-focus);
+  /* The ring is the accent at low strength: enough to find the field at a
+     glance, not so much that a focused form reads as an alert. */
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--edge-focus) 18%, transparent);
   outline: none;
 }
-/* Invalid/danger fields keep the slit but recolor it. */
-.slit-input-flag { --edge-color: rgba(217, 119, 87, 0.7); }
+/* Invalid/danger fields keep the field but recolor its border. */
+.slit-input-flag { --edge-color: color-mix(in srgb, var(--flag) 70%, transparent); }
 .slit-input-flag:focus,
-.slit-input-flag:focus-visible { --edge-color: rgba(217, 119, 87, 0.95); }
+.slit-input-flag:focus-visible {
+  --edge-color: var(--flag);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--flag) 18%, transparent);
+}
 
-/* A <select> paints its own dropdown from its background-color, and the
-   `background` shorthand above resets that to transparent. The browser then
-   falls back to the system list colour (white) while the inherited ink stays
-   near-white, so the options read white on white. Naming the popup colours is
-   the only hook CSS gets here, because the list itself is drawn by the OS.
-   Mobile pickers ignore these and follow `color-scheme: dark` on html. */
+/* A <select> paints its own dropdown from its background-color. The field
+   now sets one, but the option list is drawn by the OS and ignores the
+   field's text colour on some platforms, so name both explicitly. Mobile
+   pickers ignore these and follow `color-scheme: dark` on html. */
 .slit-input option {
   background-color: var(--color-card);
   color: var(--color-ink);
 }
 
-/* Inline code chip: the input treatment on an inline-block token. */
+/* Inline code chip: a small filled token. */
 .slit-inline {
   display: inline-block;
-  border: 1px solid transparent;
+  border: 1px solid var(--slit);
   border-radius: 4px;
-  background:
-    linear-gradient(90deg, transparent 0, var(--edge) 5px, var(--edge) calc(100% - 5px), transparent 100%) top / 100% 1px no-repeat,
-    linear-gradient(90deg, transparent 0, var(--edge) 5px, var(--edge) calc(100% - 5px), transparent 100%) bottom / 100% 1px no-repeat,
-    linear-gradient(180deg, transparent 0, var(--edge) 5px, var(--edge) calc(100% - 5px), transparent 100%) left / 1px 100% no-repeat,
-    linear-gradient(180deg, transparent 0, var(--edge) 5px, var(--edge) calc(100% - 5px), transparent 100%) right / 1px 100% no-repeat;
+  background-color: var(--card);
 }
 
-/* The claim-line input's underline: a horizontal slit under the name,
-   thickening on focus. --edge recolors it for the negative state. */
-/* The claim underline carries the availability verdict: ink while a name is
-   free or untested, flag once it is refused. Registering the colour as a
-   typed custom property is what makes that flip animatable at all -- an
+/* The claim-line input's underline carries the availability verdict: ink
+   while a name is free or untested, flag once it is refused. Registering the
+   colour as a typed custom property is what makes that flip animatable -- an
    unregistered var jumps, because the gradient it feeds cannot interpolate.
-   Same idiom as --slit-line and --edge-color above. Its own name rather than
-   the shared --edge, so registering a type here cannot affect the slit inputs
-   that also read --edge. */
+   Same idiom as --slit-line and --edge-color. Its own name rather than the
+   shared --edge, so typing it here cannot affect the inputs that read --edge.
+   It reads the semantic tokens directly (a registered property accepts a
+   var() value), so a palette change reaches it with nothing to keep in sync. */
 @property --claim-edge {
   syntax: '<color>';
   inherits: true;
@@ -481,16 +470,12 @@ a {
 }
 .claim-underline {
   border: 0;
-  /* Literal colours, not var(--ink) / var(--flag): a registered custom
-     property whose value is a var() reference is invalid at computed-value
-     time and silently falls back to initial-value, which drops the verdict
-     colour entirely. These two must stay in step with --ink and --flag. */
-  --claim-edge: #edf1f5;
+  --claim-edge: var(--ink);
   background: linear-gradient(90deg, transparent, var(--claim-edge) 12%, var(--claim-edge) 88%, transparent) bottom / 100% 2px no-repeat;
   transition: background-size 0.15s ease, --claim-edge 0.2s ease;
 }
 .claim-underline-flag {
-  --claim-edge: #d97757;
+  --claim-edge: var(--flag);
 }
 .claim-underline:focus-visible {
   background-size: 100% 3px;
@@ -658,7 +643,9 @@ a {
 }
 [data-nav][data-scrolled='true'] > header {
   background-color: color-mix(in srgb, var(--paper) 96%, transparent);
-  --slit-line: var(--slit-frame-hi);
+  /* --slit, not --slit-line: the header's rule is .slit-bottom, which reads
+     --slit. --slit-line only reaches .slit-frame. */
+  --slit: var(--slit-frame-hi);
 }
 
 /* DNS table rows arrive in sequence. A <tr> cannot be wrapped in the Reveal
@@ -707,4 +694,31 @@ a {
   .panel-in {
     animation: none !important;
   }
+}
+
+/* ── DNS record table ────────────────────────────────────────────────
+   Read like a zone file: a record type is a fixed-width label, rows are
+   separated by the structural rule (the .slit-top each row already carries),
+   and a hovered row takes the card surface so the Edit/Delete pair reads as
+   belonging to that row. The hover is a background change only -- no
+   movement, because rows in a control panel should not shift under the
+   pointer. */
+.dns-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .dns-table tbody tr:hover {
+    background-color: var(--card);
+  }
+}
+.dns-type {
+  display: inline-block;
+  min-width: 3.25rem;
+  border: 1px solid var(--slit-frame-hi);
+  border-radius: 4px;
+  padding: 1px 6px;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
 }
