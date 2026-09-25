@@ -1,10 +1,20 @@
 {
   "github": "preetmendpara",
   "included": 1,
-  "adminGranted": 0,
+  "adminGranted": 1,
   "names": [
     "preet"
   ],
   "pending": {},
-  "history": []
+  "pullRequests": {},
+  "history": [
+    {
+      "at": "2026-09-25T05:09:50.841Z",
+      "by": "preetmendpara",
+      "action": "grant",
+      "amount": 1,
+      "reason": "",
+      "adminGranted": 1
+    }
+  ]
 }
