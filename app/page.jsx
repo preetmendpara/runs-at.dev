@@ -6,6 +6,7 @@ import { Section, Quote } from './components/Section.jsx';
 import { Divider, StatusBadge } from './components/ui.jsx';
 import { DocList } from './docs/components.jsx';
 import HomeMap from './components/home-map.jsx';
+import AdBanner from './components/ad-banner.jsx';
 import { CLAIM_GEO } from './components/claim-geo.js';
 import { geoPlacement } from '../lib/geo-placement.js';
 import { readRegistry } from '../lib/registry-files.js';
@@ -281,6 +282,10 @@ export default async function Home() {
             </p>
           </div>
         </Section>
+
+        {/* The one ad slot on the site: below the explanatory content, far
+            from the claim form, before the link grid. */}
+        <AdBanner />
 
         <Section title="Where to go next">
           {/* Link grid, service-cell style: each cell outlined by its own
