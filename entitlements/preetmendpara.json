@@ -1,10 +1,19 @@
 {
   "github": "preetmendpara",
   "included": 1,
-  "adminGranted": 0,
+  "adminGranted": 1,
   "names": [
     "preet"
   ],
   "pending": {},
-  "history": []
+  "history": [
+    {
+      "at": "2026-09-25T04:48:55.316Z",
+      "by": "preetmendpara",
+      "action": "grant",
+      "amount": 1,
+      "reason": "staging branch only: room for pr-slots test claims",
+      "adminGranted": 1
+    }
+  ]
 }
