@@ -6,9 +6,16 @@ import { REPO_URL } from '../../../lib/repo.js';
 import { claimedNamesFromTree, similarNames } from '../../../lib/similar-names.js';
 import { StatusBadge } from '../../components/ui.jsx';
 
-// Record freshness, not the GitHub profile's: a name claimed just now must
-// stop serving a cached 404 within seconds, not up to an hour.
-export const revalidate = 30;
+// Record freshness comes from the registry webhook, not this timer. Every
+// push touching domains/<name>.json calls revalidatePath('/sites/<name>')
+// (app/api/revalidate), which purges this page and its cached record read
+// within seconds -- a new claim stops showing "available" as soon as it
+// lands. The hour is only the fallback window if a webhook delivery is
+// missed. It was 30s; at that interval every actively visited card cost up
+// to 120 record reads an hour out of CARD_TOKEN's 5,000, which ran out at
+// ~40 busy names. A wrong "available" here cannot cause a double claim:
+// /api/claim re-reads the record from GitHub and answers 409.
+export const revalidate = 3600;
 
 // Wildcard DNS makes every grammar-valid hostname live, so an anonymous curl
 // loop over a few thousand names can exhaust the shared registry quota. A
@@ -30,7 +37,9 @@ async function githubProfile(login) {
 }
 
 async function fetchRecord(name) {
-  const fetchImpl = (url, init) => fetch(url, { ...init, next: { revalidate: 30 } });
+  // Same window as the page, for the same reason: the webhook's
+  // revalidatePath also clears this fetch, so 3600 is only the fallback.
+  const fetchImpl = (url, init) => fetch(url, { ...init, next: { revalidate: 3600 } });
   return getRecord(name, { token: CARD_TOKEN, fetchImpl });
 }
 
