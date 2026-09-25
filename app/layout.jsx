@@ -6,7 +6,7 @@ import Nav from './components/Nav.jsx';
 import EdgePicker from './edge-picker.jsx';
 import { publishedPosts } from '../lib/blog.js';
 import { Analytics } from '@vercel/analytics/next';
-import Popunder from './components/popunder.jsx';
+import SideAdRails from './components/side-ad-rails.jsx';
 
 // Satoshi stands in for Aeonik (per the style reference's own substitute
 // list): geometric, slightly warm, carrying body copy at weight 400.
@@ -95,13 +95,16 @@ export default function RootLayout({ children }) {
         <Nav />
         {/* Right padding on phones keeps text clear of the edge dock. */}
         <div className="pr-10 sm:pr-0">
-          {children}
+          {/* relative: the desktop side-rail ads position against the page
+              content only, so they stop above the footer. */}
+          <div className="relative">
+            {children}
+            <SideAdRails />
+          </div>
           <Footer />
         </div>
         <EdgePicker hideBlog={publishedPosts().length === 0} />
         <Analytics />
-        {/* HilltopAds Popunder: decides for itself, per route, whether to load. */}
-        <Popunder />
       </body>
     </html>
   );

@@ -2,7 +2,7 @@ import { Section, Quote } from '../components/Section.jsx';
 
 export const metadata = {
   title: 'Privacy',
-  description: 'What runs-at.dev stores, what is public by design, the sign-in cookie, privacy-friendly page counts, and the HilltopAds advertising on the homepage and content pages.',
+  description: 'What runs-at.dev stores, what is public by design, the sign-in cookie, privacy-friendly page counts, and the HilltopAds banner advertising.',
   alternates: { canonical: 'https://runs-at.dev/privacy' },
   openGraph: { title: 'Privacy · runs-at.dev' },
 };
@@ -71,35 +71,32 @@ export default function Privacy() {
 
       <Section title="Advertising">
         <p className="text-sm leading-relaxed sm:text-base">
-          runs-at.dev shows advertising provided by HilltopAds, in two formats. Neither runs on
-          claimed{' '}
+          runs-at.dev shows banner advertising provided by HilltopAds. There are three 300&times;250
+          banners, and none of them runs on claimed{' '}
           <code className="rounded-[4px] border border-(--color-rule) bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-[0.9em]">*.runs-at.dev</code>{' '}
           names.
         </p>
         <ul className="list-disc space-y-2 pl-6 text-sm leading-relaxed sm:text-base">
           <li>
-            <strong className="font-normal text-(--color-ink)">A banner on the homepage.</strong> It
-            loads lazily: nothing is requested from HilltopAds for it until the banner comes close to
-            the visible part of the page.
+            <strong className="font-normal text-(--color-ink)">One on the homepage.</strong> It loads
+            lazily: nothing is requested from HilltopAds for it until the banner comes close to the
+            visible part of the page.
           </li>
           <li>
-            <strong className="font-normal text-(--color-ink)">A popunder on selected content
-            pages:</strong> the documentation, the FAQ, and the about, stats, blog, policy, privacy and
-            contact pages. After you click on one of these pages, it can open an advertising tab or
-            window. It is not loaded on the homepage, the manage and admin pages, sign-in, the API, or
-            the debugging and profile-card pages.
+            <strong className="font-normal text-(--color-ink)">Two beside the content</strong>, one on
+            each side, on the documentation, the FAQ, and the about, policy, privacy, contact and blog
+            pages. They appear, and their code loads, only on screens at least 1680 pixels wide; on
+            smaller screens nothing is requested for them. They are not used on the homepage, the
+            stats page, the manage and admin pages, sign-in, the API, or the debugging and
+            profile-card pages.
           </li>
         </ul>
         <p className="text-sm leading-relaxed sm:text-base">
-          When either loads, your browser connects to HilltopAds&rsquo; servers to fetch and display
-          ads. The popunder&rsquo;s code also sends error and status reports to HilltopAds that include
-          the page address, the addresses of any parent pages, and your browser&rsquo;s user-agent
-          string, and it keeps visit counters in your browser&rsquo;s local storage. Like other
-          advertising technology, HilltopAds may receive and process further technical information to
-          deliver and measure ads. What it collects, and how it uses it, is described in{' '}
+          Once a banner loads, your browser connects to HilltopAds&rsquo; servers to fetch and display
+          the ad. Like other advertising technology, HilltopAds may receive and process technical
+          information about that request to deliver and measure ads. What it collects, and how it
+          uses it, is described in{' '}
           <a className="text-(--color-ink) underline" href="https://hilltopads.com/privacy-policy" rel="noopener noreferrer">HilltopAds&rsquo; privacy policy</a>.
-        </p>
-        <p className="text-sm leading-relaxed sm:text-base">
           runs-at.dev does not pass your GitHub sign-in to HilltopAds, and the session cookie is
           marked so that no script on the page, the ads&rsquo; included, can read it.
         </p>
@@ -113,7 +110,7 @@ export default function Privacy() {
           runs-at.dev and answers every claimed name before passing the request on). A visit to any
           <code className="rounded-[4px] border border-(--color-rule) bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-[0.9em]">*.runs-at.dev</code> name
           therefore passes through Cloudflare. None of these receive anything beyond what is needed
-          to answer your request. The site also loads ads from HilltopAds, as described under
+          to answer your request. Some pages also load banner ads from HilltopAds, as described under
           Advertising above.
         </p>
       </Section>
