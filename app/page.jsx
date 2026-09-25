@@ -117,7 +117,7 @@ export default async function Home() {
 
         <p className="mt-5 font-(family-name:--font-mono) text-xs tracking-[0.04em] text-(--color-muted)">
           {registryList.length} {registryList.length === 1 ? 'name' : 'names'} claimed · {placement.resolved} on the public claim map ·
-          one per GitHub account · open source
+          1 free domain included per GitHub account · open source
         </p>
 
         <div className="mt-8 flex justify-center">

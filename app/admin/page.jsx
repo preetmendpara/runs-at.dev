@@ -30,8 +30,8 @@ export default async function Admin() {
         Domain slots
       </h1>
       <p className="mt-4 max-w-[540px] text-[16px] leading-[1.5] text-(--color-muted)">
-        Every account gets one name. Extra slots granted here let an account claim more
-        through the normal flow.
+        Every account has 1 free domain included. Extra slots granted here let an account
+        claim more through the normal flow.
       </p>
       <div className="mt-12">
         <AdminPanel />

@@ -37,8 +37,8 @@ const faqs = [
     a: 'Sign-in and eligibility both run through GitHub: your account needs to be at least 30 days old with at least one public repository, so claiming is cheap for a real developer and expensive for a bot farm sweeping names at scale.',
   },
   {
-    q: 'How many names can I have?',
-    a: 'Every account gets one name included. The maintainer can grant an account extra slots, and every name you hold is managed from the same GitHub sign-in. The limit is enforced at claim time.',
+    q: 'How many domains can I have?',
+    a: '1 free domain is included with every GitHub account. Additional domains may be granted by the administrator. A GitHub account can own several runs-at.dev domains, all managed from one sign-in at runs-at.dev/manage. The limit is enforced at claim time.',
   },
   {
     q: 'What stops someone claiming a brand name?',

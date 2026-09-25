@@ -140,8 +140,11 @@ export default async function Site({ params }) {
                   {name}.runs-at.dev
                 </a>
               </h1>
+              {/* Always the apex: the session cookie is host-only and never
+                  sent to <name>.runs-at.dev, so this page stays public and
+                  /manage does the sign-in and ownership check. */}
               <a
-                href="/manage"
+                href={`https://runs-at.dev/manage?name=${encodeURIComponent(name)}`}
                 className="slit-frame [--slit-over:8px] rounded-full px-3 py-1 font-(family-name:--font-mono) text-xs text-(--color-muted) transition-colors hover:text-(--color-ink)"
               >
                 manage

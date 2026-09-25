@@ -80,7 +80,8 @@ Three workflows, all under `.github/workflows/`:
   case-insensitively, since GitHub logins are unique that way), the name
   must not be reserved, `claimedAt` may not be in the future, the account
   must pass `lib/eligibility.js` (30 days old, one public repository), and
-  it must not already own a name. A pull request is a second front door
+  it must have a free slot (1 included plus any administrator grant) that
+  this pull request has reserved. A pull request is a second front door
   onto the same registry, so any gate it checked less strictly would
   simply become the way around that gate.
 - **Both claim lookups fail closed.** Eligibility comes from

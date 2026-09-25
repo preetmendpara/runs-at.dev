@@ -622,7 +622,8 @@ function SwapZone({ name }) {
 
       if (res.ok && body.ok) {
         setResult({ ok: true, text: body.message });
-        setTimeout(() => { window.location.href = '/manage'; }, 2000);
+        // Straight back to the swapped-to name, not whichever domain is listed first.
+        setTimeout(() => { window.location.href = `/manage?name=${encodeURIComponent(body.name ?? '')}`; }, 2000);
       } else {
         setResult({ ok: false, text: body.detail ?? body.error ?? 'swap failed' });
       }
@@ -738,8 +739,9 @@ function ReleaseZone({ name }) {
       const body = await res.json().catch(() => ({}));
       if (res.ok && body.ok) {
         setResult({ ok: true, text: body.message });
-        // Redirect to homepage after a short delay so the user sees the confirmation
-        setTimeout(() => { window.location.href = '/'; }, 2000);
+        // Back to the domain list after a short delay so the user sees the
+        // confirmation; with nothing left it offers to claim one.
+        setTimeout(() => { window.location.href = '/manage'; }, 2000);
       } else {
         setResult({ ok: false, text: body.detail ?? body.error ?? 'release failed' });
       }
