@@ -1,0 +1,49 @@
+name: revalidate-prs
+
+# A registry pull request's `validate` pass is a statement about the registry
+# at the moment it ran. Every claim, release, swap or grant on the website
+# commits to domains/ or entitlements/ on main, and any of them can make an
+# earlier pass wrong -- the author claims a name on the site after their PR was
+# approved, and merging the PR would put them over their allowance. So whenever
+# those paths change on main, re-run `validate` on every open pull request that
+# touches them. validate.yml counts at the live tip of main, so the re-run
+# judges each PR against the allowance as it stands now, and a PR that no
+# longer fits turns red before anyone can merge it on the old result.
+#
+# Re-running changes nothing but check results. The only checkout is main,
+# for the helper script: no code from any pull request runs here.
+on:
+  push:
+    branches: [main]
+    paths: ['domains/**', 'entitlements/**']
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+
+# One sweep at a time; a newer push supersedes an older sweep still waiting.
+concurrency:
+  group: revalidate-prs
+  cancel-in-progress: true
+
+jobs:
+  revalidate:
+    runs-on: ubuntu-latest
+    steps:
+      # main, for scripts/rerun-validate.sh. Nothing from any pull request.
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Re-run validate on open registry pull requests
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for pr in $(gh pr list --repo "$REPO" --state open --base main --limit 200 --json number --jq '.[].number'); do
+            if gh pr view "$pr" --repo "$REPO" --json files --jq '.files[].path' | grep -qE '^(domains|entitlements)/'; then
+              bash scripts/rerun-validate.sh "$pr"
+            fi
+          done

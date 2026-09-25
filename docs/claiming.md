@@ -79,36 +79,85 @@ a real developer and expensive for a bot farm to fake at scale, which is
 the actual goal: keep the barrier low for genuine users and high for a
 land-grab.
 
-### The one-name-per-account limit
+### How many names an account may hold
 
-Each GitHub account may hold one claimed name at a time, enforced by
-`evaluateClaim` in `lib/claim.js`: `MAX_NAMES_PER_ACCOUNT` is `1`, and a
-claim past that returns `403 limit_reached`. `POST /api/claim`
-(`app/api/claim/route.js`) tracks how many names an account owns in a
-per-account index file, `owners/<login>.json`, read with `getOwnerIndex`
-and written with `putOwnerIndex` (both in `lib/owners.js`). A successful
-claim appends the new name to that account's index right after the record
-itself is written.
+Every eligible GitHub account gets **one included name**. The maintainer can
+grant any account **extra slots**, any positive number of them, from the
+admin panel at `/admin`. An account may hold `1 + adminGranted` names at
+once, and every one of them belongs to that same GitHub login: signing in
+once manages all of them. A slot is permission to claim, not a name. The
+account still claims each extra name itself through the normal flow, and
+every other rule on this page still applies to each one. A claim past the
+allowance returns `403 limit_reached`. Accounts nobody has granted anything
+to hold one name, exactly as before.
 
-That index is a cache, not the registry — `domains/` is. A name claimed by
-pull request never runs `putOwnerIndex`, so the index would undercount and
-hand the account a second name; `scripts/sync-owners.mjs` therefore
-rebuilds `owners/` from `domains/` after every merge that touches a record
-(`.github/workflows/sync-owners.yml`), and CI counts owned names by
-scanning `domains/` directly rather than trusting the index.
+The authoritative record is `entitlements/<login>.json` (`lib/entitlements.js`):
+`adminGranted`, plus `names`, the list of names holding a slot. A name
+reserved partway through a claim is also listed in `pending`, with the time
+it was reserved. An account without the file has the default of one
+included name and no grants. Every change to slots goes through one
+compare-and-swap on that file, re-checking the allowance against a fresh
+read: claiming, releasing, swapping, granting and revoking. So two claims
+from one account are applied one after the other and cannot together exceed
+the allowance. A revoke can only take back slots that are not in use.
 
-This closes the same land-grab door the eligibility rules open partway:
-even a 30-day-old account with a real repo could otherwise sweep a long
-list of short names. The index write happens after the record write and is
-not atomic with it, so a claim that races the same account twice in a
-narrow window can, in the worst case, leave that account owning one name
-more than the limit. The record write itself stays safe either way, since
-GitHub's Contents API refuses to create a file that already exists.
+A claim reserves its slot before it writes `domains/<name>.json`, and
+confirms or returns the slot afterwards. If a claim dies in between, its
+reservation keeps counting. It is only reclaimed once it is older than
+any claim can run, and only after `domains/` confirms that no file was
+written. Held names whose file is gone (released by pull request, or
+removed by moderation) are reclaimed the same way when the account is at its
+limit.
 
-The limit itself is applied by `withinNameLimit` in `lib/claim.js`, on both the
-site and the pull-request path. It also consults `MAINTAINER_PROJECT_NAMES`, a
-per-(account, name) exemption list that is currently empty, so today one name
-per account is the rule with no exceptions.
+`owners/<login>.json` stays a derived index, rebuilt from `domains/` by
+`scripts/sync-owners.mjs` after every merge that touches a record. It is only
+ever added to the count (it knows about names claimed by pull request), so a
+stale, rebuilt or deleted index can never free a slot. The pull-request path
+applies the same rule, using `withinNameLimit` in `lib/claim.js`. It counts
+owned names from a checkout of `domains/` and reads `entitlements/` at the
+**live tip** of `main` when the check runs, not at the commit the pull request was
+opened against. A pull request may not change `entitlements/` itself.
+
+A pull request that adds a name takes its slot in the entitlement record **before**
+it can be merged. `.github/workflows/pr-slots.yml` runs trusted base-branch code
+(`pull_request_target`, never the pull request's own code) and does three things:
+
+- When the pull request opens or changes, it reserves the slot. The reservation is
+  marked with the pull request number in `pullRequests`. It is refused, like a website
+  claim, if every slot is held.
+- When the pull request merges, it confirms the slot.
+- When the pull request closes unmerged, it hands the slot back.
+
+`validate` refuses a new-name pull request until that reservation is on `main`. So the
+website counts the name from before the merge onward, and no website claim can use the
+slot while the merge is catching up. An open pull request's slot never expires on a
+timer. If its cleanup never ran, a closed, unmerged pull request's slot is reclaimed
+the next time the account is at its limit. A name merged without a reservation (a
+maintainer override) is still recorded when the pull request closes, so from then on
+the account is counted as holding it.
+
+A passing check can also go stale: the author might claim a name on the website after
+their pull request was approved. Two things stop that stale pass being merged:
+
+- `.github/workflows/revalidate-prs.yml` re-runs `validate` on every open pull request
+  that touches `domains/` or `entitlements/` whenever either changes on `main`. The
+  re-run counts at the new tip, so a pull request that no longer fits turns red.
+- A branch ruleset on `main` should require the `validate` check and require pull
+  request branches to be up to date before merging. Then any commit to `main` puts
+  the pull request out of date, and updating it runs `validate` again. Three writers
+  commit straight to `main` and need to be bypass actors: the site's `REGISTRY_TOKEN`,
+  the workflow deploy key, and GitHub Actions (for `pr-slots`). While `REGISTRY_TOKEN`
+  belongs to the maintainer's own account, that bypass also lets the maintainer
+  override the rule by hand. Moving the token to a separate machine account removes
+  that override.
+
+Accounts that held names before `entitlements/` existed are given their file once,
+by `scripts/backfill-entitlements.mjs`. It lists the names each account owns in
+`domains/`, with one included slot and no grants. It never rewrites an existing file.
+It prints its plan unless run with `--write`.
+
+`MAINTAINER_PROJECT_NAMES` in `lib/claim.js` is a per-(account, name)
+exemption list for the pull-request path; it is currently empty.
 
 ## Reserved names
 

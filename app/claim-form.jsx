@@ -211,7 +211,7 @@ export default function ClaimForm({ signedIn }) {
           // with a way to reach that name. This is where a returning owner
           // ends up, so it has to lead somewhere.
           <a href="/manage" className="btn-pill">
-            {ownedName ? `Point ${ownedName}.runs-at.dev somewhere` : 'Point your name somewhere'}
+            {ownedName ? 'Manage your domains' : 'Point your name somewhere'}
             <span aria-hidden="true">→</span>
           </a>
         ) : signedIn ? (
@@ -307,9 +307,7 @@ function message(status, name, ownedName) {
     // Without it a 429 renders as "Something went wrong", which tells someone
     // who only has to wait that something is broken.
     rate_limited: 'Too many attempts in a short window. Give it a few minutes.',
-    limit_reached: ownedName
-      ? `You already own ${ownedName}.runs-at.dev. One per account for now.`
-      : 'You already have a name. One per account for now.',
+    limit_reached: "You've used all your domain slots.",
   };
   return map[status] ?? 'Something went wrong.';
 }

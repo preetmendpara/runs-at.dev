@@ -1,8 +1,19 @@
 name: validate
 
+# Runs on EVERY pull request and always reports a `validate` check, so the
+# check can be required on main without blocking pull requests that never
+# touch the registry: those pass at the scope step and run nothing else.
+#
+# pull_request_target, not pull_request. With pull_request, GitHub runs the
+# workflow file as it is in the pull request, so a pull request could rewrite
+# this file to skip validation and then pass the very check that is meant to
+# stop it. pull_request_target always runs this file from the base branch.
+# That trigger is only safe because nothing from the pull request runs here:
+# every checkout below is the base branch, and the validator reads the pull
+# request's files over the API as data. The token is read-only.
 on:
-  pull_request:
-    paths: ['domains/**']
+  pull_request_target:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -12,39 +23,74 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      # Check out the BASE branch, never the PR's merge commit. `actions/checkout` with no
-      # `ref` checks out the pull request's own content, so the job would run the PR's copy
-      # of lib/pr.js and scripts/validate-pr.mjs — a PR that rewrites validateChangeset to
-      # return { ok: true } would approve itself. The validator reads the PR's files over
-      # the API, so it never needs the PR's working tree.
+      # Registry pull requests are the ones that touch domains/ or
+      # entitlements/. Anything else is not this check's business.
+      - name: Scope
+        id: scope
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          files=$(gh api --paginate "repos/$REPO/pulls/$PR/files" --jq '.[].filename')
+          if printf '%s\n' "$files" | grep -qE '^(domains|entitlements)/'; then
+            echo "registry=true" >> "$GITHUB_OUTPUT"
+            echo "Registry pull request: running registry validation."
+          else
+            echo "registry=false" >> "$GITHUB_OUTPUT"
+            echo "No changes under domains/ or entitlements/: nothing to validate."
+          fi
+      # Check out the BASE branch, never the PR's merge commit, so the job runs
+      # the base copy of lib/pr.js and scripts/validate-pr.mjs -- a PR that
+      # rewrites validateChangeset to return { ok: true } cannot approve itself.
       #
       # `base.ref` (the branch tip) rather than `base.sha` (the branch as of the last PR
       # event): both are trusted content, but base.sha is frozen in the stored event payload,
       # so a re-run of an old PR keeps executing the validator as it was when the PR opened.
-      # A fix to the validator would then never reach the already-open PRs it was written for.
-      # BASE_SHA below stays base.sha — "what does the registry look like under this PR" is
+      # BASE_SHA below stays base.sha -- "what does the record look like under this PR" is
       # a question about the PR, and must not drift while the PR is being reviewed.
-      - uses: actions/checkout@v5
+      - if: steps.scope.outputs.registry == 'true'
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.base.ref }}
-      # The registry as of the PR's exact base commit, for counting how many names the
-      # author already owns. A second, sparse checkout rather than switching the one above
-      # to base.sha, so the validator code keeps running at the branch tip (see above)
-      # while the data it counts is pinned to BASE_SHA. Counting from disk replaces the
-      # Contents API, which lists at most 1,000 files per directory and cost one request
-      # per record -- past ~1,000 names it both missed owners and exhausted the token.
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ github.event.pull_request.base.sha }}
-          path: .base-registry
-          sparse-checkout: domains
           persist-credentials: false
-      - uses: actions/setup-node@v5
+      # The registry as it is on the base branch NOW, for counting the names and
+      # slots the author already holds. A second, sparse checkout so the data it
+      # counts is fetched separately from the validator code above. Counting from
+      # disk replaces the Contents API, which lists at most 1,000 files per
+      # directory and cost one request per record.
+      #
+      # `base.ref` (the branch tip when this job runs), not `base.sha` (the tip
+      # when the PR was last pushed): base.sha is frozen in the event payload, so
+      # a pass computed against it goes stale the moment the same account claims
+      # a name on the website. Counting at the live tip means every run, and every
+      # re-run -- revalidate-prs.yml and pr-slots.yml re-run this job when the
+      # registry or a reservation changes -- judges the PR against the allowance
+      # as it stands at that moment.
+      - if: steps.scope.outputs.registry == 'true'
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          path: .base-registry
+          # entitlements/ is the per-account allowance, read at the same commit.
+          sparse-checkout: |
+            domains
+            entitlements
+          persist-credentials: false
+      - if: steps.scope.outputs.registry == 'true'
+        name: Registry state counted
+        run: echo "Counting domains/ and entitlements/ at $(git -C .base-registry rev-parse HEAD)"
+      - if: steps.scope.outputs.registry == 'true'
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
-      - run: npm ci
-      - run: npm test
-      - run: node scripts/validate-pr.mjs
+      - if: steps.scope.outputs.registry == 'true'
+        run: npm ci
+      - if: steps.scope.outputs.registry == 'true'
+        run: npm test
+      - if: steps.scope.outputs.registry == 'true'
+        run: node scripts/validate-pr.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}

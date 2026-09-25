@@ -2,7 +2,8 @@ import { sessionFromRequest } from '../../../lib/session.js';
 import { validateName } from '../../../lib/name.js';
 import { isReserved } from '../../../lib/blocklist.js';
 import { getRecord, getContentsMeta, putRecord } from '../../../lib/registry.js';
-import { getOwnerIndex, putOwnerIndex } from '../../../lib/owners.js';
+import { updateOwnerIndex } from '../../../lib/owners.js';
+import { swapSlot, unswapSlot, settleSlot } from '../../../lib/entitlements.js';
 import { createRateLimiter, rateLimitHeaders } from '../../../lib/throttle.js';
 
 // Swaps the user's claimed name for a new one. Releases the old name
@@ -14,8 +15,7 @@ import { createRateLimiter, rateLimitHeaders } from '../../../lib/throttle.js';
 //
 // Release-before-create is deliberate: if the run dies halfway, the user
 // briefly owns nothing (retryable, harmless) instead of silently owning
-// two names, which would break the one-name-per-account invariant the PR
-// path enforces.
+// one name more than their allowance, which the PR path would then refuse.
 
 const SWAP_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const SWAP_MAX = 2;
@@ -109,6 +109,17 @@ export async function POST(request) {
     newRecord.country = meta.data.country;
   }
 
+  // Move the slot from `from` to `to` in the authoritative entitlement record
+  // before touching either file. The count does not change, so a swap never
+  // needs a free slot and never spends one, and a claim racing this swap
+  // sees the same number of slots held throughout. `to` stays pending until
+  // its file exists.
+  const moved = await swapSlot(session.login, from, to, { token, fetchImpl: uncachedFetch })
+    .catch(() => ({ ok: false, reason: 'threw' }));
+  if (!moved.ok) {
+    return Response.json({ ok: false, error: 'busy', detail: 'try again in a moment' }, { status: 503, headers: { 'Retry-After': '4' } });
+  }
+
   // Step 1: Release the old record first (SHA from our read, so if anything
   // changed underneath us the delete fails safely and nothing is lost). If
   // this fails, the swap has not happened at all and the user still owns
@@ -131,6 +142,8 @@ export async function POST(request) {
   ).catch(() => null);
 
   if (!deleteRes || !deleteRes.ok) {
+    // Nothing changed on disk, so put the slot back on the old name.
+    await unswapSlot(session.login, from, to, { token, fetchImpl: uncachedFetch }).catch(() => null);
     return Response.json({
       ok: false,
       error: 'release_failed',
@@ -143,6 +156,8 @@ export async function POST(request) {
   // cleanly. The old name is already released at this point; the user owns
   // nothing for the moment, which a retry fixes.
   const createResult = await putRecord(newRecord, { token, fetchImpl: uncachedFetch });
+  // Confirm `to`, or free the slot: `from` is already gone either way.
+  await settleSlot(session.login, to, createResult.ok, { token, fetchImpl: uncachedFetch }).catch(() => null);
   if (!createResult.ok) {
     const taken = createResult.reason === 'exists';
     return Response.json({
@@ -160,15 +175,14 @@ export async function POST(request) {
   // entry renders the swapped-away name as "could not be read" instead of
   // the new one. Best-effort for the same reason as /api/claim's index
   // write: the swap already succeeded, so never fail the request over it.
+  // A swap trades one name for another, so the count stays where it was and
+  // no extra slot is spent: `from` is replaced in place by `to`.
   try {
-    const index = await getOwnerIndex(session.login, { token, fetchImpl: uncachedFetch }).catch(() => null);
-    const names = (index?.names ?? []).filter((n) => n !== from);
-    if (!names.includes(to)) names.push(to);
-    const indexResult = await putOwnerIndex(session.login, names, {
-      token,
-      sha: index?.sha,
-      fetchImpl: uncachedFetch,
-    });
+    const indexResult = await updateOwnerIndex(
+      session.login,
+      (names) => [...names.filter((n) => n !== from && n !== to), to],
+      { token, fetchImpl: uncachedFetch },
+    );
     if (!indexResult.ok) {
       console.warn(`owner index update failed for ${session.login} after swap: ${indexResult.reason}`);
     }

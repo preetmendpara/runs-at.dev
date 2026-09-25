@@ -102,6 +102,8 @@ test('rejects a new file claiming a reserved name', async () => {
     readBase: async () => null,
     getUser: async () => ({ created_at: '2020-01-01T00:00:00Z', public_repos: 3 }),
     countOwnedNames: async () => 0,
+  getEntitlement: async () => ({ included: 1, adminGranted: 0 }),
+    getEntitlement: async () => ({ included: 1, adminGranted: 0 }),
   });
   assert.equal(out.ok, false);
   assert.ok(out.errors.some((e) => e.includes('reserved')));
@@ -139,6 +141,7 @@ const claim = (over = {}) => ({
   readBase: async () => null,
   getUser: async () => ELIGIBLE,
   countOwnedNames: async () => 0,
+  getEntitlement: async () => ({ included: 1, adminGranted: 0 }),
   now: NOW,
   ...over,
 });
@@ -205,7 +208,7 @@ test('rejects a claim from an account with no public repositories', async () => 
 test('rejects a second name for an account that already owns one', async () => {
   const out = await validateChangeset(claim({ countOwnedNames: async () => 1 }));
   assert.equal(out.ok, false);
-  assert.ok(out.errors.some((e) => e.includes('one name per account')));
+  assert.ok(out.errors.some((e) => e.includes('domain limit reached')));
 });
 
 const projectClaim = (author, over = {}) => claim({
@@ -218,22 +221,23 @@ const projectClaim = (author, over = {}) => claim({
     records: { CNAME: 'zordhalo.github.io' },
   }),
   countOwnedNames: async () => 1,
+  getEntitlement: async () => ({ included: 1, adminGranted: 0 }),
   ...over,
 });
 
 test('the upstream maintainer project names are not exempt here', async () => {
   const out = await validateChangeset(projectClaim('zordhalo'));
-  assert.ok(out.errors.some((e) => e.includes('one name per account')));
+  assert.ok(out.errors.some((e) => e.includes('domain limit reached')));
 });
 
 test('the project exemption is not transferable to another account', async () => {
   const out = await validateChangeset(projectClaim('someone-else'));
-  assert.ok(out.errors.some((e) => e.includes('one name per account')));
+  assert.ok(out.errors.some((e) => e.includes('domain limit reached')));
 });
 
 test('the project exemption does not cover unlisted names for the maintainer', async () => {
   const out = await validateChangeset(claim({ countOwnedNames: async () => 1 }));
-  assert.ok(out.errors.some((e) => e.includes('one name per account')));
+  assert.ok(out.errors.some((e) => e.includes('domain limit reached')));
 });
 
 test('rejects a claim with a future claimedAt', async () => {

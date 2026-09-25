@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { validateName } from './lib/name.js';
+import { adminFromRequest } from './lib/admin.js';
 
 const ROOT = 'runs-at.dev';
 
@@ -14,6 +15,15 @@ export const config = {
 
 export function proxy(request) {
   const host = (request.headers.get('host') ?? '').split(':')[0];
+
+  // /admin answers 403 to everyone but the maintainer, decided here on the
+  // server from the signed session, before any of the page is rendered. The
+  // page checks again, and the admin API checks on its own.
+  const path = request.nextUrl.pathname;
+  if (path === '/admin' || path.startsWith('/admin/')) {
+    const auth = adminFromRequest(request);
+    if (!auth.session) return new NextResponse(auth.status === 401 ? 'sign in required' : 'forbidden', { status: 403 });
+  }
 
   // Blog markdown twin: /blog/<slug>.md serves the post's raw markdown for
   // agents and the post page's "view as markdown" menu item. A distinct URL

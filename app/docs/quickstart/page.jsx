@@ -30,7 +30,7 @@ export default function Quickstart() {
         </p>
         <p className="text-sm leading-relaxed sm:text-base">
           Claiming also requires your GitHub account to be at least 30 days old with at least one
-          public repository, and one name per account. Both are checked at claim time, not just in
+          public repository, and one included name per account (the maintainer can grant more). Both are checked at claim time, not just in
           the form.
         </p>
       </Section>

@@ -1,6 +1,6 @@
 import { REPO_URL } from '../lib/repo.js';
 
-// One name per account, so a signed-in owner has nothing to claim. Showing
+// Shown to an owner who has used every slot, so has nothing to claim. Showing
 // them the claim form anyway offers an action that can only be refused, and
 // the refusal is where a returning owner used to dead-end. This replaces the
 // form with the thing they actually came back for: their own record, and a

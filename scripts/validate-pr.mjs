@@ -6,6 +6,7 @@ import {
   countOwnedNames,
   localDomainSource,
 } from '../lib/pr.js';
+import { localEntitlementSource } from '../lib/entitlements.js';
 
 const REPO = process.env.GITHUB_REPOSITORY;
 const PR = process.env.PR_NUMBER;
@@ -57,6 +58,9 @@ async function getUser(login) {
 // API, so the count has no 1,000-entry cap and costs nothing against the
 // token's rate limit.
 const countOwned = (login) => countOwnedNames(login, localDomainSource(path.resolve(REGISTRY_CHECKOUT)));
+// The allowance (one included name plus admin-granted slots) from the same
+// checkout, entitlements/<login>.json at BASE_SHA.
+const getEntitlement = localEntitlementSource(path.resolve(REGISTRY_CHECKOUT));
 
 const prRes = await api(`/repos/${REPO}/pulls/${PR}`);
 if (!prRes.ok) {
@@ -89,6 +93,9 @@ try {
     readBase: (p) => readAt(p, BASE_SHA),
     getUser,
     countOwnedNames: countOwned,
+    getEntitlement,
+    // A new name must already hold a slot reserved by this pull request.
+    prNumber: Number(PR),
   });
 } catch (err) {
   if (!(err instanceof RecordParseError)) throw err;
