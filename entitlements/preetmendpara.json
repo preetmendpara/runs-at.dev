@@ -3,13 +3,10 @@
   "included": 1,
   "adminGranted": 1,
   "names": [
-    "preet",
-    "pr-slot-test-preet"
+    "preet"
   ],
   "pending": {},
-  "pullRequests": {
-    "pr-slot-test-preet": 5
-  },
+  "pullRequests": {},
   "history": [
     {
       "at": "2026-09-25T05:09:50.841Z",
