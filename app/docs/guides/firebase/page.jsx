@@ -1,11 +1,12 @@
 import { Section } from '../../../components/Section.jsx';
 import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record } from '../../components.jsx';
+import { SITE_OG_IMAGE } from '../../../../lib/og.js';
 
 export const metadata = {
   title: 'Firebase Hosting',
   description: 'Point name.runs-at.dev at a Firebase Hosting site with an A record.',
   alternates: { canonical: 'https://runs-at.dev/docs/guides/firebase' },
-  openGraph: { title: 'Firebase Hosting · runs-at.dev' },
+  openGraph: { title: 'Firebase Hosting · runs-at.dev', images: SITE_OG_IMAGE },
 };
 
 export default function FirebaseGuide() {

@@ -1,11 +1,12 @@
 import { Section } from '../../../components/Section.jsx';
 import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record } from '../../components.jsx';
+import { SITE_OG_IMAGE } from '../../../../lib/og.js';
 
 export const metadata = {
   title: 'URL redirect',
   description: 'Point name.runs-at.dev at any link with a URL record, no hosting required.',
   alternates: { canonical: 'https://runs-at.dev/docs/guides/url-redirect' },
-  openGraph: { title: 'URL redirect · runs-at.dev' },
+  openGraph: { title: 'URL redirect · runs-at.dev', images: SITE_OG_IMAGE },
 };
 
 export default function UrlRedirectGuide() {

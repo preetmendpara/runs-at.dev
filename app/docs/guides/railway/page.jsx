@@ -1,11 +1,12 @@
 import { Section } from '../../../components/Section.jsx';
 import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record, Warning } from '../../components.jsx';
+import { SITE_OG_IMAGE } from '../../../../lib/og.js';
 
 export const metadata = {
   title: 'Railway',
   description: 'Point name.runs-at.dev at a Railway service with a CNAME record, and the one case our schema cannot express.',
   alternates: { canonical: 'https://runs-at.dev/docs/guides/railway' },
-  openGraph: { title: 'Railway · runs-at.dev' },
+  openGraph: { title: 'Railway · runs-at.dev', images: SITE_OG_IMAGE },
 };
 
 export default function RailwayGuide() {

@@ -1,11 +1,12 @@
 import { Section } from '../components/Section.jsx';
 import { Eyebrow, DocTitle, Lede, DocList } from './components.jsx';
+import { SITE_OG_IMAGE } from '../../lib/og.js';
 
 export const metadata = {
   title: 'Docs',
   description: 'Documentation for runs-at.dev: quickstart, the full record reference, provider guides, and where to find the source.',
   alternates: { canonical: 'https://runs-at.dev/docs' },
-  openGraph: { title: 'Docs · runs-at.dev' },
+  openGraph: { title: 'Docs · runs-at.dev', images: SITE_OG_IMAGE },
 };
 
 export default function Docs() {
@@ -25,6 +26,7 @@ export default function Docs() {
             { href: '/docs/records', label: 'Record reference', note: 'every field, every record type, the rules' },
             { href: '/docs/guides', label: 'Guides', note: 'copy-paste walkthroughs for hosts, email, and verification' },
             { href: '/docs/seo', label: 'SEO', note: 'how search engines treat a name, and what is per host' },
+            { href: '/docs/free-subdomain-vs-domain', label: 'Free subdomain vs free domain', note: 'Understand ownership, DNS, SEO, email, and when a registrable domain may make more sense.' },
             { href: '/docs/resources', label: 'Resources', note: 'the repo, the schema, abuse reporting, the policy' },
           ]}
         />

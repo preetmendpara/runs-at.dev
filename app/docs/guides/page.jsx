@@ -1,11 +1,12 @@
 import { Section } from '../../components/Section.jsx';
 import { Eyebrow, DocTitle, Lede, DocList } from '../components.jsx';
+import { SITE_OG_IMAGE } from '../../../lib/og.js';
 
 export const metadata = {
   title: 'Guides',
   description: 'Copy-paste walkthroughs for pointing a runs-at.dev name at a host, email forwarding, or a social verification record.',
   alternates: { canonical: 'https://runs-at.dev/docs/guides' },
-  openGraph: { title: 'Guides · runs-at.dev' },
+  openGraph: { title: 'Guides · runs-at.dev', images: SITE_OG_IMAGE },
 };
 
 export default function Guides() {

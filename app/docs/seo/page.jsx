@@ -1,12 +1,13 @@
 import { Section, Quote } from '../../components/Section.jsx';
 import { Eyebrow, DocTitle, Lede, C, Code, Record, Warning } from '../components.jsx';
+import { SITE_OG_IMAGE } from '../../../lib/og.js';
 
 export const metadata = {
   title: 'SEO',
   description:
     'How search engines treat a runs-at.dev name: why robots.txt and sitemaps are per host, why a URL redirect cannot rank, and which canonical to declare.',
   alternates: { canonical: 'https://runs-at.dev/docs/seo' },
-  openGraph: { title: 'SEO · runs-at.dev' },
+  openGraph: { title: 'SEO · runs-at.dev', images: SITE_OG_IMAGE },
 };
 
 export default function Seo() {

@@ -252,3 +252,55 @@ test('TXT values are never lowercased or stripped', () => {
   const v = 'vc-domain-verify=amanworks.runs-at.dev,81E73fdea1b7f9058ffa';
   assert.deepEqual(buildSubdomains([{ label: '_vercel', type: 'TXT', value: v }]), { _vercel: { TXT: [v] } });
 });
+
+// ── switching hosting presets ─────────────────────────────────────────────
+// Drives presetTarget the way the form does: `field` is what the input holds,
+// `auto` what the form itself last inserted.
+const { presetTarget } = await import('../lib/record-fields.js');
+const PREFILL = { 'github-pages': 'friend.github.io', vercel: null, netlify: null, 'cloudflare-pages': null };
+function form(initial = '') {
+  const s = { field: initial, auto: null };
+  return {
+    pick(id) { const n = presetTarget({ current: s.field, autoFilled: s.auto, prefill: PREFILL[id] }); s.field = n.value; s.auto = n.autoFilled; return s.field; },
+    type(v) { s.field = v; },
+    get value() { return s.field; },
+  };
+}
+
+test('preset switch A: GitHub Pages → Vercel clears the auto-filled target', () => {
+  const f = form();
+  assert.equal(f.pick('github-pages'), 'friend.github.io');
+  assert.equal(f.pick('vercel'), '');
+});
+
+test('preset switch B: a target the user edited survives GitHub Pages → Vercel', () => {
+  const f = form();
+  f.pick('github-pages');
+  f.type('abc123.vercel-dns-017.com');
+  assert.equal(f.pick('vercel'), 'abc123.vercel-dns-017.com');
+  f.type('friend.github.io'); // retyped by hand to the same text: still the user's
+  assert.equal(f.pick('netlify'), 'friend.github.io');
+});
+
+test('preset switch C: Vercel → GitHub Pages fills the empty field', () => {
+  const f = form();
+  assert.equal(f.pick('vercel'), '');
+  assert.equal(f.pick('github-pages'), 'friend.github.io');
+});
+
+test('preset switch D and E: GitHub Pages → Netlify or Cloudflare Pages clears it', () => {
+  for (const next of ['netlify', 'cloudflare-pages']) {
+    const f = form();
+    f.pick('github-pages');
+    assert.equal(f.pick(next), '', next);
+  }
+});
+
+test('preset switch F: re-picking a preset keeps its own value; a saved target is never cleared', () => {
+  const f = form();
+  f.pick('github-pages');
+  assert.equal(f.pick('github-pages'), 'friend.github.io');
+  const saved = form('myproject.netlify.app'); // loaded from the committed record
+  assert.equal(saved.pick('vercel'), 'myproject.netlify.app');
+  assert.equal(saved.pick('github-pages'), 'myproject.netlify.app');
+});

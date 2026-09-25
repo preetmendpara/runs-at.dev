@@ -1,11 +1,12 @@
 import { Section } from '../../../components/Section.jsx';
 import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record } from '../../components.jsx';
+import { SITE_OG_IMAGE } from '../../../../lib/og.js';
 
 export const metadata = {
   title: 'Codeberg Pages',
   description: 'Point name.runs-at.dev at a Codeberg Pages site with a CNAME record.',
   alternates: { canonical: 'https://runs-at.dev/docs/guides/codeberg-pages' },
-  openGraph: { title: 'Codeberg Pages · runs-at.dev' },
+  openGraph: { title: 'Codeberg Pages · runs-at.dev', images: SITE_OG_IMAGE },
 };
 
 export default function CodebergPagesGuide() {

@@ -8,7 +8,7 @@ import BadgeZone from './badge-zone.jsx';
 import { resolveManagedNames } from '../../lib/manage-select.js';
 
 export const metadata = {
-  title: 'Manage your domains · runs-at.dev',
+  title: 'Manage your domains',
   description: 'Point each of your runs-at.dev domains at your own hosting, or show a profile card.',
   robots: { index: false },
 };

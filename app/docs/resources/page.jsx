@@ -1,11 +1,12 @@
 import { Section, Quote } from '../../components/Section.jsx';
 import { C, Eyebrow, DocTitle, Lede, DocList } from '../components.jsx';
+import { SITE_OG_IMAGE } from '../../../lib/og.js';
 
 export const metadata = {
   title: 'Resources',
   description: 'Where to find the runs-at.dev registry, the record schema, how to report abuse, and where the policy lives.',
   alternates: { canonical: 'https://runs-at.dev/docs/resources' },
-  openGraph: { title: 'Resources · runs-at.dev' },
+  openGraph: { title: 'Resources · runs-at.dev', images: SITE_OG_IMAGE },
 };
 
 export default function Resources() {

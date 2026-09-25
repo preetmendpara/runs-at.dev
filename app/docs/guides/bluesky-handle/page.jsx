@@ -1,11 +1,12 @@
 import { Section } from '../../../components/Section.jsx';
 import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record } from '../../components.jsx';
+import { SITE_OG_IMAGE } from '../../../../lib/og.js';
 
 export const metadata = {
   title: 'Bluesky handle',
   description: 'Use you.runs-at.dev as a verified Bluesky handle with an _atproto TXT subdomain.',
   alternates: { canonical: 'https://runs-at.dev/docs/guides/bluesky-handle' },
-  openGraph: { title: 'Bluesky handle · runs-at.dev' },
+  openGraph: { title: 'Bluesky handle · runs-at.dev', images: SITE_OG_IMAGE },
 };
 
 export default function BlueskyHandleGuide() {

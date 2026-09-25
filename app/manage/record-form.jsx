@@ -6,7 +6,7 @@ import {
   modeOf, mxToLines, buildRecords,
   SUBDOMAIN_TYPES, buildSubdomains, subdomainsToRows,
   buildProfile, profileToRows,
-  recordsToRows, rowsToRecords, validateRow, ROW_TYPES,
+  recordsToRows, rowsToRecords, validateRow, ROW_TYPES, presetTarget,
 } from '../../lib/record-fields.js';
 import { siteStatus, friendlyError, featureCards, verifyRows, deleteConsequence, CHECK_SCHEDULE_MS } from '../../lib/manage-status.js';
 
@@ -94,7 +94,7 @@ const PRESETS = [
     prefillFor: (login) => (login ? `${String(login).toLowerCase()}.github.io` : ''),
     guide: null,
     steps: (name, login) => [
-      `Target ${login ? `${String(login).toLowerCase()}.github.io` : 'yourusername.github.io'} (or <project>.github.io if the site lives in a project repo)`,
+      `Target ${login ? `${String(login).toLowerCase()}.github.io` : 'yourusername.github.io'} — always <user-or-org>.github.io, never the repository name, even for a project site`,
       `In that repo: Settings → Pages → Custom domain, enter ${name}.runs-at.dev, save`,
       "Save here. The zone publishes within a minute, HTTPS follows on GitHub's side",
     ],
@@ -126,14 +126,16 @@ const PRESETS = [
   {
     id: 'vercel',
     label: 'Vercel',
-    placeholder: 'cname.vercel-dns.com',
-    prefillFor: () => 'cname.vercel-dns.com',
+    // No prefill: Vercel shows each project its own CNAME target, so there is
+    // no safe default to put in the field.
+    placeholder: 'CNAME target shown in Vercel → Domains',
+    prefillFor: null,
     guide: '/docs/guides/vercel',
     steps: (name) => [
-      `In your Vercel project: Settings → Domains → Add, enter ${name}.runs-at.dev`,
-      'It will show a verification TXT starting with vc-domain-verify= — copy the whole value',
-      'Add it below as a subdomain record: label _vercel, type TXT',
-      'Save here. Vercel needs one re-check after the TXT is live, so give it a minute',
+      `In your Vercel project: Settings → Domains → Add, enter ${name}.runs-at.dev, and use the CNAME target it shows`,
+      'If Vercel requests verification, it shows a TXT starting with vc-domain-verify= — copy the whole value',
+      'Add that TXT below as a subdomain record: label _vercel, type TXT',
+      'Save here. If you added the TXT, press Refresh on Vercel once it is live',
     ],
   },
   {
@@ -208,18 +210,23 @@ export default function RecordForm({ name, record }) {
   }
 
   // Picking a preset swaps the placeholder and, when the preset can derive a
-  // target (GitHub Pages from the owner's login, Vercel's generic), prefills
-  // the field — but never over something the user typed themselves: only an
-  // empty field or another preset's own prefill is replaced.
+  // target (GitHub Pages from the owner's login), prefills the field. A value
+  // this form inserted is replaced on the next pick, or cleared when the new
+  // preset has no prefill; anything the user typed or saved is left alone.
+  // presetTarget in lib/record-fields.js holds the rule.
+  const autoFilledRef = useRef(null);
   function selectPreset(preset) {
     const deselecting = selectedPreset === preset.id;
     setSelectedPreset(deselecting ? null : preset.id);
     setStatus(null);
     if (deselecting) return;
-    const prefill = preset.prefillFor?.(record.owner?.github);
-    if (!prefill) return;
-    const presetValues = PRESETS.map((p) => p.prefillFor?.(record.owner?.github)).filter(Boolean);
-    if (!cname.trim() || presetValues.includes(cname.trim())) setCname(prefill);
+    const next = presetTarget({
+      current: cname,
+      autoFilled: autoFilledRef.current,
+      prefill: preset.prefillFor?.(record.owner?.github),
+    });
+    autoFilledRef.current = next.autoFilled;
+    setCname(next.value);
   }
 
   function setRow(i, patch) {
@@ -308,6 +315,7 @@ export default function RecordForm({ name, record }) {
     setErrors([]);
     setMode(savedMode);
     setCname(record.records?.CNAME ?? '');
+    autoFilledRef.current = null;
     setUrl(record.records?.URL ?? '');
     setA((record.records?.A ?? []).join('\n'));
     setTxt((record.records?.TXT ?? []).join('\n'));

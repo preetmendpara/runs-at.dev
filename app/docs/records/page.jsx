@@ -1,11 +1,12 @@
 import { Section, Quote } from '../../components/Section.jsx';
 import { Eyebrow, DocTitle, Lede, C, Code, Record } from '../components.jsx';
+import { SITE_OG_IMAGE } from '../../../lib/og.js';
 
 export const metadata = {
   title: 'Record reference',
   description: 'The complete runs-at.dev record format: every field, every supported record type, the coexistence rules, and why they exist.',
   alternates: { canonical: 'https://runs-at.dev/docs/records' },
-  openGraph: { title: 'Record reference · runs-at.dev' },
+  openGraph: { title: 'Record reference · runs-at.dev', images: SITE_OG_IMAGE },
 };
 
 function Row({ cells }) {

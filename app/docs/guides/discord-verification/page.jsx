@@ -1,11 +1,12 @@
 import { Section } from '../../../components/Section.jsx';
 import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record } from '../../components.jsx';
+import { SITE_OG_IMAGE } from '../../../../lib/og.js';
 
 export const metadata = {
   title: 'Discord verification',
   description: 'Verify ownership of you.runs-at.dev with Discord using a _discord TXT subdomain.',
   alternates: { canonical: 'https://runs-at.dev/docs/guides/discord-verification' },
-  openGraph: { title: 'Discord verification · runs-at.dev' },
+  openGraph: { title: 'Discord verification · runs-at.dev', images: SITE_OG_IMAGE },
 };
 
 export default function DiscordVerificationGuide() {
