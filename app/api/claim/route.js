@@ -1,14 +1,15 @@
 import { sessionFromRequest } from '../../../lib/session.js';
 import { evaluateClaim } from '../../../lib/claim.js';
 import { putRecord } from '../../../lib/registry.js';
-import { getOwnerIndex, putOwnerIndex } from '../../../lib/owners.js';
+import { updateOwnerIndex } from '../../../lib/owners.js';
+import { reserveSlot, settleSlot } from '../../../lib/entitlements.js';
 import { createRateLimiter, rateLimitHeaders } from '../../../lib/throttle.js';
 
 const TOKEN = () => process.env.REGISTRY_TOKEN;
 
 // Same rationale as /api/records: claiming spends the same shared
-// REGISTRY_TOKEN quota (an owner-index read plus a record write per
-// attempt), so a looped or leaned-on button must be capped per account here
+// REGISTRY_TOKEN quota (entitlement and owner-index reads and writes plus a
+// record write per attempt), so a looped or leaned-on button must be capped per account here
 // too, not just on the edit endpoint.
 const CLAIM_WINDOW_MS = 10 * 60 * 1000;
 const CLAIM_MAX = 12;
@@ -23,7 +24,6 @@ export async function POST(request) {
 
   const session = sessionFromRequest(request, process.env.SESSION_SECRET);
 
-  let ownerIndex = null;
   if (session?.login) {
     const budget = takeClaim(session.login.toLowerCase());
     if (!budget.ok) {
@@ -32,15 +32,6 @@ export async function POST(request) {
         { error: 'rate_limited', retryInMs: budget.retryAfterMs },
         { status: 429, headers: { 'Retry-After': String(seconds), ...rateLimitHeaders(budget) } },
       );
-    }
-    try {
-      ownerIndex = await getOwnerIndex(session.login, { token: TOKEN() });
-    } catch {
-      // Fail closed: a rate-limited or errored owner-index read must not
-      // let the claim through uncounted, because load is exactly when a
-      // land grab happens. Answer with the same busy response putRecord
-      // uses for its own GitHub failures.
-      return BUSY_RESPONSE();
     }
   }
 
@@ -56,52 +47,45 @@ export async function POST(request) {
     name,
     session,
     existing: null,
-    ownedCount: ownerIndex?.names?.length ?? 0,
+    // The per-account limit is not decided here: reserveSlot below decides it
+    // atomically, and can reclaim a slot this snapshot would count as used.
     country: /^[A-Z]{2}$/.test(country) ? country : undefined,
   });
-  if (!decision.ok) {
-    // Hand back the names this account already holds. Only limit_reached
-    // needs them, but they cost nothing to include and they are the caller's
-    // own records, not anyone else's. Without them the form can only say "you
-    // already have a name" without saying which -- a dead end at exactly the
-    // moment a returning owner is trying to reach their record.
-    const owned = ownerIndex?.names?.length ? ownerIndex.names : undefined;
-    return Response.json({ error: decision.code, owned }, { status: decision.status });
+  if (!decision.ok) return refusal(decision.code, decision.status);
+
+  // Take the slot in entitlements/<login>.json before writing the record. That
+  // write is a compare-and-swap which re-checks the allowance against a fresh
+  // read, so claims, releases, swaps and admin changes for one account are
+  // applied one after another: a second claim racing this one sees this
+  // reservation and is refused once the allowance is used up. The check in
+  // evaluateClaim above is only the fast path.
+  const reservation = await reserveSlot(session.login, name, { token: TOKEN() });
+  if (!reservation.ok) {
+    if (reservation.reason === 'limit_reached') return refusal('limit_reached', 403, reservation.held);
+    return BUSY_RESPONSE();
   }
 
   const result = await putRecord(decision.record, { token: TOKEN() });
 
+  // Confirm the slot, or hand it back if nothing was written. A slot this
+  // claim did not reserve (the name was already held) is left as it was. If
+  // settling fails the reservation simply stays pending: it keeps counting
+  // until it expires and is checked against domains/, so a failure here can
+  // only leave the account short a slot for a while, never over its limit.
+  if (reservation.reserved || result.ok) {
+    const settled = await settleSlot(session.login, name, result.ok, { token: TOKEN() })
+      .catch(() => ({ ok: false, reason: 'threw' }));
+    if (!settled.ok) console.warn(`slot settle failed for ${session.login}/${name}: ${settled.reason}`);
+  }
+
   if (result.ok) {
-    // Second, non-atomic commit: two claims racing from the same account
-    // inside this window can both pass evaluateClaim's limit check and end
-    // up with two names each recorded here. The record write above stays
-    // safe regardless (the contents API rejects a create over an existing
-    // path), so the worst case is an account owning one more name than the
-    // limit allows, not a corrupted or lost record. Not worth the extra
-    // machinery of an atomic two-file commit via the Git Data API for that.
-    try {
-      const names = [...(ownerIndex?.names ?? []), name];
-      // One retry: this write is what keeps the one-per-account limit honest
-      // on the next request, and its usual failure (403/429) is exactly the
-      // transient a second attempt survives. The claim itself is never failed
-      // over it; the sync-owners rebuild heals whatever both attempts miss.
-      let indexResult = await putOwnerIndex(session.login, names, {
-        token: TOKEN(),
-        sha: ownerIndex?.sha,
-      }).catch(() => ({ ok: false, reason: 'threw' }));
-      if (!indexResult.ok) {
-        indexResult = await putOwnerIndex(session.login, names, {
-          token: TOKEN(),
-          sha: ownerIndex?.sha,
-        }).catch(() => ({ ok: false, reason: 'threw' }));
-      }
-      if (!indexResult.ok) {
-        console.warn(`owner index write failed for ${session.login}: ${indexResult.reason}`);
-      }
-    } catch (err) {
-      // The claim already succeeded — the user's name is genuinely theirs.
-      // Never fail the request over an index bookkeeping problem.
-      console.warn(`owner index write threw for ${session.login}: ${err.message}`);
+    // The owners/ index is derived (sync-owners rebuilds it from domains/ on
+    // this push); updating it now only keeps /manage current in the meantime.
+    const indexed = await updateOwnerIndex(session.login, (names) => (names.includes(name) ? null : [...names, name]), {
+      token: TOKEN(),
+    }).catch(() => ({ ok: false, reason: 'threw' }));
+    if (!indexed.ok && indexed.reason !== 'refused') {
+      console.warn(`owner index write failed for ${session.login}: ${indexed.reason}`);
     }
     return Response.json({ claimed: name, commit: result.commit ?? null });
   }
@@ -115,4 +99,13 @@ export async function POST(request) {
   }
 
   return Response.json({ error: 'server_error' }, { status: 500 });
+}
+
+// Hand back the names this account already holds. Only limit_reached needs
+// them, but they cost nothing to include and they are the caller's own
+// records, not anyone else's. Without them the form can only say "you have
+// used your slots" without saying where those names are.
+function refusal(code, status, names) {
+  const owned = names?.length ? names : undefined;
+  return Response.json({ error: code, owned }, { status });
 }

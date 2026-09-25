@@ -71,7 +71,7 @@ There's prior art doing exactly this: [is-a.dev](https://www.is-a.dev),
 Go to [runs-at.dev](https://runs-at.dev), sign in with GitHub, and type
 the name you want. If it's available, claiming it writes a record to
 `domains/<name>.json` in this repo, as shown above, and the name is live
-within seconds. One name per GitHub account. See
+within seconds. One name per GitHub account is included; the maintainer can grant extra slots, and every name an account holds is managed from the same sign-in. See
 [docs/claiming.md](./docs/claiming.md) for eligibility rules, the
 per-account limit, and why they exist.
 

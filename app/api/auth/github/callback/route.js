@@ -40,6 +40,9 @@ export async function GET(request) {
   const session = signSession(
     {
       login: user.login,
+      // The numeric id never changes, unlike the login, which can be renamed
+      // and then registered by someone else. lib/admin.js checks both.
+      id: user.id,
       avatar: user.avatar_url,
       name: user.name,
       bio: user.bio,

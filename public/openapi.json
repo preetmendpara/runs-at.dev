@@ -42,7 +42,7 @@
         "type": "apiKey",
         "in": "cookie",
         "name": "__Host-session",
-        "description": "GitHub OAuth session cookie, minted by the sign-in flow at https://runs-at.dev/api/auth/github (start) and /api/auth/github/callback (completion). Signed HttpOnly cookie, 24-hour TTL. Grants: claim (names:claim), edit own records (records:write), release (names:release), swap (names:swap), mint deploy tokens (tokens:mint). One name per GitHub account. Scopes granted: names:claim, records:write, names:release, names:swap, tokens:mint (machine list in components.securitySchemes.registryOAuth and /.well-known/oauth-protected-resource)."
+        "description": "GitHub OAuth session cookie, minted by the sign-in flow at https://runs-at.dev/api/auth/github (start) and /api/auth/github/callback (completion). Signed HttpOnly cookie, 24-hour TTL. Grants: claim (names:claim), edit own records (records:write), release (names:release), swap (names:swap), mint deploy tokens (tokens:mint). One included name per GitHub account, plus any slots the maintainer grants. Scopes granted: names:claim, records:write, names:release, names:swap, tokens:mint (machine list in components.securitySchemes.registryOAuth and /.well-known/oauth-protected-resource)."
       },
       "siteToken": {
         "type": "http",
@@ -479,7 +479,7 @@
       "post": {
         "operationId": "claimName",
         "summary": "Claim a subdomain for the signed-in GitHub account",
-        "description": "Writes domains/<name>.json to the registry and stamps the request's edge-inferred country (aggregate stats only). One name per account; the account must be 30+ days old with at least one public repo. DNS follows within seconds. Rate limited per session with automatic 503-retry semantics on the client side.",
+        "description": "Writes domains/<name>.json to the registry and stamps the request's edge-inferred country (aggregate stats only). One included name per account plus any maintainer-granted slots; the account must be 30+ days old with at least one public repo. DNS follows within seconds. Rate limited per session with automatic 503-retry semantics on the client side.",
         "tags": [
           "names"
         ],

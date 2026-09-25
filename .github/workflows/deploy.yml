@@ -16,7 +16,8 @@ on:
     # Vercel's free-tier upload quota ("api-upload-paid, more than 40000")
     # and every deploy after it failed while claims kept landing. Data
     # commits no longer deploy at all; the schedule below and
-    # workflow_dispatch remain the paths for forcing one.
+    # workflow_dispatch remain the paths for forcing one. entitlements/** is the
+    # per-account slot record, read at request time, so a grant never needs a build.
     #
     # /stats is the one page that reads domains/ at build time rather than
     # through the runtime API, so it depends on a deploy to stay fresh. The
@@ -26,7 +27,7 @@ on:
     # evidence, not application code, and a burst of spam should not spend
     # the deploy budget. `sites/**` is registry data too (hosted-site
     # pointers, written per deploy), so it never triggers a build either.
-    paths-ignore: ['domains/**', 'owners/**', 'data/**', 'docs/**', '.moderation/**', 'sites/**', '*.md', '!content/**']
+    paths-ignore: ['domains/**', 'owners/**', 'entitlements/**', 'data/**', 'docs/**', '.moderation/**', 'sites/**', '*.md', '!content/**']
   schedule:
     # Daily at 04:00 UTC (blog content changes always deploy: content/** is
     # un-ignored below, so a new post ships without waiting for the next day), off the top of the hour so it doesn't co-fire with

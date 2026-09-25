@@ -11,6 +11,7 @@ import { readRegistry } from '../lib/registry-files.js';
 import countryCentroids from '../scripts/country-centroids.json';
 import { readSession, SESSION_COOKIE } from '../lib/session.js';
 import { getOwnerIndex } from '../lib/owners.js';
+import { getEntitlement, heldNames, totalAllowed } from '../lib/entitlements.js';
 import { getRecord } from '../lib/registry.js';
 
 export const metadata = {
@@ -69,9 +70,15 @@ const LINKS = [
 async function ownedName(session) {
   if (!session?.login) return null;
   const token = process.env.REGISTRY_TOKEN;
-  const index = await getOwnerIndex(session.login, { token }).catch(() => null);
+  const [index, entitlement] = await Promise.all([
+    getOwnerIndex(session.login, { token }).catch(() => null),
+    getEntitlement(session.login, { token }).catch(() => null),
+  ]);
   const name = index?.names?.[0];
   if (!name) return null;
+  // An owner with a free slot (granted by the maintainer) gets the claim form,
+  // so they can claim another name; the form fails soft to the truth anyway.
+  if (entitlement && heldNames(entitlement, index.names).length < totalAllowed(entitlement)) return null;
   const record = await getRecord(name, { token }).catch(() => null);
   // An index entry whose record cannot be read (a stale index after a swap,
   // or a transient read failure) must not render as "your name is a bare

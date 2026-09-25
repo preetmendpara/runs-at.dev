@@ -1,0 +1,62 @@
+name: pr-slots
+
+# A pull request that adds a name takes its slot in entitlements/<author>.json
+# before it can be merged, and gives it back if it closes unmerged. validate
+# refuses a new-name pull request until the reservation is on main, so the
+# website counts the name from before the merge onward: there is no moment
+# after a merge when the account looks one name short and a website claim
+# could take a slot it does not have.
+#
+# pull_request_target, because writing the reservation needs a token that can
+# write to main, which a pull_request run from a fork never gets. That trigger
+# is only safe because nothing from the pull request runs here: the checkout
+# is the base branch (the default for this event), and the pull request's
+# files are read over the API as data by scripts/pr-slots.mjs.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, closed]
+    paths: ['domains/**']
+
+permissions:
+  contents: write
+  pull-requests: read
+  actions: write
+
+# One run per pull request at a time, in event order; the file itself is
+# guarded by compare-and-swap against every other writer.
+concurrency:
+  group: pr-slots-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  slots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Reserve, confirm or return the slot
+        run: node scripts/pr-slots.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY_REPO: ${{ github.repository }}
+          # The reservation lands on the branch this pull request merges into.
+          REGISTRY_BRANCH: ${{ github.event.pull_request.base.ref }}
+          PR: ${{ github.event.pull_request.number }}
+          ACTION: ${{ github.event.action }}
+          MERGED: ${{ github.event.pull_request.merged }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      # A commit made with GITHUB_TOKEN starts no other workflow, so
+      # revalidate-prs will not see this one: re-run this pull request's
+      # validate here, now that the reservation is on main.
+      - name: Re-run validate against the reservation
+        if: github.event.action != 'closed'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: bash scripts/rerun-validate.sh "${{ github.event.pull_request.number }}"

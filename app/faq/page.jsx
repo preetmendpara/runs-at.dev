@@ -38,7 +38,7 @@ const faqs = [
   },
   {
     q: 'How many names can I have?',
-    a: 'One per account. That is a hard limit enforced at claim time, so a second name needs a second GitHub account.',
+    a: 'Every account gets one name included. The maintainer can grant an account extra slots, and every name you hold is managed from the same GitHub sign-in. The limit is enforced at claim time.',
   },
   {
     q: 'What stops someone claiming a brand name?',

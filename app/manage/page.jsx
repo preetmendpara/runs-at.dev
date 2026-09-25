@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { readSession, SESSION_COOKIE } from '../../lib/session.js';
 import { getOwnerIndex } from '../../lib/owners.js';
 import { getRecord } from '../../lib/registry.js';
+import { getEntitlement, heldNames, slotSummary } from '../../lib/entitlements.js';
 import RecordForm from './record-form.jsx';
 import BadgeZone from './badge-zone.jsx';
 
@@ -34,8 +35,13 @@ export default async function Manage() {
     );
   }
 
-  const index = await getOwnerIndex(session.login, { token: TOKEN() }).catch(() => null);
+  const [index, entitlement] = await Promise.all([
+    getOwnerIndex(session.login, { token: TOKEN() }).catch(() => null),
+    getEntitlement(session.login, { token: TOKEN() }).catch(() => null),
+  ]);
   const names = index?.names ?? [];
+  // Display only: /api/claim re-reads both before it lets a claim through.
+  const slots = entitlement ? slotSummary(entitlement, heldNames(entitlement, names).length) : null;
 
   if (names.length === 0) {
     return (
@@ -58,6 +64,7 @@ export default async function Manage() {
 
   return (
     <Shell login={session.login}>
+      <Domains names={names} slots={slots} />
       {records.map((record, i) =>
         record ? (
           // Per name, not per account: the badge is that name's card. Sits
@@ -86,6 +93,35 @@ export default async function Manage() {
           for hosting that cannot answer is worse than offering nothing, so
           the panel stays out until the serving path exists. */}
     </Shell>
+  );
+}
+
+// Every name the signed-in account holds, and how many more it may claim.
+function Domains({ names, slots }) {
+  return (
+    <section>
+      <p className="meta">Your domains</p>
+      <ul className="mt-3 space-y-1 font-(family-name:--font-mono) text-sm text-(--color-ink)">
+        {names.map((n) => (
+          <li key={n}>
+            <a className="underline" href={`https://${n}.runs-at.dev`}>{n}.runs-at.dev</a>
+          </li>
+        ))}
+      </ul>
+      {slots && (
+        <p className="mt-3 text-sm text-(--color-muted)">
+          {slots.used} of {slots.total} domain{slots.total === 1 ? '' : 's'} used
+          {slots.available > 0 ? (
+            <>
+              {' · '}{slots.available} domain{slots.available === 1 ? '' : 's'} available{' · '}
+              <a className="text-(--color-ink) underline" href="/">Claim another domain</a>
+            </>
+          ) : (
+            <>{' · '}You've used all your domain slots.</>
+          )}
+        </p>
+      )}
+    </section>
   );
 }
 

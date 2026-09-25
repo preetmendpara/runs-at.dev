@@ -1,7 +1,8 @@
 import { sessionFromRequest } from '../../../lib/session.js';
 import { validateName } from '../../../lib/name.js';
 import { getContentsMeta } from '../../../lib/registry.js';
-import { getOwnerIndex, putOwnerIndex } from '../../../lib/owners.js';
+import { updateOwnerIndex } from '../../../lib/owners.js';
+import { releaseSlot } from '../../../lib/entitlements.js';
 import { createRateLimiter, rateLimitHeaders } from '../../../lib/throttle.js';
 
 // Releases a claimed name: deletes domains/<name>.json from the repo,
@@ -85,26 +86,26 @@ export async function POST(request) {
     return Response.json({ error: 'delete_failed', detail: `GitHub returned ${res.status}` }, { status: 502 });
   }
 
-  // Drop the released name from the owners/ index now, not whenever the
-  // sync-owners rebuild lands: /api/claim counts from this index, so a stale
-  // entry would tell a user who just released their only name that they are
-  // still at the one-per-account limit. Best-effort; the release already
-  // succeeded.
+  // Free the slot in the authoritative entitlement record, so the next claim
+  // can use it straight away. If this write fails the slot is not lost: once
+  // the account is at its limit, reserveSlot checks held names against
+  // domains/ and reclaims this one, whose file is now gone.
+  const freed = await releaseSlot(session.login, name, {
+    token: process.env.REGISTRY_TOKEN,
+    fetchImpl: uncachedFetch,
+  }).catch(() => ({ ok: false, reason: 'threw' }));
+  if (!freed.ok) console.warn(`slot release failed for ${session.login}/${name}: ${freed.reason}`);
+
+  // The owners/ index is derived and rebuilt by sync-owners; dropping the name
+  // now only keeps /manage current until then. Best-effort.
   try {
-    const index = await getOwnerIndex(session.login, {
-      token: process.env.REGISTRY_TOKEN,
-      fetchImpl: uncachedFetch,
-    }).catch(() => null);
-    if (index?.names?.includes(name)) {
-      const names = index.names.filter((n) => n !== name);
-      const indexResult = await putOwnerIndex(session.login, names, {
-        token: process.env.REGISTRY_TOKEN,
-        sha: index.sha,
-        fetchImpl: uncachedFetch,
-      });
-      if (!indexResult.ok) {
-        console.warn(`owner index update failed for ${session.login} after release: ${indexResult.reason}`);
-      }
+    const indexResult = await updateOwnerIndex(
+      session.login,
+      (names) => (names.includes(name) ? names.filter((n) => n !== name) : null),
+      { token: process.env.REGISTRY_TOKEN, fetchImpl: uncachedFetch },
+    );
+    if (!indexResult.ok && indexResult.reason !== 'refused') {
+      console.warn(`owner index update failed for ${session.login} after release: ${indexResult.reason}`);
     }
   } catch (err) {
     console.warn(`owner index update threw for ${session.login} after release: ${err.message}`);
