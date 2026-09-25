@@ -1,7 +1,7 @@
 {
   "github": "preetmendpara",
   "included": 1,
-  "adminGranted": 0,
+  "adminGranted": 1,
   "names": [
     "preet"
   ],
@@ -23,6 +23,14 @@
       "amount": 1,
       "reason": "",
       "adminGranted": 0
+    },
+    {
+      "at": "2026-09-25T09:52:23.190Z",
+      "by": "preetmendpara",
+      "action": "grant",
+      "amount": 1,
+      "reason": "",
+      "adminGranted": 1
     }
   ]
 }
