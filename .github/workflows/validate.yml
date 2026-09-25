@@ -27,6 +27,18 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.base.ref }}
+      # The registry as of the PR's exact base commit, for counting how many names the
+      # author already owns. A second, sparse checkout rather than switching the one above
+      # to base.sha, so the validator code keeps running at the branch tip (see above)
+      # while the data it counts is pinned to BASE_SHA. Counting from disk replaces the
+      # Contents API, which lists at most 1,000 files per directory and cost one request
+      # per record -- past ~1,000 names it both missed owners and exhausted the token.
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .base-registry
+          sparse-checkout: domains
+          persist-credentials: false
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
@@ -38,3 +50,4 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REGISTRY_CHECKOUT: .base-registry

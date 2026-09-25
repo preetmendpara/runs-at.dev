@@ -1,9 +1,10 @@
+import path from 'node:path';
 import {
   validateChangeset,
-  parseRecordFile,
   RecordParseError,
   readRecordAt,
   countOwnedNames,
+  localDomainSource,
 } from '../lib/pr.js';
 
 const REPO = process.env.GITHUB_REPOSITORY;
@@ -11,8 +12,12 @@ const PR = process.env.PR_NUMBER;
 const TOKEN = process.env.GITHUB_TOKEN;
 const BASE_SHA = process.env.BASE_SHA;
 const HEAD_SHA = process.env.HEAD_SHA;
+// Checkout of the registry at BASE_SHA (see validate.yml). Required, not
+// defaulted: falling back to this script's own checkout would count against
+// the moving branch tip instead of the PR's base, and do it silently.
+const REGISTRY_CHECKOUT = process.env.REGISTRY_CHECKOUT;
 
-const REQUIRED = { GITHUB_REPOSITORY: REPO, PR_NUMBER: PR, GITHUB_TOKEN: TOKEN, BASE_SHA, HEAD_SHA };
+const REQUIRED = { GITHUB_REPOSITORY: REPO, PR_NUMBER: PR, GITHUB_TOKEN: TOKEN, BASE_SHA, HEAD_SHA, REGISTRY_CHECKOUT };
 const missing = Object.entries(REQUIRED)
   .filter(([, value]) => !value)
   .map(([key]) => key);
@@ -47,20 +52,11 @@ async function getUser(login) {
   return { created_at: u.created_at, public_repos: u.public_repos };
 }
 
-const countOwned = (login) =>
-  countOwnedNames(login, {
-    listDomainEntries: async () => {
-      const res = await api(`/repos/${REPO}/contents/domains?ref=${BASE_SHA}`);
-      if (!res.ok) throw new Error(`GET domains/ -> ${res.status}`);
-      return res.json();
-    },
-    readRecord: async (filePath) => {
-      const res = await api(`/repos/${REPO}/contents/${filePath}?ref=${BASE_SHA}`);
-      if (!res.ok) throw new Error(`GET ${filePath} -> ${res.status}`);
-      const body = await res.json();
-      return parseRecordFile(filePath, Buffer.from(body.content, 'base64').toString('utf8'));
-    },
-  });
+// Owned names are counted from REGISTRY_CHECKOUT, the registry as of the PR's
+// base commit. No directory listing and no per-record request goes to the
+// API, so the count has no 1,000-entry cap and costs nothing against the
+// token's rate limit.
+const countOwned = (login) => countOwnedNames(login, localDomainSource(path.resolve(REGISTRY_CHECKOUT)));
 
 const prRes = await api(`/repos/${REPO}/pulls/${PR}`);
 if (!prRes.ok) {

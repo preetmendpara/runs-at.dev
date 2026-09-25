@@ -3,6 +3,7 @@ import { getRecord } from '../../../lib/registry.js';
 import { isValidRedirectUrl } from '../../../lib/schema.js';
 import { cardMetadata } from '../../../lib/metadata.js';
 import { REPO_URL } from '../../../lib/repo.js';
+import { claimedNamesFromTree, similarNames } from '../../../lib/similar-names.js';
 import { StatusBadge } from '../../components/ui.jsx';
 
 // Record freshness, not the GitHub profile's: a name claimed just now must
@@ -244,25 +245,11 @@ export default async function Site({ params }) {
 // claims: shows the name is available, a claim button, and suggestions
 // for nearby claimed names (Levenshtein distance <= 2).
 
-// Simple Levenshtein distance, enough for short subdomain names.
-function editDistance(a, b) {
-  const matrix = Array.from({ length: a.length + 1 }, (_, i) => [i]);
-  for (let j = 1; j <= b.length; j++) matrix[0][j] = j;
-  for (let i = 1; i <= a.length; i++) {
-    for (let j = 1; j <= b.length; j++) {
-      matrix[i][j] = Math.min(
-        matrix[i - 1][j] + 1,
-        matrix[i][j - 1] + 1,
-        matrix[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
-      );
-    }
-  }
-  return matrix[a.length][b.length];
-}
-
+// The domains/ listing comes from the Git Trees API: one request, no
+// 1,000-entry cap (see lib/similar-names.js).
 async function findSimilarNames(attempted) {
   try {
-    const res = await fetch('https://api.github.com/repos/preetmendpara/runs-at.dev/contents/domains', {
+    const res = await fetch('https://api.github.com/repos/preetmendpara/runs-at.dev/git/trees/main:domains', {
       headers: {
         Accept: 'application/vnd.github+json',
         ...(process.env.CARD_TOKEN ?? process.env.REGISTRY_TOKEN
@@ -272,17 +259,7 @@ async function findSimilarNames(attempted) {
       next: { revalidate: 300 },
     });
     if (!res.ok) return [];
-    const entries = await res.json();
-    const claimed = entries
-      .filter((e) => e.type === 'file' && e.name.endsWith('.json'))
-      .map((e) => e.name.replace('.json', ''));
-
-    return claimed
-      .filter((c) => c !== attempted && editDistance(attempted, c) <= 2)
-      .map((c) => ({ name: c, distance: editDistance(attempted, c) }))
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 3)
-      .map((s) => s.name);
+    return similarNames(attempted, claimedNamesFromTree(await res.json()));
   } catch {
     return [];
   }
