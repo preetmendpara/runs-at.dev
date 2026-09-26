@@ -4,11 +4,12 @@
     "github": "mayankkkk4"
   },
   "claimedAt": "2026-09-26T09:00:11.757Z",
-  "records": {
-    "URL": "https://toolhub.runs-at.dev"
-  },
+  "records": {},
   "country": "IN",
   "subdomains": {
+    "toolhub": {
+      "CNAME": "cname.vercel-dns.com"
+    },
     "_vercel": {
       "TXT": [
         "vc-domain-verify=runs-at.dev,5f217e69fd1f94e86afc"
