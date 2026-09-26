@@ -11,6 +11,11 @@
   "subdomains": {
     "toolhub": {
       "CNAME": "cname.vercel-dns.com"
+    },
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=runs-at.dev,5f217e69fd1f94e86afc"
+      ]
     }
   }
 }
