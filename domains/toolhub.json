@@ -4,15 +4,17 @@
     "github": "mayankkkk4"
   },
   "claimedAt": "2026-09-26T09:00:11.757Z",
-  "records": {},
+  "records": {
+    "CNAME": "f6bad5cff89b95cf.vercel-dns-017.com"
+  },
   "country": "IN",
   "subdomains": {
     "toolhub": {
-      "CNAME": "cname.vercel-dns.com"
+      "CNAME": "f6bad5cff89b95cf.vercel-dns-017.com"
     },
     "_vercel": {
       "TXT": [
-        "vc-domain-verify=runs-at.dev,5f217e69fd1f94e86afc"
+        "vc-domain-verify=toolhub.runs-at.dev,36512d959803a310b378"
       ]
     }
   }
