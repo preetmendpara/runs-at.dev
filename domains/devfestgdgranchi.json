@@ -1,0 +1,21 @@
+{
+  "name": "devfestgdgranchi",
+  "owner": {
+    "github": "sinhaArchit"
+  },
+  "claimedAt": "2026-09-29T04:42:25.063Z",
+  "records": {
+    "URL": "https://gdg-ranchi-devfest.vercel.app/"
+  },
+  "profile": {
+    "name": "archit",
+    "bio": "bro",
+    "links": [
+      {
+        "label": "my portfolio",
+        "url": "https://gdg-ranchi-devfest.vercel.app/"
+      }
+    ]
+  },
+  "country": "IN"
+}
