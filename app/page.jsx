@@ -2,9 +2,6 @@ import { cookies } from 'next/headers';
 import ClaimForm from './claim-form.jsx';
 import OwnedName from './owned-name.jsx';
 import JsonLd from './components/JsonLd.jsx';
-import { Section, Quote } from './components/Section.jsx';
-import { Divider, StatusBadge } from './components/ui.jsx';
-import { DocList } from './docs/components.jsx';
 import HomeMap from './components/home-map.jsx';
 import AdBanner from './components/ad-banner.jsx';
 import { CLAIM_GEO } from './components/claim-geo.js';
@@ -15,6 +12,7 @@ import { readSession, SESSION_COOKIE } from '../lib/session.js';
 import { getOwnerIndex } from '../lib/owners.js';
 import { getEntitlement, heldNames, totalAllowed } from '../lib/entitlements.js';
 import { getRecord } from '../lib/registry.js';
+import { REPO_URL } from '../lib/repo.js';
 
 const DESCRIPTION =
   'Claim a free yourname.runs-at.dev with your GitHub account. One domain is included, additional domains can be granted, and you can manage DNS for GitHub Pages, Vercel, Netlify and Cloudflare Pages.';
@@ -67,14 +65,79 @@ const LINKS = [
   { href: 'https://github.com/preetmendpara/runs-at.dev', label: 'GitHub', note: 'source code and the registry files', external: true },
 ];
 
-// Text styles shared by the explanatory sections, taken from the classes the
-// page already used for its one prose block, so nothing new is introduced.
-const COLUMN = 'mx-auto max-w-[600px] text-center';
-const STATEMENT = 'text-[23px] leading-[1.07] font-normal tracking-[-0.005em] text-(--color-ink)';
-const BODY = 'mt-5 text-[16px] leading-[1.5] text-(--color-muted)';
-const MONO = 'font-(family-name:--font-mono) text-[15px]';
+// Shared text styles for the homepage blocks.
+const MONO = 'font-(family-name:--font-mono)';
+const LABEL = `${MONO} text-[12px] tracking-[0.08em] uppercase text-(--color-muted)`;
+const BODY = 'text-[16px] leading-[1.55] text-(--color-ash)';
 const LINK = 'text-(--color-ink) underline';
-const FACTS = 'mx-auto mt-8 max-w-[440px] space-y-3 text-left font-(family-name:--font-mono) text-[13px]';
+const CODE = `${MONO} text-[15px] text-(--color-ink)`;
+
+const PROVIDERS = [
+  { href: '/docs/guides/github-pages', label: 'GitHub Pages', record: 'CNAME' },
+  { href: '/docs/guides/vercel', label: 'Vercel', record: 'CNAME' },
+  { href: '/docs/guides/netlify', label: 'Netlify', record: 'CNAME' },
+  { href: '/docs/guides/cloudflare-pages', label: 'Cloudflare Pages', record: 'CNAME' },
+];
+
+const STEPS = [
+  { key: 'Sign in', body: 'Sign in with GitHub. Your GitHub login becomes the owner of every name you claim.' },
+  { key: 'Choose', body: 'Type the name you want in the box above; it tells you whether it is still free.' },
+  {
+    key: 'Claim',
+    body: (
+      <>
+        Claim it. runs-at.dev writes <span className={CODE}>domains/yourname.json</span> into the public
+        registry, and the name resolves from then on.
+      </>
+    ),
+  },
+  { key: 'Point DNS', body: 'Point it wherever your project lives, or keep the profile card.' },
+];
+
+const SPEC = [
+  {
+    key: 'included',
+    value:
+      'one runs-at.dev name for every eligible GitHub account: at least 30 days old, with at least one public repository.',
+  },
+  { key: 'more', value: 'extra domain slots, granted by the administrator when a project needs its own name.' },
+  {
+    key: 'dns',
+    value:
+      'a profile card built from your GitHub profile, a redirect, a CNAME to your host, or A, AAAA, TXT and MX records you manage yourself.',
+  },
+  {
+    key: 'status',
+    value: 'a live check for every name you own, plus a public diagnosis page you can share when something is not resolving.',
+  },
+];
+
+// A homepage section on the page grid: the index numeral and label set in a
+// narrow left column like a manual's margin, the content in the wide one.
+function Block({ index, label, id, children, className = '' }) {
+  return (
+    <section aria-labelledby={id} className={`mx-auto max-w-[1200px] px-4 sm:px-6 ${className}`}>
+      <div className="grid gap-6 border-t-2 border-(--line-strong) pt-6 lg:grid-cols-[240px_1fr] lg:gap-12">
+        <div className="flex items-baseline gap-3 lg:block">
+          <p className="text-[44px] leading-none text-(--color-accent) lg:text-[64px]" style={{ fontFamily: 'var(--font-display)' }} aria-hidden="true">
+            {index}
+          </p>
+          <h2 id={id} className={`${MONO} text-[12px] tracking-[0.12em] text-(--color-ink) uppercase lg:mt-3`}>
+            {label}
+          </h2>
+        </div>
+        <div className="min-w-0">{children}</div>
+      </div>
+    </section>
+  );
+}
+
+// Record type column for the registry readout: what the name points at,
+// straight from its file. An empty records object serves the profile card.
+function recordKind(record) {
+  const keys = Object.keys(record.records || {});
+  return keys.length ? keys.join(' + ') : 'CARD';
+}
 
 // Only for a signed-in visitor: this page is the highest-traffic route on the
 // site and these reads come out of REGISTRY_TOKEN's quota, the same one
@@ -118,203 +181,327 @@ export default async function Home() {
   const owned = await ownedName(session);
   const registryList = registry();
   const placement = geoPlacement(registryList, CLAIM_GEO, countryCentroids);
+  const recent = [...registryList]
+    .sort((a, b) => String(b.claimedAt).localeCompare(String(a.claimedAt)))
+    .slice(0, 8);
+
+  const readout = [
+    ['Names', `${registryList.length} claimed`],
+    ['On map', `${placement.resolved} placed`],
+    ['Included', '1 per GitHub account'],
+    ['Sign-in', 'GitHub'],
+    ['Registry', 'public'],
+    ['License', 'AGPL-3.0'],
+  ];
 
   return (
     <main>
       <JsonLd data={websiteJsonLd} />
 
-      <h1 className="sr-only">Free developer subdomains at runs-at.dev</h1>
+      {/* ── Masthead: the headline as a printed poster, an index card of
+          registry facts pinned beside it, and the lede set wide below. */}
+      <section className="mx-auto max-w-[1200px] px-4 pt-8 sm:px-6 sm:pt-12">
+        <div className={`flex flex-wrap items-center justify-between gap-3 border-b-2 border-(--line-strong) pb-2 ${LABEL}`}>
+          <span className="text-(--color-ink)">runs-at.dev // free subdomain registry</span>
+          <span className="inline-flex items-center gap-2 text-(--color-ink)">
+            <span aria-hidden="true" className="pulse-dot inline-block h-2 w-2 bg-(--color-pulse)" />
+            System online
+          </span>
+        </div>
 
-      {/* Hero: the claim line IS the display headline, set at 63px weight 400
-          with negative tracking. Centered stack, then the dot-map world below. */}
-      <section id="claim" className="mx-auto max-w-[1200px] px-6 pt-20 pb-16 text-center sm:pt-28">
-        <StatusBadge tone="live" pulse>Free with GitHub sign-in</StatusBadge>
+        <div className="mt-10 grid gap-10 lg:mt-16 lg:grid-cols-[1fr_320px] lg:gap-14">
+          <div className="min-w-0">
+            <h1 className="text-[clamp(2.6rem,12.5vw,7rem)] leading-[0.86] font-normal tracking-[-0.02em] text-(--color-ink) uppercase lg:text-[clamp(3.2rem,8vw,7rem)]">
+              <span className="block">Free</span>{' '}
+              <span className="block">developer</span>{' '}
+              <span className="block text-(--color-accent)">subdomains</span>{' '}
+              <span className={`mt-6 block text-[14px] leading-none tracking-[0.12em] text-(--color-muted) normal-case ${MONO}`}>
+                at runs-at.dev
+              </span>
+            </h1>
+          </div>
 
-        <p className="mt-5 font-(family-name:--font-mono) text-xs tracking-[0.04em] text-(--color-muted)">
-          {registryList.length} {registryList.length === 1 ? 'name' : 'names'} claimed · {placement.resolved} on the public claim map ·
-          1 free domain included per GitHub account · open source
-        </p>
+          {/* Index card: ruled rows with dotted leaders, card stock on paper. */}
+          <dl className={`hard-shadow self-end border-2 border-(--line-strong) bg-(--color-card) ${MONO} text-[13px]`}>
+            <div className="flex items-center justify-between border-b-2 border-(--line-strong) bg-(--color-ink) px-4 py-2 text-[11px] tracking-[0.12em] text-(--color-paper) uppercase">
+              <span>Status readout</span>
+              <span aria-hidden="true">№ 01</span>
+            </div>
+            {readout.map(([key, value]) => (
+              <div key={key} className="flex items-baseline gap-2 border-b border-(--line) px-4 py-2.5 last:border-b-0">
+                <dt className="tracking-[0.08em] text-(--color-muted) uppercase">{key}</dt>
+                <span aria-hidden="true" className="min-w-4 flex-1 translate-y-[-3px] border-b border-dotted border-(--color-muted)" />
+                <dd className="text-right text-(--color-ink)">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
 
-        <div className="mt-8 flex justify-center">
-          {owned ? (
-            <OwnedName name={owned.name} record={owned.record} />
-          ) : (
-            <ClaimForm signedIn={Boolean(session)} />
-          )}
+        <div className="mt-10 grid gap-6 border-t border-(--line) pt-6 lg:mt-14 lg:grid-cols-[240px_1fr] lg:gap-12">
+          <p className={`${LABEL}`}>Abstract</p>
+          <p className="max-w-[720px] text-[20px] leading-[1.45] text-(--color-ash) sm:text-[24px] sm:leading-[1.35]">
+            A name of your own, under a domain someone else runs. Claim{' '}
+            <span className={CODE}>yourname.runs-at.dev</span> with your GitHub account and point it at
+            GitHub Pages, Vercel, Netlify, Cloudflare Pages or DNS records of your choosing.
+          </p>
         </div>
       </section>
 
-      {/* Full-bleed dot-matrix world map carrying the claim heat. The base
-          world is a static image (keeps ~1600 elements out of the HTML);
-          selecting a continent dims it and spotlights that continent
-          client-side. The split-flap frame keeps the easter egg alive. */}
-      <HomeMap
-        heading
-        points={placement.points}
-        resolved={placement.resolved}
-        total={placement.total}
-      />
-
-      <div className="mx-auto max-w-[1200px] px-6">
-        <Section title="What is a free subdomain?">
-          <div className={COLUMN}>
-            <p className={STATEMENT}>A name of your own, under a domain someone else runs.</p>
-            <p className={BODY}>
-              <span className={MONO}>yourname.runs-at.dev</span> is a hostname one level below
-              runs-at.dev, which the operator registered and keeps paying for. You pick the first part,
-              and it works like any address: point it at a site, a redirect or DNS records of your
-              choosing. What you do not get is a domain of your own. There is nothing to buy or renew,
-              and nothing to move to a registrar later.
-            </p>
-            <p className={BODY}>
-              That trade-off suits portfolios, demos, docs and side projects that deserve a clean
-              address today. When a project needs a name you own outright, register a domain for it;
-              see{' '}
-              <a className={LINK} href="/docs/free-subdomain-vs-domain">Free subdomain vs free domain</a>{' '}
-              for what that difference means in practice.
-            </p>
+      {/* ── Claim terminal: a full-width ink plate. The claim form itself is
+          unchanged; the plate re-points the colour tokens around it. */}
+      <section id="claim" aria-label="Claim a name" className="surface-ink mt-16 scroll-mt-20 sm:mt-24">
+        <div className="mx-auto grid max-w-[1200px] gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[240px_1fr] lg:gap-12">
+          <div className={`${MONO} text-[12px] tracking-[0.12em] uppercase`}>
+            <p className="text-(--color-accent-ink)">Form 00</p>
+            <p className="mt-2 text-(--color-ink)">{owned ? 'Your name' : 'Enter your name'}</p>
+            <p className="mt-2 text-(--color-muted)">claim // domains/*.json</p>
           </div>
-        </Section>
+          <div className="flex justify-center border-2 border-(--line-strong) bg-(--color-card) px-4 py-10 sm:px-8 sm:py-14">
+            {owned ? (
+              <OwnedName name={owned.name} record={owned.record} />
+            ) : (
+              <ClaimForm signedIn={Boolean(session)} />
+            )}
+          </div>
+        </div>
+      </section>
 
-        <Section title="What you get">
-          <div className={COLUMN}>
-            <p className={STATEMENT}>One free domain for your GitHub account, and room to grow.</p>
-            <dl className={FACTS}>
-              <div className="slit-top slit-dim pt-3">
-                <dt className="meta mb-1">included</dt>
-                <dd className="text-(--color-ink)">
-                  one runs-at.dev name for every eligible GitHub account: at least 30 days old, with at
-                  least one public repository.
-                </dd>
-              </div>
-              <div className="slit-top slit-dim pt-3">
-                <dt className="meta mb-1">more</dt>
-                <dd className="text-(--color-ink)">
-                  extra domain slots, granted by the administrator when a project needs its own name.
-                </dd>
-              </div>
-              <div className="slit-top slit-dim pt-3">
-                <dt className="meta mb-1">dns</dt>
-                <dd className="text-(--color-ink)">
-                  a profile card built from your GitHub profile, a redirect, a CNAME to your host, or
-                  A, AAAA, TXT and MX records you manage yourself.
-                </dd>
-              </div>
-              <div className="slit-top slit-dim pt-3">
-                <dt className="meta mb-1">status</dt>
-                <dd className="text-(--color-ink)">
-                  a live check for every name you own, plus a public diagnosis page you can share when
-                  something is not resolving.
-                </dd>
-              </div>
+      <Block index="01" label="Registry" id="registry" className="mt-20 sm:mt-28">
+        <div className="grid gap-8 xl:grid-cols-[1fr_1.35fr] xl:gap-12">
+          <p className={BODY}>
+            Each name is a small JSON file in a public repository, and that file is the only thing
+            deciding where the name goes. Anyone can read who owns a name and what it points at, and
+            every change is a commit you can look back through. The claim map and the{' '}
+            <a className={LINK} href="/stats">stats page</a> are drawn from those same files.
+          </p>
+
+          <div className={`border-2 border-(--line-strong) bg-(--color-card) ${MONO} text-[13px]`}>
+            <div
+              aria-hidden="true"
+              className="hidden grid-cols-[1fr_96px_96px] gap-4 border-b-2 border-(--line-strong) px-4 py-2 text-[11px] tracking-[0.12em] text-(--color-muted) uppercase sm:grid"
+            >
+              <span>Name</span>
+              <span>Record</span>
+              <span className="text-right">Claimed</span>
+            </div>
+            <ol aria-label="Most recently claimed names">
+              {recent.map((record) => (
+                <li
+                  key={record.name}
+                  className="grid gap-1 border-b border-(--line) px-4 py-3 last:border-b-0 sm:grid-cols-[1fr_96px_96px] sm:gap-4"
+                >
+                  <span className="break-all text-(--color-ink)">
+                    {record.name}
+                    <span className="text-(--color-muted)">.runs-at.dev</span>
+                  </span>
+                  <span className="text-(--color-muted)">
+                    <span aria-hidden="true" className="mr-2 inline-block h-1.5 w-1.5 bg-(--color-pulse) align-middle" />
+                    {recordKind(record)}
+                  </span>
+                  <span className="text-(--color-muted) sm:text-right">
+                    {String(record.claimedAt || '').slice(0, 10)}
+                  </span>
+                </li>
+              ))}
+            </ol>
+            <div className={`flex flex-wrap justify-between gap-2 border-t-2 border-(--line-strong) px-4 py-2 ${LABEL}`}>
+              <span>
+                {recent.length} of {registryList.length} shown
+              </span>
+              <a className="text-(--color-ink) underline" href={`${REPO_URL}/tree/main/domains`} target="_blank" rel="noopener noreferrer">
+                full registry ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      </Block>
+
+      {/* ── The dot-matrix claim map on a ink plate, where its light dots
+          were drawn to sit. */}
+      <div className="surface-ink mt-20 pb-6 sm:mt-28">
+        <HomeMap heading points={placement.points} resolved={placement.resolved} total={placement.total} />
+      </div>
+
+      <Block index="02" label="How claiming works" id="how" className="mt-20 sm:mt-28">
+        <ol className="grid gap-x-8 sm:grid-cols-2 xl:grid-cols-4">
+          {STEPS.map((step, i) => (
+            <li
+              key={step.key}
+              className="border-b border-(--line) py-6 first:pt-0 sm:[&:nth-child(-n+2)]:pt-0 xl:border-b-0"
+            >
+              <p className="text-[72px] leading-[0.8] text-(--color-ink)" style={{ fontFamily: 'var(--font-display)' }} aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </p>
+              <p className={`mt-5 ${MONO} text-[12px] tracking-[0.12em] text-(--color-accent-ink) uppercase`}>/ {step.key}</p>
+              <p className="mt-3 max-w-[34ch] text-[15px] leading-[1.55] text-(--color-ash)">{step.body}</p>
+            </li>
+          ))}
+        </ol>
+        <p className={`mt-6 ${BODY}`}>
+          The <a className={LINK} href="/docs/quickstart">quickstart</a> walks through each step,
+          including claiming by pull request if you prefer.
+        </p>
+      </Block>
+
+      {/* ── Specification on a cream band: a big statement against a ruled
+          spec sheet, then the two explanatory columns. */}
+      <div className="surface-cream mt-20 py-14 sm:mt-28 sm:py-20">
+        <Block index="03" label="What you get" id="spec">
+          <div className="grid gap-10 xl:grid-cols-[0.9fr_1.1fr] xl:gap-14">
+            <p className="text-[30px] leading-[1.05] text-(--color-ink) sm:text-[40px]" style={{ fontFamily: 'var(--font-display)' }}>
+              One free domain for your GitHub account, and room to grow.
+            </p>
+            <dl className={`border-t-2 border-(--line-strong) ${MONO} text-[14px]`}>
+              {SPEC.map((row) => (
+                <div key={row.key} className="grid gap-1 border-b border-(--line) py-4 sm:grid-cols-[110px_1fr] sm:gap-6">
+                  <dt className="text-[11px] tracking-[0.12em] text-(--color-accent-ink) uppercase">{row.key}</dt>
+                  <dd className="leading-[1.55] text-(--color-ink)">{row.value}</dd>
+                </div>
+              ))}
             </dl>
           </div>
-        </Section>
+          <div className="mt-12 grid gap-10 md:grid-cols-2">
+            <div>
+              <h3 className={`${MONO} text-[12px] tracking-[0.12em] text-(--color-ink) uppercase`}>What is a free subdomain?</h3>
+              <p className={`mt-3 ${BODY}`}>
+                <span className={CODE}>yourname.runs-at.dev</span> is a hostname one level below runs-at.dev,
+                which the operator registered and keeps paying for. You pick the first part, and it works
+                like any address: point it at a site, a redirect or DNS records of your choosing. What you
+                do not get is a domain of your own. There is nothing to buy or renew, and nothing to move
+                to a registrar later.
+              </p>
+            </div>
+            <div>
+              <h3 className={`${MONO} text-[12px] tracking-[0.12em] text-(--color-ink) uppercase`}>When to use one</h3>
+              <p className={`mt-3 ${BODY}`}>
+                That trade-off suits portfolios, demos, docs and side projects that deserve a clean address
+                today. When a project needs a name you own outright, register a domain for it; see{' '}
+                <a className={LINK} href="/docs/free-subdomain-vs-domain">Free subdomain vs free domain</a>{' '}
+                for what that difference means in practice.
+              </p>
+            </div>
+          </div>
+        </Block>
+      </div>
 
-        <Section title="How claiming works">
-          <div className={COLUMN}>
-            <ol className={`${BODY} list-decimal space-y-3 pl-6 text-left`}>
-              <li>Sign in with GitHub. Your GitHub login becomes the owner of every name you claim.</li>
-              <li>Type the name you want in the box above; it tells you whether it is still free.</li>
-              <li>
-                Claim it. runs-at.dev writes <span className={MONO}>domains/yourname.json</span> into
-                the public registry, and the name resolves from then on.
+      <Block index="04" label="Point it at your hosting" id="hosting" className="mt-20 sm:mt-28">
+        <p className={`max-w-[640px] ${BODY}`}>
+          Each guide covers the setting on your host, the record to add on runs-at.dev, and how to tell
+          when it is working.
+        </p>
+        <div className={`mt-8 border-2 border-(--line-strong) bg-(--color-card) ${MONO} text-[13px]`}>
+          <div
+            aria-hidden="true"
+            className="grid grid-cols-[1fr_auto] gap-4 border-b-2 border-(--line-strong) bg-(--color-ink) px-4 py-2 text-[11px] tracking-[0.12em] text-(--color-paper) uppercase sm:grid-cols-[1fr_100px_120px]"
+          >
+            <span>Platform</span>
+            <span className="hidden sm:block">Record</span>
+            <span className="text-right">Guide</span>
+          </div>
+          <ul>
+            {PROVIDERS.map((p) => (
+              <li key={p.href} className="border-b border-(--line) last:border-b-0">
+                <a
+                  href={p.href}
+                  className="group grid grid-cols-[1fr_auto] gap-4 px-4 py-3.5 no-underline hover:bg-(--color-accent) sm:grid-cols-[1fr_100px_120px]"
+                >
+                  <span className="tracking-[0.04em] text-(--color-ink) uppercase group-hover:text-white">
+                    Free subdomain for {p.label}
+                  </span>
+                  <span className="hidden text-(--color-muted) group-hover:text-white sm:block">{p.record}</span>
+                  <span className="text-right text-(--color-ink) group-hover:text-white">Read →</span>
+                </a>
               </li>
-              <li>Point it wherever your project lives, or keep the profile card.</li>
-            </ol>
-            <p className={BODY}>
-              The <a className={LINK} href="/docs/quickstart">quickstart</a> walks through each step,
-              including claiming by pull request if you prefer.
+            ))}
+          </ul>
+        </div>
+        <p className={`mt-6 ${BODY}`}>
+          Other hosts and record types: the{' '}
+          <a className={LINK} href="/docs/records">DNS record reference</a> lists every record type and
+          what can share a name, and <a className={LINK} href="/docs/guides">hosting guides</a> has every
+          provider walkthrough.
+        </p>
+      </Block>
+
+      {/* ── Two sheets side by side: managing names, and the source. */}
+      <section className="mx-auto mt-20 max-w-[1200px] px-4 sm:mt-28 sm:px-6">
+        <div className="grid gap-px border-2 border-(--line-strong) bg-(--line-strong) lg:grid-cols-2">
+          <div className="bg-(--color-paper) p-6 sm:p-10">
+            <p className="text-[44px] leading-none text-(--color-accent)" style={{ fontFamily: 'var(--font-display)' }} aria-hidden="true">05</p>
+            <h2 id="manage" className={`mt-3 ${MONO} text-[12px] tracking-[0.12em] text-(--color-ink) uppercase`}>Manage multiple domains</h2>
+            <p className="mt-6 text-[24px] leading-[1.15] text-(--color-ink)">Every name you own, behind one sign-in.</p>
+            <p className={`mt-5 ${BODY}`}>
+              <a className={LINK} href="/manage">runs-at.dev/manage</a> lists all the names your GitHub account
+              owns and shows how many slots you have used. Pick a name to edit its records, swap it for
+              another or release it; the others stay as they are. When a slot is free, you can claim another
+              name from the same place.
             </p>
           </div>
-        </Section>
-
-        <Section title="Point it at your hosting">
-          <div className={COLUMN}>
-            <p className={BODY}>
-              Each guide covers the setting on your host, the record to add on runs-at.dev, and how to
-              tell when it is working.
-            </p>
-          </div>
-          <DocList
-            items={[
-              { href: '/docs/guides/github-pages', label: 'Free subdomain for GitHub Pages' },
-              { href: '/docs/guides/vercel', label: 'Free subdomain for Vercel' },
-              { href: '/docs/guides/netlify', label: 'Free subdomain for Netlify' },
-              { href: '/docs/guides/cloudflare-pages', label: 'Free subdomain for Cloudflare Pages' },
-              { href: '/docs/records', label: 'DNS record reference', note: 'every record type and what can share a name' },
-            ]}
-          />
-        </Section>
-
-        <Section title="Manage multiple domains">
-          <div className={COLUMN}>
-            <p className={STATEMENT}>Every name you own, behind one sign-in.</p>
-            <p className={BODY}>
-              <a className={LINK} href="/manage">runs-at.dev/manage</a> lists all the names your GitHub
-              account owns and shows how many slots you have used. Pick a name to edit its records,
-              swap it for another or release it; the others stay as they are. When a slot is free, you
-              can claim another name from the same place.
-            </p>
-          </div>
-        </Section>
-
-        <Section title="Public by design">
-          <div className={COLUMN}>
-            <p className={BODY}>
-              Each name is a small JSON file in a public repository, and that file is the only thing
-              deciding where the name goes. Anyone can read who owns a name and what it points at, and
-              every change is a commit you can look back through. The claim map and the{' '}
-              <a className={LINK} href="/stats">stats page</a> are drawn from those same files.
-            </p>
-          </div>
-        </Section>
-
-        <Section title="Open source">
-          <div className={COLUMN}>
-            <p className={BODY}>
-              The registry, its validation rules and this site are released under AGPL-3.0 on{' '}
-              <a className={LINK} href="https://github.com/preetmendpara/runs-at.dev" target="_blank" rel="noopener noreferrer">
-                GitHub
-              </a>
-              . The service is offered free, on a best-effort basis, under the terms in the{' '}
-              <a className={LINK} href="/policy">policy</a>.
-            </p>
-          </div>
-        </Section>
-
-        {/* The one ad slot on the site: below the explanatory content, far
-            from the claim form, before the link grid. */}
-        <AdBanner />
-
-        <Section title="Where to go next">
-          {/* Link grid, service-cell style: each cell outlined by its own
-              fading slit (open corners), brightening on hover. */}
-          <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 sm:gap-16 lg:grid-cols-3">
-            {LINKS.map((link) => (
+          <div className="surface-ink p-6 sm:p-10">
+            <p className="text-[44px] leading-none text-(--color-accent)" style={{ fontFamily: 'var(--font-display)' }} aria-hidden="true">06</p>
+            <h2 id="source" className={`mt-3 ${MONO} text-[12px] tracking-[0.12em] text-(--color-ink) uppercase`}>Open source</h2>
+            <p className={`mt-6 ${MONO} text-[13px] break-all text-(--color-muted)`}>github.com/preetmendpara/runs-at.dev</p>
+            <dl className={`mt-4 border-t border-(--line) ${MONO} text-[13px]`}>
+              {[
+                ['License', 'AGPL-3.0'],
+                ['Covers', 'the registry, its validation rules and this site'],
+                ['Terms', 'free, on a best-effort basis'],
+              ].map(([key, value]) => (
+                <div key={key} className="grid gap-1 border-b border-(--line) py-3 sm:grid-cols-[100px_1fr] sm:gap-4">
+                  <dt className="text-[11px] tracking-[0.12em] text-(--color-muted) uppercase">{key}</dt>
+                  <dd className="text-(--color-ink)">{value}</dd>
+                </div>
+              ))}
+            </dl>
+            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-4">
               <a
-                key={link.href}
+                className="btn-pill"
+                href="https://github.com/preetmendpara/runs-at.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View on GitHub <span aria-hidden="true">↗</span>
+              </a>
+              <a className={`${LINK} ${MONO} text-[13px]`} href="/policy">
+                Read the policy
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* The one ad slot on the page, on its own cream band: below the
+          explanatory content, far from the claim form, before the index. */}
+      <div className="surface-cream mt-20 py-12 sm:mt-28">
+        <AdBanner />
+      </div>
+
+      <Block index="07" label="Where to go next" id="next" className="mt-20 sm:mt-28">
+        <ul className={`border-t-2 border-(--line-strong) ${MONO}`}>
+          {LINKS.map((link) => (
+            <li key={link.href} className="border-b border-(--line)">
+              <a
                 href={link.href}
                 {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                className="slit-frame group rounded-lg p-6 transition-colors hover:bg-(--color-card)"
+                className="group grid gap-1 py-4 no-underline transition-transform duration-75 hover:translate-x-1 sm:grid-cols-[220px_1fr_auto] sm:items-baseline sm:gap-6"
               >
-                <p className="text-[14px] tracking-[0.01em] text-(--color-ink) uppercase transition-colors group-hover:text-(--color-muted)">
-                  {link.label}
-                  <span aria-hidden="true" className="ml-2 text-(--color-muted)">↗</span>
-                </p>
-                <p className="mt-2 text-[14px] leading-relaxed text-(--color-muted)">{link.note}</p>
+                <span className="text-[18px] tracking-[0.02em] text-(--color-ink) uppercase group-hover:text-(--color-accent-ink)">{link.label}</span>
+                <span className="text-[13px] text-(--color-muted)">{link.note}</span>
+                <span aria-hidden="true" className="hidden text-(--color-accent-ink) sm:block">
+                  {link.external ? '↗' : '→'}
+                </span>
               </a>
-            ))}
-          </div>
-        </Section>
+            </li>
+          ))}
+        </ul>
+      </Block>
 
-        <Section title="Report abuse">
-          <Quote>
-            Seen a runs-at.dev name used for phishing, malware or impersonation? Send the name and what
-            you saw to abuse@runs-at.dev. Names used that way are taken back.
-          </Quote>
-        </Section>
-      </div>
+      <Block index="08" label="Report abuse" id="abuse" className="mt-20 sm:mt-28">
+        <p className="border-l-[6px] border-(--color-flag) bg-(--color-card) p-5 text-[16px] leading-[1.55] text-(--color-ash) sm:p-6">
+          Seen a runs-at.dev name used for phishing, malware or impersonation? Send the name and what you
+          saw to abuse@runs-at.dev. Names used that way are taken back.
+        </p>
+      </Block>
     </main>
   );
 }

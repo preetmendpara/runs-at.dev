@@ -19,18 +19,29 @@ const LINKS = [
 export default async function Footer() {
   const stars = await getStarCount();
 
+  // The colophon: a ink plate under a vermilion rule, the name set as a
+  // bleeding display line, then an index of every route and the credits.
   return (
-    <footer className="slit-top mt-32">
-      <div className="mx-auto max-w-[1200px] px-6 py-10">
-        <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
+    <footer className="surface-ink mt-32 border-t-[6px] border-(--color-accent)">
+      <div className="mx-auto max-w-[1200px] px-4 pt-12 pb-10 sm:px-6 sm:pt-16">
+        <p
+          aria-hidden="true"
+          className="text-[clamp(2.75rem,12vw,9.5rem)] leading-[0.82] tracking-[-0.02em] text-(--color-ink) uppercase select-none"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          runs-at<span className="text-(--color-accent)">.</span>dev
+        </p>
+
+        <div className="mt-12 grid gap-10 border-t border-(--line) pt-8 md:grid-cols-[1fr_1.4fr] md:gap-16">
           <div>
-            <p className="text-[14px] text-(--color-ink)">
+            <p className="font-(family-name:--font-mono) text-[11px] tracking-[0.12em] text-(--color-muted) uppercase">Reports</p>
+            <p className="mt-3 text-[16px] text-(--color-ink)">
               <a className="text-(--color-ink) underline" href="mailto:abuse@runs-at.dev">
                 abuse@runs-at.dev
               </a>
               <span className="text-(--color-muted)"> for reports</span>
             </p>
-            <p className="meta mt-4 normal-case">
+            <p className="meta mt-6 normal-case">
               © 2026 · every name is a file in a{' '}
               <a
                 className="text-(--color-muted) underline hover:text-(--color-ink)"
@@ -48,24 +59,30 @@ export default async function Footer() {
             </p>
           </div>
 
-          <nav aria-label="Footer" className="grid grid-cols-2 gap-x-12 gap-y-2.5">
-            {LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="font-(family-name:--font-mono) text-[13px] text-(--color-muted) no-underline transition-colors hover:text-(--color-ink)"
-              >
-                {link.label}
-              </a>
-            ))}
-            <a
-              href={REPO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-(family-name:--font-mono) text-[13px] text-(--color-muted) no-underline transition-colors hover:text-(--color-ink)"
-            >
-              GitHub ↗
-            </a>
+          <nav aria-label="Footer">
+            <p className="font-(family-name:--font-mono) text-[11px] tracking-[0.12em] text-(--color-muted) uppercase">Index</p>
+            <ul className="mt-3 grid grid-cols-2 border-t border-(--line) sm:grid-cols-3">
+              {LINKS.map((link) => (
+                <li key={link.href} className="border-b border-(--line)">
+                  <a
+                    href={link.href}
+                    className="block py-2.5 font-(family-name:--font-mono) text-[13px] tracking-[0.04em] text-(--color-ash) uppercase no-underline hover:text-(--color-accent-ink)"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+              <li className="border-b border-(--line)">
+                <a
+                  href={REPO_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block py-2.5 font-(family-name:--font-mono) text-[13px] tracking-[0.04em] text-(--color-ash) uppercase no-underline hover:text-(--color-accent-ink)"
+                >
+                  GitHub ↗
+                </a>
+              </li>
+            </ul>
           </nav>
         </div>
       </div>

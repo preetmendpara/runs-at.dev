@@ -492,7 +492,7 @@ export default function RecordForm({ name, record }) {
             </div>
           ))}
           {linkRows.length < MAX_LINKS && (
-            <button type="button" onClick={() => { setLinkRows((rows) => [...rows, { label: '', url: '' }]); setStatus(null); }} className="slit-frame rounded-[4px] px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a link</button>
+            <button type="button" onClick={() => { setLinkRows((rows) => [...rows, { label: '', url: '' }]); setStatus(null); }} className="slit-frame px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a link</button>
           )}
         </div>
       </div>
@@ -547,10 +547,10 @@ function NameHeader({ name, site, status, justSaved }) {
           className={`inline-block h-2 w-2 rounded-full ${status.tone === 'live' ? 'pulse-dot' : ''}`}
           style={{
             background:
-              status.tone === 'live' ? '#98ff38'
-              : status.tone === 'waiting' ? '#eab308'
-              : status.tone === 'down' ? '#ff5c5c'
-              : '#9c9c9c',
+              status.tone === 'live' ? 'var(--pulse)'
+              : status.tone === 'waiting' ? 'var(--warn)'
+              : status.tone === 'down' ? 'var(--flag)'
+              : 'var(--muted)',
           }}
         />
         <span className={`text-[14px] ${status.tone === 'down' ? 'text-(--color-flag)' : 'text-(--color-ink)'}`}>{status.label}</span>
@@ -576,10 +576,10 @@ function NameHeader({ name, site, status, justSaved }) {
 function FeatureCard({ card, open, onSelect }) {
   const { status } = card;
   const dot =
-    status.tone === 'live' ? '#98ff38'
-    : status.tone === 'waiting' ? '#eab308'
-    : status.tone === 'attention' ? '#ff5c5c'
-    : '#5a5a5a';
+    status.tone === 'live' ? 'var(--pulse)'
+    : status.tone === 'waiting' ? 'var(--warn)'
+    : status.tone === 'attention' ? 'var(--flag)'
+    : 'var(--muted)';
   return (
     <div className={`slit-frame rounded-lg p-4 ${open ? 'slit-frame-bright' : ''}`}>
       <div className="flex items-center gap-2">
@@ -796,7 +796,7 @@ function ReleaseZone({ name }) {
                 type="button"
                 onClick={release}
                 disabled={releasing || confirmText.trim().toLowerCase() !== name}
-                className="slit-frame slit-frame-flag rounded-[4px] px-4 py-2 font-(family-name:--font-mono) text-xs text-(--color-flag) disabled:opacity-40"
+                className="slit-frame slit-frame-flag px-4 py-2 font-(family-name:--font-mono) text-xs text-(--color-flag) disabled:opacity-40"
               >
                 {releasing ? 'Releasing…' : 'Release permanently'}
               </button>
@@ -842,7 +842,7 @@ function SubdomainRecords({ name, subRows, setRow, addRow, removeRow }) {
         </div>
       ))}
       {subRows.length < MAX_SUBDOMAINS && (
-        <button type="button" onClick={addRow} className="mt-4 slit-frame rounded-[4px] px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a subdomain record</button>
+        <button type="button" onClick={addRow} className="mt-4 slit-frame px-3 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)">+ add a subdomain record</button>
       )}
     </div>
   );
@@ -872,11 +872,11 @@ const TYPE_HELP = {
 };
 
 const VERDICT_COLOR = {
-  published: '#98ff38',
-  publishing: '#eab308',
-  missing: '#eab308',
-  different: '#ff5c5c',
-  unknown: '#5a5a5a',
+  published: 'var(--pulse)',
+  publishing: 'var(--warn)',
+  missing: 'var(--warn)',
+  different: 'var(--flag)',
+  unknown: 'var(--muted)',
 };
 
 function blankRow() {
@@ -1019,7 +1019,7 @@ function RecordTable({ name, rows, setRows, verdicts, onCheck, checking }) {
             {' '}It is removed when you save.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={() => remove(confirming)} className="slit-frame slit-frame-flag rounded-[4px] px-4 py-2 font-(family-name:--font-mono) text-xs text-(--color-flag)">Delete record</button>
+            <button type="button" onClick={() => remove(confirming)} className="slit-frame slit-frame-flag px-4 py-2 font-(family-name:--font-mono) text-xs text-(--color-flag)">Delete record</button>
             <button type="button" onClick={() => setConfirming(null)} className="btn-ghost px-4 py-2 text-xs">Keep it</button>
           </div>
         </div>

@@ -18,9 +18,9 @@ test('side rails: never on a claimed *.runs-at.dev name', () => {
   assert.equal(sideRailsAllowed('/docs', 'preet.runs-at.dev'), false);
 });
 
-test('side rails: the breakpoint leaves room for both rails, gutters and the edge dock', () => {
-  const column = 768, gutter = 32, ad = 300, dockFromEdge = 66;
+test('side rails: the breakpoint leaves room for both rails and their gutters', () => {
+  const column = 768, gutter = 32, ad = 300;
   const rightRailOuterEdge = SIDE_RAIL_MIN_WIDTH / 2 + column / 2 + gutter + ad;
   assert.ok(SIDE_RAIL_MIN_WIDTH / 2 - column / 2 - gutter - ad > 0, 'left rail stays on screen');
-  assert.ok(rightRailOuterEdge < SIDE_RAIL_MIN_WIDTH - dockFromEdge, 'right rail clears the edge dock');
+  assert.ok(rightRailOuterEdge < SIDE_RAIL_MIN_WIDTH, 'right rail stays on screen');
 });

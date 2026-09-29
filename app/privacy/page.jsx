@@ -1,4 +1,5 @@
-import { Section, Quote } from '../components/Section.jsx';
+import { Section, Quote } from '../docs/components.jsx';
+import PageHeader from '../components/page-header.jsx';
 
 export const metadata = {
   title: 'Privacy',
@@ -9,19 +10,16 @@ export const metadata = {
 
 export default function Privacy() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16 sm:py-20">
-      <p className="meta">Privacy</p>
-      <h1 className="mt-3 text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
-        What is stored, what is not
-      </h1>
-      <p className="mt-4 max-w-[600px] text-[16px] leading-[1.5] text-(--color-muted)">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
+      <PageHeader label="privacy" crumb="Privacy" title="What is stored, what is not">
         The short version: no visitor tracking, no hidden database. Your record is a public file
         you can read, and this page is the full list of what the site keeps.
-      </p>
+      </PageHeader>
 
+      <div className="surface-cream mt-12 border-2 border-(--line-strong) px-5 pb-10 sm:px-10 [&>section:first-child]:mt-8">
       <Section title="Public by design">
-        <p className="text-sm leading-relaxed sm:text-base">
-          A claim writes <code className="rounded-[4px] border border-(--color-rule) bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-[0.9em]">domains/&lt;name&gt;.json</code> to a
+        <p className="text-[15px] leading-[1.6] text-(--color-ash) sm:text-base">
+          A claim writes <code className="slit-inline bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-[0.9em] text-(--color-ink)">domains/&lt;name&gt;.json</code> to a
           public GitHub repository: the name, your GitHub login, the claim timestamp, any DNS
           records you set, and an optional display profile. Git history keeps every past version.
           That publicity is the registry&rsquo;s integrity model, not a side effect.
@@ -29,7 +27,7 @@ export default function Privacy() {
       </Section>
 
       <Section title="Sign-in and the session cookie">
-        <p className="text-sm leading-relaxed sm:text-base">
+        <p className="text-[15px] leading-[1.6] text-(--color-ash) sm:text-base">
           Signing in runs through GitHub OAuth. The site stores a single signed, HttpOnly cookie
           holding your login and a few public profile facts, expiring after 24 hours. Two more
           cookies exist only during sign-in: one that checks the sign-in started here, and one that
@@ -41,9 +39,9 @@ export default function Privacy() {
       </Section>
 
       <Section title="The claim-time country field">
-        <p className="text-sm leading-relaxed sm:text-base">
+        <p className="text-[15px] leading-[1.6] text-(--color-ash) sm:text-base">
           When a name is claimed, the request&rsquo;s edge-inferred country (an ISO code like{' '}
-          <code className="rounded-[4px] border border-(--color-rule) bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-[0.9em]">IN</code>) is
+          <code className="slit-inline bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-[0.9em] text-(--color-ink)">IN</code>) is
           written into the record, and nothing more precise. It feeds the aggregate claim map on
           the stats page. It is never a city, never an IP address, written exactly once at the
           moment of the claim, and never refreshed or enriched afterwards. To remove it entirely,
@@ -52,12 +50,12 @@ export default function Privacy() {
       </Section>
 
       <Section title="What is and is not collected">
-        <p className="text-sm leading-relaxed sm:text-base">
+        <p className="text-[15px] leading-[1.6] text-(--color-ash) sm:text-base">
           runs-at.dev itself does no visitor fingerprinting, no location lookups on page views, and
           builds no profile from how you browse. The advertising described below comes from a third
           party and is covered separately.
         </p>
-        <p className="text-sm leading-relaxed sm:text-base">
+        <p className="text-[15px] leading-[1.6] text-(--color-ash) sm:text-base">
           One thing is counted: the site uses Vercel Analytics, which records page views without
           cookies and without identifying visitors. It tells the operator which pages get used; it
           cannot follow a person across pages, sites, or visits.
@@ -70,13 +68,13 @@ export default function Privacy() {
       </Section>
 
       <Section title="Advertising">
-        <p className="text-sm leading-relaxed sm:text-base">
+        <p className="text-[15px] leading-[1.6] text-(--color-ash) sm:text-base">
           runs-at.dev shows banner advertising provided by HilltopAds. There are three 300&times;250
           banners, and none of them runs on claimed{' '}
-          <code className="rounded-[4px] border border-(--color-rule) bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-[0.9em]">*.runs-at.dev</code>{' '}
+          <code className="slit-inline bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-[0.9em] text-(--color-ink)">*.runs-at.dev</code>{' '}
           names.
         </p>
-        <ul className="list-disc space-y-2 pl-6 text-sm leading-relaxed sm:text-base">
+        <ul className="list-disc space-y-2 pl-6 text-[15px] leading-[1.6] text-(--color-ash) marker:text-(--color-muted) sm:text-base">
           <li>
             <strong className="font-normal text-(--color-ink)">One on the homepage.</strong> It loads
             lazily: nothing is requested from HilltopAds for it until the banner comes close to the
@@ -91,7 +89,7 @@ export default function Privacy() {
             profile-card pages.
           </li>
         </ul>
-        <p className="text-sm leading-relaxed sm:text-base">
+        <p className="text-[15px] leading-[1.6] text-(--color-ash) sm:text-base">
           Once a banner loads, your browser connects to HilltopAds&rsquo; servers to fetch and display
           the ad. Like other advertising technology, HilltopAds may receive and process technical
           information about that request to deliver and measure ads. What it collects, and how it
@@ -103,12 +101,12 @@ export default function Privacy() {
       </Section>
 
       <Section title="Third parties the site talks to">
-        <p className="text-sm leading-relaxed sm:text-base">
+        <p className="text-[15px] leading-[1.6] text-(--color-ash) sm:text-base">
           GitHub&rsquo;s API (your public profile fills the sign-in session and the profile card),
           live DNS resolvers (to answer the &ldquo;is it working?&rdquo; panel), Vercel (which
           hosts the site and counts page views), and Cloudflare (which runs the DNS for
           runs-at.dev and answers every claimed name before passing the request on). A visit to any
-          <code className="rounded-[4px] border border-(--color-rule) bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-[0.9em]">*.runs-at.dev</code> name
+          <code className="slit-inline bg-(--color-card) px-1.5 py-0.5 font-(family-name:--font-mono) text-[0.9em] text-(--color-ink)">*.runs-at.dev</code> name
           therefore passes through Cloudflare. None of these receive anything beyond what is needed
           to answer your request. Some pages also load banner ads from HilltopAds, as described under
           Advertising above.
@@ -116,13 +114,14 @@ export default function Privacy() {
       </Section>
 
       <Section title="Removing your data">
-        <p className="text-sm leading-relaxed sm:text-base">
+        <p className="text-[15px] leading-[1.6] text-(--color-ash) sm:text-base">
           Release the name on the <a className="text-(--color-ink) underline" href="/manage">manage page</a> and
           the record (country field included) is deleted from the registry. Git history on the
           public repo keeps past versions of records, as it must for a registry whose integrity is
           its history; truly sensitive data should never go into a record in the first place.
         </p>
       </Section>
+      </div>
     </main>
   );
 }

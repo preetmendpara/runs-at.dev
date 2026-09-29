@@ -68,7 +68,7 @@ NOTES
 
 // Small outlined action in the system's voice: a fading slit frame that
 // brightens on hover. Used for the secondary copy/regenerate controls.
-const MINI = 'slit-frame rounded-[4px] px-2.5 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)';
+const MINI = 'slit-frame px-2.5 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)';
 
 // The deploy-token card. Account-scoped, unlike the record forms above it,
 // which are per-name: one login mints one kind of credential, and the

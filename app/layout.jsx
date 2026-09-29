@@ -3,8 +3,6 @@ import { Bitcount_Prop_Single, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 import Footer from './components/Footer.jsx';
 import Nav from './components/Nav.jsx';
-import EdgePicker from './edge-picker.jsx';
-import { publishedPosts } from '../lib/blog.js';
 import { Analytics } from '@vercel/analytics/next';
 import SideAdRails from './components/side-ad-rails.jsx';
 
@@ -69,7 +67,7 @@ export const metadata = {
 };
 
 // Mobile Chrome and Safari tint the address bar / browser UI from these.
-// The site is dark-locked, so every entry is the same obsidian #101010.
+// The site is printed on one paper stock, so every entry is the same #eeeae0.
 // They are hand-written in the head (not a viewport export) to control
 // ORDER: the plain media-less tag leads, which is the shape GitHub ships.
 // An engine that only reads the leading theme-color, or that mishandles
@@ -84,17 +82,16 @@ export default function RootLayout({ children }) {
     // raises a mismatch warning on every page load for those visitors. The
     // markup itself is deterministic; this silences only that attribute-level
     // noise on the two elements extensions touch, nothing deeper.
-    <html lang="en" suppressHydrationWarning style={{ backgroundColor: '#101010' }} className={`${satoshi.variable} ${bitcount.variable} ${mono.variable}`}>
+    <html lang="en" suppressHydrationWarning style={{ backgroundColor: '#eeeae0' }} className={`${satoshi.variable} ${bitcount.variable} ${mono.variable}`}>
       <head>
-        <meta name="theme-color" content="#101010" />
-        <meta name="theme-color" content="#101010" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#101010" media="(prefers-color-scheme: dark)" />
-        <meta name="color-scheme" content="dark" />
+        <meta name="theme-color" content="#eeeae0" />
+        <meta name="theme-color" content="#eeeae0" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#eeeae0" media="(prefers-color-scheme: dark)" />
+        <meta name="color-scheme" content="light" />
       </head>
       <body suppressHydrationWarning>
         <Nav />
-        {/* Right padding on phones keeps text clear of the edge dock. */}
-        <div className="pr-10 sm:pr-0">
+        <div>
           {/* relative: the desktop side-rail ads position against the page
               content only, so they stop above the footer. */}
           <div className="relative">
@@ -103,7 +100,6 @@ export default function RootLayout({ children }) {
           </div>
           <Footer />
         </div>
-        <EdgePicker hideBlog={publishedPosts().length === 0} />
         <Analytics />
       </body>
     </html>

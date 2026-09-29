@@ -1,4 +1,4 @@
-import { Section, Quote } from '../../components/Section.jsx';
+import { Section, Quote } from '../components.jsx';
 import { C, Code, DocList, DocTitle, Eyebrow, Lede, Record } from '../components.jsx';
 import { SITE_OG_IMAGE } from '../../../lib/og.js';
 
@@ -16,7 +16,7 @@ const LIST = `list-disc space-y-2 pl-6 ${P}`;
 
 export default function Quickstart() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
       <Eyebrow>Docs / Quickstart</Eyebrow>
       <DocTitle>Get a free subdomain in four steps</DocTitle>
       <Lede>

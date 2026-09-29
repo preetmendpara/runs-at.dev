@@ -1,4 +1,4 @@
-import { Section } from '../../../components/Section.jsx';
+import { Section } from '../../components.jsx';
 import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record } from '../../components.jsx';
 import { SITE_OG_IMAGE } from '../../../../lib/og.js';
 
@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function ReplitGuide() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
       <Eyebrow>Docs / Guides / Replit</Eyebrow>
       <DocTitle>Replit</DocTitle>
       <Lede>you.runs-at.dev serving a Replit deployment, over HTTPS, via A and TXT records.</Lede>

@@ -115,22 +115,22 @@ export default async function Site({ params }) {
         domains/{name}.json
       </p>
 
-      <div className="slit-frame mt-5 rounded-lg bg-(--color-card) p-6 sm:p-8">
+      <div className="hard-shadow mt-5 border-2 border-(--line-strong) bg-(--color-card) p-6 sm:p-8">
         <div className="flex items-center gap-5">
           {profile?.avatar_url && (
-            <span className="slit-frame inline-block shrink-0 rounded-full p-[3px]">
+            <span className="inline-block shrink-0 border border-(--line-strong) p-[3px]">
               <img
                 src={profile.avatar_url}
                 alt=""
                 width={64}
                 height={64}
-                className="rounded-full"
+                className="block"
               />
             </span>
           )}
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="min-w-0">
+              <h1 className="min-w-0 [overflow-wrap:anywhere]">
                 <a
                   href={`https://${name}.runs-at.dev`}
                   target="_blank"
@@ -145,7 +145,7 @@ export default async function Site({ params }) {
                   /manage does the sign-in and ownership check. */}
               <a
                 href={`https://runs-at.dev/manage?name=${encodeURIComponent(name)}`}
-                className="slit-frame [--slit-over:8px] rounded-full px-3 py-1 font-(family-name:--font-mono) text-xs text-(--color-muted) transition-colors hover:text-(--color-ink)"
+                className="slit-frame px-3 py-1 font-(family-name:--font-mono) text-xs text-(--color-muted) transition-colors hover:text-(--color-ink)"
               >
                 manage
               </a>
@@ -157,14 +157,14 @@ export default async function Site({ params }) {
         {bio && <p className="mt-5 max-w-[540px] text-[16px] leading-[1.5] text-(--color-ash)">{bio}</p>}
 
         {links.length > 0 && (
-          <ul className="mt-6 space-y-12">
+          <ul className="mt-6 space-y-3">
             {links.map((link) => (
               <li key={`${link.label}-${link.url}`}>
                 <a
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="slit-frame flex items-center justify-between rounded-lg px-4 py-3 font-(family-name:--font-mono) text-sm text-(--color-ink) transition-colors"
+                  className="slit-frame flex items-center justify-between px-4 py-3 font-(family-name:--font-mono) text-sm text-(--color-ink) transition-colors"
                 >
                   <span className="truncate">{link.label}</span>
                   <span aria-hidden className="ml-3 shrink-0 text-(--color-muted)">↗</span>

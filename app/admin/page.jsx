@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { readSession, SESSION_COOKIE } from '../../lib/session.js';
 import { isAdmin } from '../../lib/admin.js';
 import AdminPanel from './admin-panel.jsx';
+import PageHeader from '../components/page-header.jsx';
 
 export const metadata = {
   title: 'Admin · runs-at.dev',
@@ -24,16 +25,12 @@ export default async function Admin() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20">
-      <p className="meta">Admin</p>
-      <h1 className="mt-3 text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
-        Domain slots
-      </h1>
-      <p className="mt-4 max-w-[540px] text-[16px] leading-[1.5] text-(--color-muted)">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
+      <PageHeader label="admin" crumb="Admin" title="Domain slots">
         Every account has 1 free domain included. Extra slots granted here let an account
         claim more through the normal flow.
-      </p>
-      <div className="mt-12">
+      </PageHeader>
+      <div className="mt-12 border-2 border-(--line-strong) bg-(--color-card) p-5 sm:p-8">
         <AdminPanel />
       </div>
     </main>

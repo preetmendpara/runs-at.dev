@@ -132,7 +132,9 @@ export function ContinentChart({ points, total, heading = false, selected = null
   const max = rows[0]?.count ?? 1;
   const interactive = typeof onSelect === 'function';
 
-  const cell = 'slit-frame w-[calc(50%-16px)] rounded-lg p-5 text-left sm:w-[calc(25%-30px)]';
+  // Square cells in a ruled grid: each cell draws its right and bottom rule,
+  // the grid's own top and left border closes the frame.
+  const cell = 'border-r border-b border-(--line) p-4 text-left sm:p-5 hover:bg-(--color-card)';
 
   return (
     <div className={className}>
@@ -146,7 +148,7 @@ export function ContinentChart({ points, total, heading = false, selected = null
           </p>
         </div>
       )}
-      <div className={heading ? 'mt-8 flex flex-wrap justify-center gap-8 sm:gap-10' : 'flex flex-wrap justify-center gap-8 sm:gap-10'}>
+      <div className={`grid grid-cols-2 border-t border-l border-(--line) sm:grid-cols-4 ${heading ? 'mt-8' : ''}`}>
         {rows.map((c) => {
           const active = selected === c.name;
           const body = (
@@ -157,11 +159,8 @@ export function ContinentChart({ points, total, heading = false, selected = null
               <div className="meta mt-2">{c.name}</div>
               <div
                 aria-hidden="true"
-                className="mt-4 h-0.5 rounded-full"
-                style={{
-                  width: `${Math.max((c.count / max) * 100, 3)}%`,
-                  backgroundImage: 'linear-gradient(90deg, var(--blue), transparent)',
-                }}
+                className="mt-4 h-1 bg-(--color-blue)"
+                style={{ width: `${Math.max((c.count / max) * 100, 3)}%` }}
               />
             </>
           );
@@ -172,7 +171,7 @@ export function ContinentChart({ points, total, heading = false, selected = null
               onClick={() => onSelect(active ? null : c.name)}
               aria-pressed={active}
               aria-label={`Show ${c.name} on the map`}
-              className={`${cell} cursor-pointer ${active ? 'slit-frame-bright' : ''}`}
+              className={`${cell} cursor-pointer ${active ? 'bg-(--color-ink) text-(--color-paper) [&_*]:text-(--color-paper)' : ''}`}
             >
               {body}
             </button>
@@ -198,18 +197,18 @@ export function ContinentChart({ points, total, heading = false, selected = null
 // Availability / status pill: badge surface inside a graphite hairline, a
 // single pulse-green dot reserved for live/active states.
 const TONES = {
-  live: '#98ff38',
-  ok: '#98ff38',
-  pending: '#eab308',
-  redirect: '#8ea1ff',
-  neutral: '#9c9c9c',
-  error: '#d97757',
+  live: 'var(--pulse)',
+  ok: 'var(--pulse)',
+  pending: 'var(--warn)',
+  redirect: 'var(--blue)',
+  neutral: 'var(--muted)',
+  error: 'var(--flag)',
 };
 
 export function StatusBadge({ tone = 'neutral', pulse = false, children }) {
   const color = TONES[tone] ?? TONES.neutral;
   return (
-    <span className="slit-frame inline-flex items-center gap-2 rounded-[4px] bg-(--color-badge) px-3.5 py-2 font-(family-name:--font-mono) text-[12px] tracking-[0.05em] text-(--color-muted) uppercase">
+    <span className="slit-frame inline-flex items-center gap-2 bg-(--color-badge) px-3.5 py-2 font-(family-name:--font-mono) text-[12px] tracking-[0.05em] text-(--color-ink) uppercase">
       <span
         aria-hidden="true"
         className={`inline-block h-1.5 w-1.5 rounded-full ${pulse ? 'pulse-dot' : ''}`}

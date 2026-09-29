@@ -1,4 +1,4 @@
-import { Section, Quote } from '../../components/Section.jsx';
+import { Section, Quote } from '../components.jsx';
 import { Eyebrow, DocTitle, Lede, C, Code, Record } from '../components.jsx';
 import { SITE_OG_IMAGE } from '../../../lib/og.js';
 
@@ -11,9 +11,9 @@ export const metadata = {
 
 function Row({ cells }) {
   return (
-    <tr className="slit-top slit-dim">
+    <tr className="border-t border-(--line)">
       {cells.map((cell, i) => (
-        <td key={i} className="py-2 pr-4 align-top text-sm leading-relaxed">
+        <td key={i} className="px-3 py-3 align-top text-sm leading-relaxed">
           {cell}
         </td>
       ))}
@@ -23,7 +23,7 @@ function Row({ cells }) {
 
 export default function Records() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
       <Eyebrow>Docs / Records</Eyebrow>
       <DocTitle>Record reference</DocTitle>
       <Lede>
@@ -71,13 +71,13 @@ export default function Records() {
       </Section>
 
       <Section title="Record types">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+        <div className="overflow-x-auto border-2 border-(--line-strong)">
+          <table className="w-full min-w-[520px] border-collapse text-left">
             <thead>
-              <tr>
-                <th className="pb-2 pr-4 font-(family-name:--font-mono) text-xs tracking-[0.1em] text-(--color-muted) uppercase">Type</th>
-                <th className="pb-2 pr-4 font-(family-name:--font-mono) text-xs tracking-[0.1em] text-(--color-muted) uppercase">Shape</th>
-                <th className="pb-2 font-(family-name:--font-mono) text-xs tracking-[0.1em] text-(--color-muted) uppercase">Coexistence</th>
+              <tr className="border-b-2 border-(--line-strong) bg-(--color-card)">
+                <th className="px-3 py-2 font-(family-name:--font-mono) text-xs tracking-[0.1em] text-(--color-muted) uppercase">Type</th>
+                <th className="px-3 py-2 font-(family-name:--font-mono) text-xs tracking-[0.1em] text-(--color-muted) uppercase">Shape</th>
+                <th className="px-3 py-2 font-(family-name:--font-mono) text-xs tracking-[0.1em] text-(--color-muted) uppercase">Coexistence</th>
               </tr>
             </thead>
             <tbody>

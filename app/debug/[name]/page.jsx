@@ -73,12 +73,12 @@ const STUCK_ADVICE = {
 };
 
 const VERDICT = {
-  ok: { label: 'Serving your site', color: '#22c55e' },
-  redirect: { label: 'Redirecting', color: '#3b82f6' },
-  card: { label: 'Serving the profile card', color: '#9ca3af' },
-  stuck: { label: 'Stuck on the profile card', color: '#eab308' },
-  down: { label: 'No answer', color: '#ef4444' },
-  unknown: { label: 'Unclassified', color: '#9ca3af' },
+  ok: { label: 'Serving your site', color: 'var(--pulse)' },
+  redirect: { label: 'Redirecting', color: 'var(--blue)' },
+  card: { label: 'Serving the profile card', color: 'var(--muted)' },
+  stuck: { label: 'Stuck on the profile card', color: 'var(--warn)' },
+  down: { label: 'No answer', color: 'var(--flag)' },
+  unknown: { label: 'Unclassified', color: 'var(--muted)' },
 };
 
 export default async function DebugPage({ params }) {
@@ -91,9 +91,9 @@ export default async function DebugPage({ params }) {
   const budget = takeDebug(name);
   if (!budget.ok) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-16">
-        <p className="font-(family-name:--font-mono) text-xs tracking-[0.14em] text-(--color-muted) uppercase">Debug</p>
-        <h1 className="mt-2 font-(family-name:--font-display) text-2xl font-medium text-(--color-ink)">{name}.runs-at.dev</h1>
+      <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
+        <p className="border-b border-(--line) pb-3 font-(family-name:--font-mono) text-[12px] tracking-[0.08em] text-(--color-muted) uppercase">Debug</p>
+        <h1 className="mt-8 text-[clamp(1.6rem,6vw,2.75rem)] leading-[1.05] font-normal break-all text-(--color-ink)">{name}.runs-at.dev</h1>
         <p className="mt-4 text-sm leading-relaxed text-(--color-muted)">
           Too many checks on this name in the last minute. Live DNS answers change on
           the scale of minutes anyway — reload shortly.
@@ -119,9 +119,9 @@ export default async function DebugPage({ params }) {
 
   if (readFailed) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-16">
-        <p className="font-(family-name:--font-mono) text-xs tracking-[0.14em] text-(--color-muted) uppercase">Debug</p>
-        <h1 className="mt-2 font-(family-name:--font-display) text-2xl font-medium text-(--color-ink)">{name}.runs-at.dev</h1>
+      <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
+        <p className="border-b border-(--line) pb-3 font-(family-name:--font-mono) text-[12px] tracking-[0.08em] text-(--color-muted) uppercase">Debug</p>
+        <h1 className="mt-8 text-[clamp(1.6rem,6vw,2.75rem)] leading-[1.05] font-normal break-all text-(--color-ink)">{name}.runs-at.dev</h1>
         <p className="mt-4 text-sm leading-relaxed text-(--color-muted)">
           The registry could not be read just now, so there is nothing trustworthy to
           report. Reload in a moment — a claimed name is not "not claimed" because a
@@ -133,9 +133,9 @@ export default async function DebugPage({ params }) {
 
   if (!record) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-16">
-        <p className="font-(family-name:--font-mono) text-xs tracking-[0.14em] text-(--color-muted) uppercase">Debug</p>
-        <h1 className="mt-2 font-(family-name:--font-display) text-2xl font-medium text-(--color-ink)">{name}.runs-at.dev</h1>
+      <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
+        <p className="border-b border-(--line) pb-3 font-(family-name:--font-mono) text-[12px] tracking-[0.08em] text-(--color-muted) uppercase">Debug</p>
+        <h1 className="mt-8 text-[clamp(1.6rem,6vw,2.75rem)] leading-[1.05] font-normal break-all text-(--color-ink)">{name}.runs-at.dev</h1>
         <p className="mt-4 text-sm leading-relaxed text-(--color-muted)">
           This name is not claimed, so there is no record to check: the wildcard serves a
           claim page for it and DNS points nowhere in particular.
@@ -198,14 +198,14 @@ export default async function DebugPage({ params }) {
   const recordTypes = Object.keys(records);
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-16">
-      <p className="font-(family-name:--font-mono) text-xs tracking-[0.14em] text-(--color-muted) uppercase">Debug</p>
-      <div className="mt-2 flex flex-wrap items-center gap-3">
-        <h1 className="font-(family-name:--font-display) text-2xl font-medium tracking-tight text-(--color-ink)">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
+      <p className="border-b border-(--line) pb-3 font-(family-name:--font-mono) text-[12px] tracking-[0.08em] text-(--color-muted) uppercase">Debug</p>
+      <div className="mt-8 flex flex-wrap items-center gap-3">
+        <h1 className="text-[clamp(1.6rem,6vw,2.75rem)] leading-[1.05] font-normal break-all text-(--color-ink)">
           {name}.runs-at.dev
         </h1>
         <span
-          className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-(family-name:--font-mono) text-xs"
+          className="inline-flex items-center gap-1.5 border px-3 py-1 font-(family-name:--font-mono) text-xs"
           style={{ borderColor: verdict.color, color: verdict.color }}
         >
           <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: verdict.color }} />
@@ -213,7 +213,7 @@ export default async function DebugPage({ params }) {
         </span>
       </div>
 
-      <div className="mt-6 border border-(--color-rule) bg-(--color-card) px-5 py-4">
+      <div className="mt-8 border-2 border-(--line-strong) bg-(--color-card) px-5 py-4">
         <p className="font-(family-name:--font-mono) text-xs text-(--color-muted)">{'// live check'}</p>
         <ul className="mt-2 space-y-1 font-(family-name:--font-mono) text-xs">
           {rows.length === 0 && <li className="text-(--color-muted)">nothing to check yet</li>}
@@ -230,7 +230,7 @@ export default async function DebugPage({ params }) {
       </div>
 
       {advice && (
-        <div className="mt-4 border border-(--color-signal)/50 bg-(--color-signal)/5 px-5 py-4">
+        <div className="hard-shadow mt-6 border-2 border-(--color-signal) bg-(--color-card) px-5 py-4">
           <p className="font-(family-name:--font-mono) text-xs text-(--color-signal)">{'// what is missing'}</p>
           <p className="mt-2 text-sm font-medium text-(--color-ink)">{advice.title}</p>
           <p className="mt-1 text-sm leading-relaxed text-(--color-muted)">{advice.body}</p>

@@ -4,14 +4,13 @@ import { useRef } from 'react';
 import { Confetti } from '@/components/ui/confetti';
 
 // Firework cadence from the Magic UI preset (twin side bursts repeating over
-// a short run), but the particles are the star shape in shades of white, so
-// the celebration reads as sparks on the obsidian canvas rather than a
-// rainbow.
-const WHITE_STARS = ['#FFFFFF', '#F5F5F5', '#E8E8E8', '#D6D6D6', '#BFBFBF'];
+// a short run), the star particles printed in the site's own inks --
+// vermilion, carbon, lamp-black, link blue and cream -- rather than a rainbow.
+const PRINT_STARS = ['#CF4A1F', '#17171A', '#2E2A25', '#2A4D9B', '#E3DDCF'];
 
 const STAR_BURST = {
   shapes: ['star'],
-  colors: WHITE_STARS,
+  colors: PRINT_STARS,
   scalar: 1.3,
   spread: 360,
   startVelocity: 32,
@@ -65,9 +64,9 @@ function fireStarWorks(confettiRef) {
   }, 250);
 }
 
-// The "Names claimed" stat card, clickable: a click fires white star
-// fireworks from the screen edges. Markup mirrors the Stat cell exactly so
-// the card reads as identical; only the affordances differ.
+// The primary readout figure, clickable: a click fires white star fireworks
+// from the screen edges. Fills its readout cell; the global focus ring marks
+// keyboard focus.
 export default function ConfettiStat({ value, label }) {
   const confettiRef = useRef(null);
 
@@ -82,12 +81,15 @@ export default function ConfettiStat({ value, label }) {
         type="button"
         onClick={() => fireStarWorks(confettiRef)}
         aria-label={`${label}: ${value}. Activate for confetti.`}
-        className="slit-frame cursor-pointer rounded-lg p-6 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-(--color-signal) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-paper) sm:p-8"
+        className="block h-full w-full cursor-pointer p-5 text-left hover:bg-(--color-paper) sm:p-8"
       >
-        <div className="text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
+        <div className="meta whitespace-nowrap">{label}</div>
+        <div
+          className="mt-6 text-[clamp(5rem,26vw,11rem)] leading-[0.85] text-(--color-ink) sm:text-[clamp(6rem,14vw,11rem)]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           {value}
         </div>
-        <div className="meta mt-3">{label}</div>
       </button>
     </>
   );

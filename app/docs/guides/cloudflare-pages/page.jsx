@@ -1,4 +1,4 @@
-import { Section, Quote } from '../../../components/Section.jsx';
+import { Section, Quote } from '../../components.jsx';
 import { C, Code, DocList, DocTitle, Eyebrow, Lede, Record, Warning } from '../../components.jsx';
 import { SITE_OG_IMAGE } from '../../../../lib/og.js';
 
@@ -15,7 +15,7 @@ const LINK = 'text-(--color-ink) underline';
 
 export default function CloudflarePagesGuide() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
       <Eyebrow>Docs / Guides / Cloudflare Pages</Eyebrow>
       <DocTitle>Use a free runs-at.dev subdomain with Cloudflare Pages</DocTitle>
       <Lede>

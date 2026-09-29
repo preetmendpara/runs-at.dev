@@ -1,4 +1,4 @@
-import { Section, Quote } from '../../components/Section.jsx';
+import { Section, Quote } from '../components.jsx';
 import { C, Eyebrow, DocTitle, Lede, DocList } from '../components.jsx';
 import { SITE_OG_IMAGE } from '../../../lib/og.js';
 
@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function Resources() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
       <Eyebrow>Docs / Resources</Eyebrow>
       <DocTitle>Resources</DocTitle>
       <Lede>The source, the schema, and where to go if something is wrong.</Lede>

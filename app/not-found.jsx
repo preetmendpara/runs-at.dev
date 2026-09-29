@@ -21,12 +21,12 @@ Looking for a claimed site? Claimed names live on their own hosts
 
 export default function NotFound() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16 sm:py-20">
-      <p className="meta">404 · not found</p>
-      <h1 className="mt-3 text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
+      <p className="meta border-b border-(--line) pb-3">404 · not found</p>
+      <h1 className="mt-8 text-[clamp(2rem,8vw,4.25rem)] leading-[0.95] font-normal tracking-[-0.01em] text-(--color-ink) uppercase sm:mt-12">
         Nothing lives at this path
       </h1>
-      <pre className="mt-8 rounded-lg border border-(--color-rule) bg-(--color-card) p-4 font-(family-name:--font-mono) text-xs leading-relaxed whitespace-pre-wrap [overflow-wrap:break-word] text-(--color-ash)">
+      <pre className="hard-shadow mt-10 border-2 border-(--line-strong) bg-(--color-card) p-4 sm:p-6 font-(family-name:--font-mono) text-xs leading-relaxed whitespace-pre-wrap [overflow-wrap:break-word] text-(--color-ash)">
         {BODY}
       </pre>
     </main>

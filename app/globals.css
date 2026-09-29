@@ -19,24 +19,24 @@
    designed for. */
 @theme inline {
   --color-paper: var(--paper);
+  --color-cream: var(--cream);
   --color-card: var(--card);
   --color-rule: var(--rule);
   --color-ink: var(--ink);
+  --color-ash: var(--ash);
   --color-muted: var(--muted);
+  --color-smoke: var(--muted);
   --color-signal: var(--signal);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-charcoal: var(--charcoal);
   --color-flag: var(--flag);
-
-  --color-obsidian: #101010;
-  --color-carbon: #080808;
-  --color-graphite: #212121;
-  --color-chalk: #f3f3f3;
-  --color-smoke: #9c9c9c;
-  --color-ash: #c1c1c1;
-  --color-iron: #474747;
-  --color-gold: #6f6759;
-  --color-pulse: #98ff38;
+  --color-iron: var(--line);
+  --color-gold: var(--gold);
+  --color-pulse: var(--pulse);
+  --color-warn: var(--warn);
   --color-blue: var(--blue);
-  --color-badge: #1a1a1a;
+  --color-badge: var(--badge);
 }
 
 @theme {
@@ -63,41 +63,155 @@
   --text-display: 63px;
   --text-display--line-height: 1.05;
   --text-display--letter-spacing: -0.011em;
+
+  /* Retro brutalist geometry: the radius scale is flattened to 0, so the
+     rounded-* utilities across the site render square. */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
+  --radius: 0px;
 }
 
+/* ── Archive palette ─────────────────────────────────────────────────
+   The site reads as printed technical matter: unbleached paper, carbon ink,
+   one vermilion signal, and a warm lamp-black ink used for deliberate
+   "plate" sections (claim terminal, maps, code, footer). Functional
+   colours stay functional: blue for links and map heat, green for live
+   status, red for danger. Every surface below is a token; .surface-ink and
+   .surface-cream re-point the same tokens inside a section, so components
+   never hard-code a colour.
+
+     --paper    page stock          --ink     carbon type
+     --cream    index-card band     --ash     body copy
+     --card     raised card stock   --muted   captions, metadata
+     --charcoal plate sections      --accent  vermilion: rules, CTA shadow
+*/
 :root {
-  --paper: #101010;
-  --card: #080808;
-  --rule: #212121;
-  --ink: #f3f3f3;
-  --muted: #9c9c9c;
-  --signal: #ffffff;
-  --flag: #d97757;
-  --gold: #6f6759;
-  --pulse: #98ff38;
-  --blue: #4d7cff;
+  --paper: #eeeae0;
+  --cream: #e3ddcf;
+  --card: #f8f6f0;
+  --rule: #1a1a18;
+  --ink: #17171a;
+  --ash: #2f2d29;
+  --muted: #6a655b;
+  --signal: #17171a;
+  --accent: #cf4a1f;
+  /* Vermilion for small text: the same hue a step deeper, so captions and
+     arrows clear 4.5:1 on paper and cream. The bright --accent stays for
+     rules, fills, shadows and display-size type. */
+  --accent-ink: #a83a18;
+  --charcoal: #2e2a25;
+  --flag: #b0302a;
+  --gold: #8a7a55;
+  --pulse: #3e7b34;
+  --warn: #a8741a;
+  --blue: #2a4d9b;
+  --badge: #e3ddcf;
 
-  /* Slit lines: every rule on the page is a line of light whose ends fade
-     smoothly into the canvas. Structural lines sit at --slit, row separators
-     and input edges rest dimmer and brighten on focus/hover. */
-  --slit: rgba(255, 255, 255, 0.35);
-  --slit-dim: rgba(255, 255, 255, 0.2);
-  --slit-frame: rgba(255, 255, 255, 0.22);
-  --slit-frame-hi: rgba(255, 255, 255, 0.55);
-  --slit-bright: rgba(255, 255, 255, 0.85);
-  --slit-bar: rgba(255, 255, 255, 0.6);
-  --edge: rgba(255, 255, 255, 0.2);
-  --edge-focus: rgba(255, 255, 255, 0.8);
+  /* Rules. The class names (slit-*) are historic; the drawing is solid
+     print rules in ink, with a paler rule for dense row separators. */
+  --slit: #1a1a18;
+  --slit-dim: #cbc4b5;
+  --slit-frame: #1a1a18;
+  --slit-frame-hi: #cf4a1f;
+  --slit-bright: #17171a;
+  --slit-bar: #17171a;
+  --edge: #6a655b;
+  --edge-focus: #17171a;
+  --flag-dim: rgba(176, 48, 42, 0.55);
 
-  /* The claim line and section labels speak in Input's voice (mono, tight
-     utilitarian tracking). Headings speak in Bitcount Prop (pixel matrix,
-     set via the h1/h2/h3 rule below); Satoshi carries body copy. */
+  /* Line weights: 1px --line for structure, --line-strong for the heavy
+     rules that open sections and frame important panels. */
+  --line: #b9b1a1;
+  --line-strong: #17171a;
+
+  /* Hard offset shadows: flat, unblurred, printed ink. Opt-in via
+     .hard-shadow; the primary key carries the vermilion one. */
+  --shadow-offset: 4px;
+  --shadow-offset-sm: 2px;
+  --shadow-ink: #17171a;
+  --shadow-hard: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-ink);
+  --shadow-hard-sm: var(--shadow-offset-sm) var(--shadow-offset-sm) 0 var(--shadow-ink);
+
+  /* Mechanical motion: one very short linear step for presses. */
+  --press: 60ms linear;
+
   --font-display: var(--font-bitcount), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Ink plate: the same tokens re-pointed for a dark printed section, set
+   in warm lamp-black -- the brown-black of old printing ink, so it sits with
+   the paper and vermilion instead of against them. */
+.surface-ink {
+  --paper: #2e2a25;
+  --cream: #38332d;
+  --card: #25221e;
+  --ink: #f1ebdf;
+  --ash: #ddd5c6;
+  --muted: #aca292;
+  --signal: #f1ebdf;
+  --blue: #a9bde9;
+  --pulse: #9ccb74;
+  --warn: #e0b35c;
+  --flag: #f0937c;
+  --badge: #38332d;
+  --slit: #f1ebdf;
+  --slit-dim: #4a443c;
+  --slit-frame: #8a8173;
+  --slit-frame-hi: #f1ebdf;
+  --slit-bright: #f1ebdf;
+  --slit-bar: #f1ebdf;
+  --edge: #968c7d;
+  --edge-focus: #f1ebdf;
+  --line: #4a443c;
+  --line-strong: #f1ebdf;
+  --shadow-ink: #cf4a1f;
+  --accent-ink: #f0835a;
+  background-color: var(--paper);
+  color: var(--ink);
+}
+
+/* A custom property that references another resolves where it is declared,
+   so the --color-* bridge from @theme is re-declared inside each surface;
+   otherwise utilities would keep the page-level values. */
+.surface-ink,
+.surface-cream {
+  --color-paper: var(--paper);
+  --color-cream: var(--cream);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ash: var(--ash);
+  --color-muted: var(--muted);
+  --color-smoke: var(--muted);
+  --color-signal: var(--signal);
+  --color-flag: var(--flag);
+  --color-iron: var(--line);
+  --color-pulse: var(--pulse);
+  --color-warn: var(--warn);
+  --color-blue: var(--blue);
+  --color-badge: var(--badge);
+  --color-accent-ink: var(--accent-ink);
+}
+
+/* Cream band: an index-card stock one step darker than the page. */
+.surface-cream {
+  --paper: #e3ddcf;
+  --card: #efeadf;
+  --muted: #5a554c;
+  --line: #b3aa98;
+  --slit-dim: #bfb7a6;
+  background-color: var(--paper);
+  color: var(--ink);
+}
+
 html {
-  color-scheme: dark;
+  color-scheme: light;
 
   /* Slim the scrollbar to the hairline weight used elsewhere. `color-scheme`
      above keeps the bar dark; this is purely about weight: the default bar is
@@ -121,7 +235,7 @@ html {
   background: color-mix(in srgb, currentColor 20%, transparent);
   border: 2px solid transparent;
   background-clip: content-box;
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -139,12 +253,20 @@ body {
   font-family: var(--font-body);
 }
 
-/* Every heading renders in Bitcount Prop. Class-set families (the mono
-   meta labels, mono record blocks) keep winning over this element rule. */
-h1,
-h2,
-h3 {
-  font-family: var(--font-display);
+/* Every heading renders in Bitcount Prop. In the base layer, so any
+   component class or utility that sets a family (.meta, a font-() utility)
+   wins over this element default. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+
+  /* In-page anchors land below the 66px sticky header, not under it. */
+  [id] {
+    scroll-margin-top: 5.5rem;
+  }
 }
 
 ::selection {
@@ -152,33 +274,14 @@ h3 {
   color: var(--paper);
 }
 
-/* Edge picker dock: bouncy spring animations for the selector pill.
-   The overshoot (scale > 1) is what makes it feel like a physical
-   spring, matching the iOS Dynamic Island's expansion feel. */
-@keyframes edgePickerPop {
-  0% { transform: scale(0.8); opacity: 0; }
-  60% { transform: scale(1.08); opacity: 1; }
-  80% { transform: scale(0.97); }
-  100% { transform: scale(1); }
-}
-
-@keyframes edgePickerShrink {
-  0% { transform: scale(1.1); opacity: 0; }
-  60% { transform: scale(0.94); opacity: 1; }
-  100% { transform: scale(1); }
-}
-
-.edge-picker-pill {
-  transition: height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
 a {
   text-decoration-thickness: 1px;
+  text-decoration-color: var(--accent);
   text-underline-offset: 3px;
 }
 
 :focus-visible {
-  outline: 2px solid var(--signal);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -191,65 +294,73 @@ a {
 }
 
 @layer components {
-  /* Filled white pill: the single high-contrast action. Contrast alone
-     elevates it; no shadow, no border, radius 9999px. */
+  /* Primary action: a solid white slab with a hard 2px edge and an offset
+     shadow, like a key sitting on the page. Pressing it drives the key into
+     its shadow; nothing fades. */
   .btn-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 9999px;
+    border: 2px solid var(--signal);
     background: var(--signal);
     color: var(--paper);
     padding: 0.75rem 1.5rem;
-    font-size: 14px;
-    font-weight: 400;
-    letter-spacing: 0.01em;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--accent);
+    transition: transform var(--press), box-shadow var(--press);
   }
-  .btn-pill:hover { opacity: 0.9; }
-  .btn-pill:active { transform: translateY(1px); }
+  .btn-pill:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-pill:active {
+    transform: translate(var(--shadow-offset), var(--shadow-offset));
+    box-shadow: none;
+  }
   .btn-pill[disabled], .btn-pill[aria-disabled='true'] {
-    opacity: 0.3;
+    opacity: 0.35;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
   }
 
-  /* Ghost outline: the secondary action, its 1px white outline rendered as a
-     slit (fading into the corners) rather than a hard box. */
+  /* Secondary action: an outlined key with a smaller shadow. Hover hardens
+     the edge to ink; press moves it into the shadow. */
   .btn-ghost {
-    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 8px;
-    border: 1px solid transparent;
-    color: var(--signal);
+    border: 1px solid var(--line-strong);
+    background: var(--paper);
+    color: var(--ink);
     padding: 0.625rem 1.25rem;
-    font-size: 14px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 13px;
     font-weight: 400;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    box-shadow: var(--shadow-hard-sm);
+    transition: transform var(--press), box-shadow var(--press);
   }
-  .btn-ghost:hover { opacity: 0.8; }
-  .btn-ghost:active { transform: translateY(1px); }
-  .btn-ghost::before {
-    content: '';
-    position: absolute;
-    inset: -16px;
-    pointer-events: none;
-    background:
-      linear-gradient(90deg, transparent 0, rgba(255, 255, 255, 0.75) 40px, rgba(255, 255, 255, 0.75) calc(100% - 40px), transparent 100%) 0 16px / 100% 1px no-repeat,
-      linear-gradient(90deg, transparent 0, rgba(255, 255, 255, 0.75) 40px, rgba(255, 255, 255, 0.75) calc(100% - 40px), transparent 100%) 0 calc(100% - 16px) / 100% 1px no-repeat,
-      linear-gradient(180deg, transparent 0, rgba(255, 255, 255, 0.75) 40px, rgba(255, 255, 255, 0.75) calc(100% - 40px), transparent 100%) 16px 0 / 1px 100% no-repeat,
-      linear-gradient(180deg, transparent 0, rgba(255, 255, 255, 0.75) 40px, rgba(255, 255, 255, 0.75) calc(100% - 40px), transparent 100%) calc(100% - 16px) 0 / 1px 100% no-repeat;
+  .btn-ghost:hover { border-color: var(--ink); }
+  .btn-ghost:active {
+    transform: translate(var(--shadow-offset-sm), var(--shadow-offset-sm));
+    box-shadow: none;
+  }
+  .btn-ghost[disabled], .btn-ghost[aria-disabled='true'] {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 
-  /* Mono uppercase meta label, Input's role: captions, section labels,
-     fine print. */
+  /* Mono uppercase technical label, bracketed like a field tag:
+     [ DOCS / QUICKSTART ]. The brackets are decoration only (the "/ ''"
+     alt text keeps them out of the accessibility tree). Labels set in
+     sentence case (.normal-case) are prose, so they stay unbracketed. */
   .meta {
     font-family: var(--font-mono), ui-monospace, monospace;
     font-size: 12px;
@@ -257,270 +368,149 @@ a {
     text-transform: uppercase;
     color: var(--muted);
   }
-
-  /* Inline and block code: carbon surface inside a graphite hairline. */
-  .code {
-    font-family: var(--font-mono), ui-monospace, monospace;
-    font-size: 13px;
-    line-height: 1.6;
+  /* Non-breaking spaces glue each bracket to its word, so a wrapped label
+     never leaves a lone "[" or "]" on a line of its own. */
+  .meta:not(.normal-case)::before {
+    content: '[\00a0';
+    content: '[\00a0' / '';
+  }
+  .meta:not(.normal-case)::after {
+    content: '\00a0]';
+    content: '\00a0]' / '';
   }
 }
 
-/* ── Slit lines ──────────────────────────────────────────────────────
-   Every rule on the page is a slit: a slim line of light whose ends fade
-   smoothly into the canvas. Each edge of a frame is its own gradient, so
-   corners stay open (both adjacent edges fade before meeting). No hard
-   rectangles anywhere. */
+/* Hard offset shadows, opt-in. The shadow reads as a printed object resting
+   on the page; it is never applied automatically. On a .slit-frame the
+   shadow stacks under the frame's own 1px line (see --frame-shadow). */
+.hard-shadow { --frame-shadow: var(--shadow-hard); }
+.hard-shadow-sm { --frame-shadow: var(--shadow-hard-sm); }
+.hard-shadow:not(.slit-frame) { box-shadow: var(--shadow-hard); }
+.hard-shadow-sm:not(.slit-frame) { box-shadow: var(--shadow-hard-sm); }
 
-/* Standalone horizontal / vertical slit lines. */
+/* Important panel: a 2px ink border. */
+.panel {
+  border: 2px solid var(--line-strong);
+  background: var(--card);
+}
+
+/* ── Rules (the "slit" API) ──────────────────────────────────────────
+   The class names are kept from the old fading-slit system because every
+   page speaks them; the drawing underneath is now solid and square. Every
+   line is a hard 1px rule, --slit for structure and --slit-dim for row
+   separators. Borders that must not change a box's size (reserved slots,
+   cards) are drawn with box-shadow instead of border. */
+
+/* Standalone horizontal / vertical rules. */
 .slit-h {
   height: 1px;
   border: 0;
-  background: linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
-}
-.slit-v {
-  width: 1px;
-  background: linear-gradient(180deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
+  background: var(--slit);
 }
 
-/* Edge slits painted directly on an element, no extra markup. Composable:
-   .slit-top + .slit-bottom use separate longhands and stack fine. */
-.slit-top,
-.slit-bottom {
-  background-repeat: no-repeat;
-  background-size: 100% 1px;
+.slit-v {
+  width: 1px;
+  background: var(--slit);
 }
-.slit-top {
-  background-image: linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
-  background-position: 0 0;
-}
-.slit-bottom {
-  background-image: linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
-  background-position: 0 100%;
-}
+
+/* Edge rules on an element. Composable: top and bottom are separate
+   longhands, and .slit-dim dims whichever is present. */
+.slit-top { border-top: 1px solid var(--slit); }
+.slit-bottom { border-bottom: 1px solid var(--slit); }
 
 /* Dimmer variant for row separators. */
 .slit-dim { --slit: var(--slit-dim); }
 
 /* Both the top and bottom edge in one element (capped lists). */
 .slit-y {
-  background-image:
-    linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent),
-    linear-gradient(90deg, transparent, var(--slit) 18%, var(--slit) 82%, transparent);
-  background-repeat: no-repeat;
-  background-size: 100% 1px, 100% 1px;
-  background-position: 0 0, 0 100%;
+  border-top: 1px solid var(--slit);
+  border-bottom: 1px solid var(--slit);
 }
 
-/* Vertical accent bar (record spines, warnings): 2px slit at the left edge,
-   fading out at top and bottom. --bar recolors it (e.g. the flag). */
+/* Vertical accent bar (record spines, warnings): a solid 2px rule at the
+   left edge. --bar recolors it (e.g. the flag). */
 .slit-bar-l {
   --bar: var(--slit-bar);
-  background-image: linear-gradient(180deg, transparent, var(--bar) 20%, var(--bar) 80%, transparent);
-  background-repeat: no-repeat;
-  background-size: 2px 100%;
-  background-position: 0 0;
-}
-.slit-bar-flag { --bar: rgba(217, 119, 87, 0.8); }
-
-/* Card and box outlines: four slit lines whose ends overshoot the box and
-   intersect at the corners (each line crosses its neighbor, technical-
-   drawing style; every tip still fades out). The ::before drawing surface
-   extends --slit-over past the box on every side; the perpendicular lines
-   run the full extended length, so each corner is a small crossing. That
-   is why cards need generous gaps: crossings from neighbors must never
-   touch. --slit-line is the line color, registered so hover/active
-   brightening can transition. */
-@property --slit-line {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: rgba(255, 255, 255, 0.22);
+  border-left: 2px solid var(--bar);
 }
 
+.slit-bar-flag { --bar: var(--flag); }
+
+/* Card and box outlines: a square 1px frame drawn outside the box as a
+   box-shadow ring, so the box keeps its exact size (the reserved ad slots
+   depend on that). --frame-shadow lets .hard-shadow stack an offset shadow
+   under the ring. Hover is a hard state change, no fade. */
 .slit-frame {
   --slit-line: var(--slit-frame);
-  --slit-over: 24px;
-  --slit-edge: 60px;
   position: relative;
-  transition: --slit-line 0.25s ease;
+  border-radius: 0;
+  box-shadow: 0 0 0 1px var(--slit-line), var(--frame-shadow, 0 0 #0000);
 }
-.slit-frame::before {
-  content: '';
-  position: absolute;
-  inset: calc(-1 * var(--slit-over));
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, transparent 0, var(--slit-line) var(--slit-edge), var(--slit-line) calc(100% - var(--slit-edge)), transparent 100%) 0 var(--slit-over) / 100% 1px no-repeat,
-    linear-gradient(90deg, transparent 0, var(--slit-line) var(--slit-edge), var(--slit-line) calc(100% - var(--slit-edge)), transparent 100%) 0 calc(100% - var(--slit-over)) / 100% 1px no-repeat,
-    linear-gradient(180deg, transparent 0, var(--slit-line) var(--slit-edge), var(--slit-line) calc(100% - var(--slit-edge)), transparent 100%) var(--slit-over) 0 / 1px 100% no-repeat,
-    linear-gradient(180deg, transparent 0, var(--slit-line) var(--slit-edge), var(--slit-line) calc(100% - var(--slit-edge)), transparent 100%) calc(100% - var(--slit-over)) 0 / 1px 100% no-repeat;
-}
+
 .slit-frame:hover { --slit-line: var(--slit-frame-hi); }
+
 /* Selected/active frame, and the flag (danger) variant. */
 .slit-frame-bright { --slit-line: var(--slit-bright); }
 .slit-frame-bright:hover { --slit-line: var(--slit-bright); }
-.slit-frame-flag { --slit-line: rgba(217, 119, 87, 0.5); }
-.slit-frame-flag:hover { --slit-line: rgba(217, 119, 87, 0.85); }
+.slit-frame-flag { --slit-line: var(--flag-dim); }
+.slit-frame-flag:hover { --slit-line: var(--flag); }
 
-/* List rows separated by dim slits instead of divide-y borders: the list
-   carries .slit-rows, every child after the first paints its own top slit. */
+/* List rows separated by dim rules: the list carries .slit-rows, every
+   child after the first draws its own top rule. */
 .slit-rows > * + * {
-  background-image: linear-gradient(90deg, transparent, var(--slit-dim) 15%, var(--slit-dim) 85%, transparent);
-  background-repeat: no-repeat;
-  background-size: 100% 1px;
-  background-position: 0 0;
+  border-top: 1px solid var(--slit-dim);
 }
 
-/* Inputs: the same slit on all four edges, painted as backgrounds so it
-   works on <input>/<select>/<textarea> (which cannot carry pseudo-elements).
-   Backgrounds cannot overflow the box, so instead of overshooting, each
-   line runs to the corner with only a tiny ramp, and the perpendicular
-   line meets it there: the lines intersect inside the corner. The
-   transparent border keeps sizing identical to the old 1px-bordered
-   fields; focus brightens the line. */
-@property --edge-color {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: rgba(255, 255, 255, 0.2);
-}
-
+/* Inputs: a square, clearly visible 1px border on a carbon well, terminal
+   style. The border width matches the old transparent border, so field
+   sizing is unchanged. Focus hardens the edge to ink and thickens it
+   inward with an inset ring, no fade. */
 .slit-input {
   --edge-color: var(--edge);
-  border: 1px solid transparent;
-  background:
-    linear-gradient(90deg, transparent 0, var(--edge-color) 6px, var(--edge-color) calc(100% - 6px), transparent 100%) top / 100% 1px no-repeat,
-    linear-gradient(90deg, transparent 0, var(--edge-color) 6px, var(--edge-color) calc(100% - 6px), transparent 100%) bottom / 100% 1px no-repeat,
-    linear-gradient(180deg, transparent 0, var(--edge-color) 6px, var(--edge-color) calc(100% - 6px), transparent 100%) left / 1px 100% no-repeat,
-    linear-gradient(180deg, transparent 0, var(--edge-color) 6px, var(--edge-color) calc(100% - 6px), transparent 100%) right / 1px 100% no-repeat;
-  transition: --edge-color 0.2s ease;
+  border: 1px solid var(--edge-color);
+  border-radius: 0;
+  background-color: var(--card);
 }
+
 .slit-input:focus,
 .slit-input:focus-visible {
   --edge-color: var(--edge-focus);
+  box-shadow: inset 0 0 0 1px var(--edge-color);
   outline: none;
 }
-/* Invalid/danger fields keep the slit but recolor it. */
-.slit-input-flag { --edge-color: rgba(217, 119, 87, 0.7); }
-.slit-input-flag:focus,
-.slit-input-flag:focus-visible { --edge-color: rgba(217, 119, 87, 0.95); }
 
-/* A <select> paints its own dropdown from its background-color, and the
-   `background` shorthand above resets that to transparent. The browser then
-   falls back to the system list colour (white) while the inherited ink stays
-   near-white, so the options read white on white. Naming the popup colours is
-   the only hook CSS gets here, because the list itself is drawn by the OS.
-   Mobile pickers ignore these and follow `color-scheme: dark` on html. */
+/* Invalid/danger fields recolor the edge. */
+.slit-input-flag { --edge-color: var(--flag-dim); }
+
+.slit-input-flag:focus,
+.slit-input-flag:focus-visible { --edge-color: var(--flag); }
+
+/* A <select> paints its own dropdown from its background-color. Naming the
+   popup colours is the only hook CSS gets here, because the list itself is
+   drawn by the OS. Mobile pickers ignore these and follow
+   `color-scheme: dark` on html. */
 .slit-input option {
   background-color: var(--color-card);
   color: var(--color-ink);
 }
 
-/* Inline code chip: the input treatment on an inline-block token. */
+/* Inline code chip: a square 1px tag. */
 .slit-inline {
   display: inline-block;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background:
-    linear-gradient(90deg, transparent 0, var(--edge) 5px, var(--edge) calc(100% - 5px), transparent 100%) top / 100% 1px no-repeat,
-    linear-gradient(90deg, transparent 0, var(--edge) 5px, var(--edge) calc(100% - 5px), transparent 100%) bottom / 100% 1px no-repeat,
-    linear-gradient(180deg, transparent 0, var(--edge) 5px, var(--edge) calc(100% - 5px), transparent 100%) left / 1px 100% no-repeat,
-    linear-gradient(180deg, transparent 0, var(--edge) 5px, var(--edge) calc(100% - 5px), transparent 100%) right / 1px 100% no-repeat;
+  border: 1px solid var(--slit);
+  border-radius: 0;
 }
 
-/* The claim-line input's underline: a horizontal slit under the name,
-   thickening on focus. --edge recolors it for the negative state. */
+/* The claim-line input's underline: a solid rule under the name, 2px at
+   rest and 3px on focus. --edge recolors it for the negative state. */
 .claim-underline {
   border: 0;
-  background: linear-gradient(90deg, transparent, var(--edge, rgba(243, 243, 243, 0.9)) 12%, var(--edge, rgba(243, 243, 243, 0.9)) 88%, transparent) bottom / 100% 2px no-repeat;
-  transition: background-size 0.15s ease;
+  background: linear-gradient(var(--edge, var(--ink)), var(--edge, var(--ink))) bottom / 100% 2px no-repeat;
 }
+
 .claim-underline:focus-visible {
   background-size: 100% 3px;
 }
-
-/* ── Split-flap tiles (wordmark triple-tap easter egg) ───────────────
-   Each tile of the flap grid is two halves hinged at the tile's centre
-   line, the way a Solari board works: the top half rotates around its
-   bottom edge, the bottom half around its top edge. Each half clips a
-   full-size copy of the artwork offset so the tile shows its own slice;
-   the halves' width/height percentages are relative to the half, which is
-   why the img is 2800% x 1600% (28 x 16 half-dimensions = the whole art).
-   The stagger comes from animationDelay on the tile; .flap-in plays the
-   reveal, .flap-out plays it in reverse for the trip back. */
-
-.flap-grid {
-  display: grid;
-  perspective: 900px;
-}
-.flap-tile {
-  position: relative;
-}
-.flap-half {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 50%;
-  overflow: hidden;
-  backface-visibility: hidden;
-}
-.flap-half img {
-  position: absolute;
-  max-width: none;
-  /* width/height/left/top are inline per tile: cover-fit geometry computed
-     in claim-map.jsx. Each half clips its own slice, so the wider-than-box
-     artwork crops at the tile edges. */
-}
-.flap-top {
-  top: 0;
-  transform-origin: bottom center;
-}
-.flap-bottom {
-  bottom: 0;
-  transform-origin: top center;
-}
-
-@keyframes flap-top-in {
-  from { transform: rotateX(-90deg); }
-  to { transform: rotateX(0deg); }
-}
-@keyframes flap-bottom-in {
-  from { transform: rotateX(90deg); }
-  to { transform: rotateX(0deg); }
-}
-@keyframes flap-top-out {
-  from { transform: rotateX(0deg); }
-  to { transform: rotateX(-90deg); opacity: 0; }
-}
-@keyframes flap-bottom-out {
-  from { transform: rotateX(0deg); }
-  to { transform: rotateX(90deg); opacity: 0; }
-}
-
-/* Flip in: the bottom half swings up first, the top half follows a beat
-   later, so every tile reads as two blades closing on the new image. */
-.flap-in .flap-top {
-  animation: flap-top-in 0.3s ease-out both;
-  animation-delay: calc(var(--d) + 200ms);
-}
-.flap-in .flap-bottom {
-  animation: flap-bottom-in 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.08) both;
-  animation-delay: var(--d);
-}
-/* Resting on the artwork: no animation, both halves flat. Without this the
-   settled tiles would replay an animation whenever the class changes. */
-.flap-rest .flap-half {
-  transform: none;
-}
-/* On the way out the halves peel open and vanish, same stagger. */
-.flap-out .flap-top {
-  animation: flap-top-out 0.3s ease-in both;
-  animation-delay: var(--d);
-}
-.flap-out .flap-bottom {
-  animation: flap-bottom-out 0.3s ease-in both;
-  animation-delay: var(--d);
-}
-
 
 /* Blog post prose: markdown rendered by marked, styled in the site voice.
    A scoped block rather than a typography plugin — the site has no
@@ -550,13 +540,13 @@ a {
   font-size: 0.9em;
   background: var(--color-card);
   border: 1px solid var(--color-rule);
-  border-radius: 4px;
+  border-radius: 0;
   padding: 0.1em 0.35em;
 }
 .post-prose pre {
   background: var(--color-card);
   border: 1px solid var(--color-rule);
-  border-radius: 8px;
+  border-radius: 0;
   padding: 1em 1.2em;
   overflow-x: auto;
   font-size: 13px;
@@ -569,7 +559,7 @@ a {
   color: var(--color-muted);
 }
 .post-prose hr { border: 0; border-top: 1px solid var(--color-rule); margin: 2.5em 0; }
-.post-prose img { max-width: 100%; height: auto; border-radius: 8px; }
+.post-prose img { max-width: 100%; height: auto; border-radius: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -581,10 +571,8 @@ a {
     scroll-behavior: auto !important;
   }
 
-  /* Zeroing the duration still leaves the flap stagger delays running (up
-     to 1.4s of blank tiles) and the pulse dot half-faded. Kill both:
-     reduced motion means the swap and the status dot are static. */
-  .flap-half,
+  /* Zeroing the duration still leaves the status dot mid-blink. Reduced
+     motion means the status dot is static. */
   .pulse-dot {
     animation: none !important;
     animation-delay: 0s !important;
@@ -620,8 +608,8 @@ a {
 /* Pulse dot for live status indicators only (availability, verification). */
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+  50% { opacity: 0.3; }
 }
 .pulse-dot {
-  animation: pulse-dot 2.4s ease-in-out infinite;
+  animation: pulse-dot 2.4s steps(1, end) infinite;
 }

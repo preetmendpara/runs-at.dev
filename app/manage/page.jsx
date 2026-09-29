@@ -6,6 +6,7 @@ import { getEntitlement, heldNames, slotSummary } from '../../lib/entitlements.j
 import RecordForm from './record-form.jsx';
 import BadgeZone from './badge-zone.jsx';
 import { resolveManagedNames } from '../../lib/manage-select.js';
+import PageHeader from '../components/page-header.jsx';
 
 export const metadata = {
   title: 'Manage your domains',
@@ -115,11 +116,11 @@ export default async function Manage({ searchParams }) {
 // rides along, so there is no second sign-in.
 function Domains({ names, selected, slots }) {
   return (
-    <section>
-      <p className="meta">Your domains</p>
-      <ul className="mt-3 space-y-1.5 font-(family-name:--font-mono) text-sm">
+    <section className="border-2 border-(--line-strong) bg-(--color-card)">
+      <p className="surface-ink meta border-b-2 border-(--line-strong) px-4 py-2">Your domains</p>
+      <ul className="font-(family-name:--font-mono) text-sm">
         {names.map((n) => (
-          <li key={n} className="flex flex-wrap items-baseline gap-x-3">
+          <li key={n} className={`flex flex-wrap items-baseline gap-x-3 border-b border-(--line) px-4 py-3 last:border-b-0 ${n === selected ? 'bg-(--color-card)' : ''}`}>
             <span aria-hidden="true" className={n === selected ? 'text-(--color-ink)' : 'text-(--color-muted)'}>
               {n === selected ? '●' : '○'}
             </span>
@@ -135,7 +136,7 @@ function Domains({ names, selected, slots }) {
         ))}
       </ul>
       {slots && (
-        <p className="mt-3 text-sm text-(--color-muted)">
+        <p className="border-t-2 border-(--line-strong) px-4 py-3 text-sm text-(--color-muted)">
           {slots.used} of {slots.total} domain{slots.total === 1 ? '' : 's'} used
           {slots.available > 0 ? (
             <>
@@ -153,17 +154,13 @@ function Domains({ names, selected, slots }) {
 
 function Shell({ children, login }) {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20">
-      <p className="meta">Manage</p>
-      <h1 className="mt-3 text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
-        Your domains
-      </h1>
-      <p className="mt-4 max-w-[540px] text-[16px] leading-[1.5] text-(--color-muted)">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
+      <PageHeader label="manage" crumb="Manage" title="Your domains">
         Changes save straight to the public registry, and DNS follows within a minute
         or two. The panel under each name tells you whether it is working.
-      </p>
+      </PageHeader>
       {login && (
-        <form action="/api/auth/signout" method="post" className="mt-4 text-sm text-(--color-muted)">
+        <form action="/api/auth/signout" method="post" className="mt-6 font-(family-name:--font-mono) text-[13px] text-(--color-muted)">
           Signed in as @{login} ·{' '}
           <button type="submit" className="cursor-pointer text-(--color-ink) underline">
             Sign out

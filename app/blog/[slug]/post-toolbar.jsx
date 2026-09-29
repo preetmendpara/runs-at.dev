@@ -9,7 +9,7 @@ import { menuFocusTarget } from '../../../lib/menu-keyboard.js';
 // forward. No dropdown dependency — menus are small client components with
 // outside-click and Escape handling, styled from the same tokens as the
 // rest of the site. Icons are verbatim Lucide path data inlined as SVG (the
-// repo has no icon package; see app/edge-picker.jsx for the same pattern).
+// repo has no icon package).
 
 function icon(children) {
   return function Icon({ size = 16 }) {
@@ -161,7 +161,7 @@ const panelClass =
   // Floating panel: absolute + z-index. Not slit-frame — that class carries
   // position: relative, which silently un-positions an absolute utility and
   // drops the menu into the page flow, pushing content down.
-  'absolute right-0 top-[calc(100%+6px)] z-50 w-60 rounded-lg border border-(--color-rule) bg-(--color-paper) p-1.5 shadow-xl';
+  'absolute right-0 top-[calc(100%+6px)] z-50 w-60 border-2 border-(--line-strong) bg-(--color-paper) p-1.5 hard-shadow';
 
 export default function PostToolbar({ slug, title, description, markdown, headings = [], back = null, forward = null }) {
   const url = `https://runs-at.dev/blog/${slug}`;

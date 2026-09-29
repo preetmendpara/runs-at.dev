@@ -8,7 +8,7 @@ import { badgeSnippets, BADGE_THEMES } from '../../lib/badge.js';
 // anchor, which is what this is. Snippet strings come from lib/badge.js so
 // they are tested rather than trusted.
 const MINI =
-  'slit-frame rounded-[4px] px-2.5 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)';
+  'slit-frame px-2.5 py-1.5 font-(family-name:--font-mono) text-xs text-(--color-muted) hover:text-(--color-ink)';
 
 function Snippet({ label, note, value }) {
   const [copied, setCopied] = useState(false);
@@ -37,7 +37,7 @@ function Snippet({ label, note, value }) {
         </button>
       </div>
       <p className="mt-1 text-xs leading-relaxed text-(--color-muted)">{note}</p>
-      <pre className="slit-frame mt-2 overflow-x-auto rounded-[4px] px-3 py-2">
+      <pre className="slit-frame mt-2 overflow-x-auto px-3 py-2">
         <code className="font-(family-name:--font-mono) text-xs whitespace-pre text-(--color-muted)">
           {value}
         </code>
@@ -99,7 +99,7 @@ export default function BadgeZone({ name }) {
           src={snippets.imageUrl}
           alt={`Preview of the ${name}.runs-at.dev badge, ${theme} theme`}
           width={snippets.width}
-          className="mt-3 h-auto w-full max-w-[420px] rounded-[4px]"
+          className="mt-3 h-auto w-full max-w-[420px]"
         />
 
         <Snippet

@@ -78,7 +78,7 @@ export default async function BlogPost({ params }) {
   const forward = toRef(posts[idx + 1] ?? null);
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16 sm:py-20">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <div className="mb-8">
@@ -98,10 +98,10 @@ export default async function BlogPost({ params }) {
         {' · '}
         {CATEGORY_LABEL[post.category] ?? post.category} · {post.date}
       </p>
-      <h1 className="mt-3 text-[34px] leading-[1.08] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
+      <h1 className="mt-4 text-[clamp(1.85rem,7vw,3.25rem)] leading-[1] font-normal tracking-[-0.01em] break-words text-(--color-ink) uppercase">
         {post.title}
       </h1>
-      <p className="mt-4 text-[16px] leading-[1.5] text-(--color-muted)">{post.description}</p>
+      <p className="mt-6 border-l-2 border-(--line-strong) pl-4 text-[17px] leading-[1.5] text-(--color-ash)">{post.description}</p>
       <p className="meta mt-5">
         by {post.author} · published {date}
         {updated && ` · updated ${new Date(updated).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`}
@@ -111,7 +111,7 @@ export default async function BlogPost({ params }) {
         <img
           src={post.image}
           alt={post.title}
-          className="mt-8 w-full rounded-lg border border-(--color-rule)"
+          className="mt-8 w-full border-2 border-(--line-strong)"
         />
       )}
       {post.video && (
@@ -119,7 +119,7 @@ export default async function BlogPost({ params }) {
           src={post.video}
           controls
           preload="metadata"
-          className="mt-8 w-full rounded-lg border border-(--color-rule)"
+          className="mt-8 w-full border-2 border-(--line-strong)"
         />
       )}
 
@@ -128,7 +128,7 @@ export default async function BlogPost({ params }) {
         dangerouslySetInnerHTML={{ __html: html }}
       />
 
-      <div className="slit-top mt-16 pt-8">
+      <div className="mt-16 border-t-2 border-(--line-strong) pt-6">
         <p className="meta">More</p>
         <p className="mt-3 text-sm">
           <a className="text-(--color-ink) underline" href="/blog">All updates</a>

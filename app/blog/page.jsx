@@ -1,5 +1,5 @@
 import { publishedPosts, postSerial, formatSerial } from '../../lib/blog.js';
-import { Divider } from '../components/ui.jsx';
+import PageHeader from '../components/page-header.jsx';
 
 export const metadata = {
   title: 'Blog',
@@ -14,13 +14,13 @@ function PostRow({ post, serial }) {
   const d = new Date(post.date);
   const date = `${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()}, ${d.getFullYear()}`;
   return (
-    <li className="slit-top slit-dim first:border-t-0">
-      <a href={`/blog/${post.slug}`} className="group block py-6 no-underline">
+    <li className="border-b border-(--line) last:border-b-0">
+      <a href={`/blog/${post.slug}`} className="group block px-4 py-6 no-underline hover:bg-(--color-card) sm:px-6">
         {post.image && (
           <img
             src={post.image}
             alt=""
-            className="mb-4 aspect-video w-full rounded-lg border border-(--color-rule) object-cover"
+            className="mb-4 aspect-video w-full border border-(--line-strong) object-cover"
           />
         )}
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -49,25 +49,20 @@ export default function Blog() {
   const posts = publishedPosts();
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16 sm:py-20">
-      <p className="meta">Blog</p>
-      <h1 className="mt-3 text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">
-        Updates
-      </h1>
-      <p className="mt-4 max-w-[600px] text-[16px] leading-[1.5] text-(--color-muted)">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
+      <PageHeader label="blog" crumb="Blog" title="Updates">
         New features, registry changes, and engineering notes. Also available as{' '}
         <a className="text-(--color-ink) underline" href="/feed.xml">RSS</a>.
-      </p>
+      </PageHeader>
 
-      <Divider className="mt-10" />
       {posts.length > 0 ? (
-        <ul className="!list-none !p-0">
+        <ul className="hard-shadow mt-12 !list-none border-2 border-(--line-strong) bg-(--color-card) !p-0">
           {posts.map((post, i) => (
             <PostRow key={post.slug} post={post} serial={i + 1} />
           ))}
         </ul>
       ) : (
-        <p className="mt-10 text-sm text-(--color-muted)">No posts yet.</p>
+        <p className="mt-12 border-2 border-(--line-strong) px-4 py-6 font-(family-name:--font-mono) text-sm text-(--color-muted)">No posts yet.</p>
       )}
     </main>
   );

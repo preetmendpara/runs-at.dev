@@ -1,4 +1,4 @@
-import { Section } from '../../../components/Section.jsx';
+import { Section } from '../../components.jsx';
 import { ApplyNote, C, DocTitle, Eyebrow, Lede, Record } from '../../components.jsx';
 import { SITE_OG_IMAGE } from '../../../../lib/og.js';
 
@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function BlueskyHandleGuide() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
       <Eyebrow>Docs / Guides / Bluesky handle</Eyebrow>
       <DocTitle>Bluesky handle</DocTitle>
       <Lede>you.runs-at.dev as your verified Bluesky handle, via DNS, no app hosting involved.</Lede>

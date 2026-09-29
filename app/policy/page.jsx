@@ -1,4 +1,5 @@
-import { Section } from '../components/Section.jsx';
+import { Section } from '../docs/components.jsx';
+import PageHeader from '../components/page-header.jsx';
 import { loadPolicy, parseInline } from '../../lib/policy.js';
 
 export const metadata = {
@@ -32,9 +33,8 @@ export default function Policy() {
   const sections = loadPolicy();
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16 sm:py-20">
-      <h1 className="text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">Policy</h1>
-      <p className="mt-4 text-sm leading-relaxed">
+    <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
+      <PageHeader label="policy" title="Policy">
         This page is rendered from{' '}
         <a
           className="text-(--color-signal) underline"
@@ -44,13 +44,14 @@ export default function Policy() {
         </a>{' '}
         in the registry, which is the canonical copy. If the two ever disagree, the repo file
         wins.
-      </p>
+      </PageHeader>
 
+      <div className="hard-shadow mt-12 border-2 border-(--line-strong) bg-(--color-card) px-5 pb-10 sm:px-10 [&>section:first-child]:mt-8">
       {sections.map((section) => (
         <Section title={section.title} key={section.title}>
           {section.blocks.map((block, i) =>
             block.type === 'list' ? (
-              <ul className="list-disc space-y-1 pl-6 text-sm leading-relaxed" key={i}>
+              <ul className="list-disc space-y-2 pl-6 text-[15px] leading-[1.6] text-(--color-ash) marker:text-(--color-muted) sm:text-base" key={i}>
                 {block.items.map((item, j) => (
                   <li key={j}>
                     <Inline text={item} />
@@ -58,13 +59,14 @@ export default function Policy() {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm leading-relaxed" key={i}>
+              <p className="text-[15px] leading-[1.6] text-(--color-ash) sm:text-base" key={i}>
                 <Inline text={block.text} />
               </p>
             ),
           )}
         </Section>
       ))}
+      </div>
     </main>
   );
 }

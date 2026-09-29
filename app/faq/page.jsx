@@ -173,49 +173,61 @@ const faqJsonLd = {
   })),
 };
 
+const MONO = 'font-(family-name:--font-mono)';
+
 function slugify(q) {
   return q.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
-function FaqEntry({ q, a }) {
+// One numbered manual entry: index and source path in a narrow column, the
+// question and its answer beside it. Every answer stays visible, as before.
+function FaqEntry({ index, q, a }) {
   return (
-    <div className="slit-bar-l mt-8 py-1 pl-5 first:mt-10">
-      <p className="font-(family-name:--font-mono) text-[11px] text-(--color-muted) sm:text-xs">
-        faq/{slugify(q)}.json
-      </p>
-      {/* Same look as before, but the "q": and quote marks sit outside the
-          heading, so its text -- what search engines and screen readers read --
-          is the question alone. */}
-      <div className="mt-2 font-(family-name:--font-mono) text-xs sm:text-[13px]">
-        <span aria-hidden="true" className="text-(--color-muted)">&quot;q&quot;: </span>
-        <span aria-hidden="true" className="text-(--color-ink)">&quot;</span>
-        <h2 className="inline font-(family-name:--font-mono) text-(--color-ink)">{q}</h2>
-        <span aria-hidden="true" className="text-(--color-ink)">&quot;</span>
+    <li className="grid gap-x-6 gap-y-3 border-b border-(--line) px-4 py-6 last:border-b-0 sm:grid-cols-[3.5rem_1fr] sm:px-6 sm:py-8">
+      <p className="text-[32px] leading-none text-(--color-accent)" style={{ fontFamily: 'var(--font-display)' }} aria-hidden="true">{index}</p>
+      <div className="min-w-0">
+        <p className={`${MONO} text-[11px] break-all text-(--color-muted) sm:text-xs`}>faq/{slugify(q)}.json</p>
+        <h2 className="mt-2 text-[20px] leading-[1.2] font-normal text-(--color-ink) sm:text-[24px]">{q}</h2>
+        <p className="mt-4 max-w-[640px] text-[15px] leading-[1.6] text-(--color-ash) sm:text-base">
+          {a.map((part, i) =>
+            typeof part === 'string' ? (
+              part
+            ) : (
+              <a key={i} className="text-(--color-ink) underline" href={part.href}>
+                {part.text}
+              </a>
+            ),
+          )}
+        </p>
       </div>
-      <p className="mt-3 max-w-[600px] text-sm leading-relaxed text-(--color-ash) sm:text-base">
-        {a.map((part, i) =>
-          typeof part === 'string' ? (
-            part
-          ) : (
-            <a key={i} className="text-(--color-ink) underline" href={part.href}>
-              {part.text}
-            </a>
-          ),
-        )}
-      </p>
-    </div>
+    </li>
   );
 }
 
 export default function Faq() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16 sm:py-20">
+    // Wider than the old column below 1680px; at 1680px and up it returns
+    // to the 768px column the desktop side-rail ads sit around.
+    <main className="mx-auto max-w-[1100px] px-4 pt-10 pb-16 sm:px-6 sm:pt-16 min-[1680px]:max-w-3xl">
       <JsonLd data={faqJsonLd} />
-      <h1 className="text-[34px] leading-[1.03] font-normal tracking-[-0.005em] text-(--color-ink) sm:text-[44px] sm:tracking-[-0.007em]">FAQ</h1>
 
-      {faqs.map((f) => (
-        <FaqEntry q={f.q} a={f.a} key={f.q} />
-      ))}
+      <div className={`flex flex-wrap items-center justify-between gap-3 border-b border-(--line) pb-3 ${MONO} text-[12px] tracking-[0.08em] text-(--color-muted) uppercase`}>
+        <span>runs-at.dev // frequently asked questions</span>
+        <span>{faqs.length} entries</span>
+      </div>
+
+      <h1 className="mt-10 text-[clamp(4rem,22vw,9rem)] leading-[0.85] font-normal text-(--color-ink) uppercase sm:mt-14">FAQ</h1>
+
+      <section aria-label="Questions" className="mt-12 border-t-2 border-(--line-strong) pt-6 sm:mt-16">
+        <p className={`${MONO} text-[13px] tracking-[0.08em] text-(--color-ink) uppercase`}>
+          <span className="text-(--color-muted)">01 //</span> Questions
+        </p>
+        <ol className="hard-shadow mt-6 border-2 border-(--line-strong) bg-(--color-card)">
+          {faqs.map((f, i) => (
+            <FaqEntry index={String(i + 1).padStart(2, '0')} q={f.q} a={f.a} key={f.q} />
+          ))}
+        </ol>
+      </section>
     </main>
   );
 }
