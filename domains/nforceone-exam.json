@@ -4,6 +4,20 @@
     "github": "VigneshA23"
   },
   "claimedAt": "2026-09-29T07:24:53.760Z",
-  "records": {},
-  "country": "GB"
+  "records": {
+    "CNAME": "custom-domains.chatgpt.site"
+  },
+  "country": "GB",
+  "subdomains": {
+    "_openai-site-verification": {
+      "TXT": [
+        "openai-site-verification=4NG7lpQxivG7giwIJTZWj9_HEX7fwlTZXCSApg-fakc"
+      ]
+    },
+    "_cf-custom-hostname": {
+      "TXT": [
+        "20553246-4e96-4e2c-8101-8a90cbbc569a"
+      ]
+    }
+  }
 }
