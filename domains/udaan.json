@@ -7,12 +7,9 @@
   "records": {},
   "country": "IN",
   "subdomains": {
-    "garuda": {
-      "CNAME": "a2f51201c89af212.vercel-dns-017.com"
-    },
     "_vercel": {
       "TXT": [
-        "vc-domain-verify=garuda.runs-at.dev,24188e6d17637a8749de"
+        "vc-domain-verify=runs-at.dev,e749e55693bd600a728c"
       ]
     }
   }
