@@ -3,9 +3,11 @@
   "included": 1,
   "adminGranted": 0,
   "names": [
-    "archit"
+    "devfestgdgranchi"
   ],
-  "pending": {},
+  "pending": {
+    "devfestgdgranchi": "2026-09-29T04:42:25.196Z"
+  },
   "pullRequests": {},
   "history": []
 }
