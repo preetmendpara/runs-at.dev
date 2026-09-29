@@ -5,5 +5,15 @@
   },
   "claimedAt": "2026-09-29T14:17:49.340Z",
   "records": {},
-  "country": "IN"
+  "country": "IN",
+  "subdomains": {
+    "garuda": {
+      "CNAME": "a2f51201c89af212.vercel-dns-017.com"
+    },
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=garuda.runs-at.dev,24188e6d17637a8749de"
+      ]
+    }
+  }
 }
