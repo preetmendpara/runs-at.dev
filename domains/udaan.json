@@ -4,12 +4,14 @@
     "github": "basic30"
   },
   "claimedAt": "2026-09-29T14:17:49.340Z",
-  "records": {},
+  "records": {
+    "CNAME": "a2f51201c89af212.vercel-dns-017.com"
+  },
   "country": "IN",
   "subdomains": {
     "_vercel": {
       "TXT": [
-        "vc-domain-verify=runs-at.dev,e749e55693bd600a728c"
+        "vc-domain-verify=udaan.runs-at.dev,318915c584186328c48c"
       ]
     }
   }
