@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "c046dfff51941701.vercel-dns-017.com"
   },
-  "country": "NG"
+  "country": "NG",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=oracle69.runs-at.dev,9d240015b6d4e3e0be56"
+      ]
+    }
+  }
 }
