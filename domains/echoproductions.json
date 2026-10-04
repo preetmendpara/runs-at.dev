@@ -4,6 +4,19 @@
     "github": "brysoncoding"
   },
   "claimedAt": "2026-10-04T19:33:02.538Z",
-  "records": {},
-  "country": "US"
+  "records": {
+    "CNAME": "6b5be834f7f3d450.vercel-dns-017.com"
+  },
+  "country": "US",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=echoproductions.runs-at.dev,a8fc874502ea0bb01a50"
+      ]
+    }
+  },
+  "profile": {
+    "name": "ECHO Productions",
+    "bio": "Live production support for churches, events, and teams. Audio, video, lighting, and show control."
+  }
 }
