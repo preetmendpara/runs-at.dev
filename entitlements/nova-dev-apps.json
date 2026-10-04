@@ -1,0 +1,13 @@
+{
+  "github": "nova-dev-apps",
+  "included": 1,
+  "adminGranted": 0,
+  "names": [
+    "nova"
+  ],
+  "pending": {
+    "nova": "2026-10-04T08:47:08.966Z"
+  },
+  "pullRequests": {},
+  "history": []
+}
