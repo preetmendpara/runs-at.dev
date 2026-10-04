@@ -4,6 +4,8 @@
     "github": "xch-333"
   },
   "claimedAt": "2026-10-04T21:16:27.899Z",
-  "records": {},
+  "records": {
+    "CNAME": "xch-333.github.io"
+  },
   "country": "US"
 }
