@@ -8,13 +8,6 @@
     "CNAME": "c046dfff51941701.vercel-dns-017.com"
   },
   "country": "NG",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=oracle69.runs-at.dev,9d240015b6d4e3e0be56"
-      ]
-    }
-  },
   "profile": {
     "name": "Oracle69digitalmarketing",
     "bio": "AI Systems & Automation Builder | Building AI-powered business systems with Oracle69 Systems.",
