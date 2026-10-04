@@ -3,9 +3,11 @@
   "included": 1,
   "adminGranted": 0,
   "names": [
-    "nova"
+    "nova-ai"
   ],
-  "pending": {},
+  "pending": {
+    "nova-ai": "2026-10-04T10:32:20.722Z"
+  },
   "pullRequests": {},
   "history": []
 }
