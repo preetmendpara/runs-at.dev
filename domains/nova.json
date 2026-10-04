@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "592a88f9fabf6d75.vercel-dns-016.com"
   },
-  "country": "KE"
+  "country": "KE",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=nova.runs-at.dev,e4c93920e0534b376315"
+      ]
+    }
+  }
 }
