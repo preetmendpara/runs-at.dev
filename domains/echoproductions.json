@@ -12,16 +12,16 @@
     "dailuacb5icf": {
       "CNAME": "gv-k5y2asrs3wyeho.dv.googlehosted.com"
     },
-    "resend": {
-      "TXT": [
-        "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJsYwwqOrutosXijYpxxe8Ui6nRcg7PYcvSTdLWIzsb8G/QKCE6FaXuJkhPzyBZAIc82BN/aHcbki5l9NOYADp9ObwoSpr9kwNZZpY8Sj3/7WSsc+aDHHqvwITtLRWXsim/NceQIYmMv4BoRJbEvboZpZEAmfKzru2W7wd7P6A+wIDAQAB"
-      ]
-    },
     "rsend": {
       "CNAME": "rsend.forge.rmta.net"
     },
     "send": {
       "CNAME": "send.forge.rmta.net"
+    },
+    "resenddomainkey": {
+      "TXT": [
+        "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJsYwwqOrutosXijYpxxe8Ui6nRcg7PYcvSTdLWIzsb8G/QKCE6FaXuJkhPzyBZAIc82BN/aHcbki5l9NOYADp9ObwoSpr9kwNZZpY8Sj3/7WSsc+aDHHqvwITtLRWXsim/NceQIYmMv4BoRJbEvboZpZEAmfKzru2W7wd7P6A+wIDAQAB"
+      ]
     }
   },
   "profile": {
