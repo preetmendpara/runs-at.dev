@@ -2,8 +2,12 @@
   "github": "disha587",
   "included": 1,
   "adminGranted": 0,
-  "names": [],
-  "pending": {},
+  "names": [
+    "handmade-luxury-d"
+  ],
+  "pending": {
+    "handmade-luxury-d": "2026-10-05T13:21:46.886Z"
+  },
   "pullRequests": {},
   "history": []
 }
