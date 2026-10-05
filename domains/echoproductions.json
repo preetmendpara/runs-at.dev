@@ -22,6 +22,11 @@
       "TXT": [
         "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJsYwwqOrutosXijYpxxe8Ui6nRcg7PYcvSTdLWIzsb8G/QKCE6FaXuJkhPzyBZAIc82BN/aHcbki5l9NOYADp9ObwoSpr9kwNZZpY8Sj3/7WSsc+aDHHqvwITtLRWXsim/NceQIYmMv4BoRJbEvboZpZEAmfKzru2W7wd7P6A+wIDAQAB"
       ]
+    },
+    "_dmarc": {
+      "TXT": [
+        "v=DMARC1; p=none;"
+      ]
     }
   },
   "profile": {
