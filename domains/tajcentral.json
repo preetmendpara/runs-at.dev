@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "39d17d7c8def35a1.vercel-dns-017.com"
   },
-  "country": "DZ",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=tajcentral.runs-at.dev,ee8d7dce1e2ed36d610e"
-      ]
-    }
-  }
+  "country": "DZ"
 }

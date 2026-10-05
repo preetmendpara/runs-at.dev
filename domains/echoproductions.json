@@ -9,11 +9,6 @@
   },
   "country": "US",
   "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=echoproductions.runs-at.dev,a8fc874502ea0bb01a50"
-      ]
-    },
     "dailuacb5icf": {
       "CNAME": "gv-k5y2asrs3wyeho.dv.googlehosted.com"
     }
