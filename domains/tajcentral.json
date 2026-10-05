@@ -5,5 +5,12 @@
   },
   "claimedAt": "2026-10-05T11:19:36.328Z",
   "records": {},
-  "country": "DZ"
+  "country": "DZ",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=tajcentral.runs-at.dev,ee8d7dce1e2ed36d610e"
+      ]
+    }
+  }
 }
