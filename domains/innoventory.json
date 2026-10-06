@@ -5,7 +5,26 @@
   },
   "claimedAt": "2026-10-06T21:32:16.689Z",
   "records": {
-    "URL": "https://innoventory.vercel.app/"
+    "MX": [
+      {
+        "priority": 10,
+        "value": "mx1.improvmx.com"
+      },
+      {
+        "priority": 20,
+        "value": "mx2.improvmx.com"
+      }
+    ],
+    "TXT": [
+      "v=spf1 include:spf.improvmx.com ~all"
+    ]
   },
-  "country": "IL"
+  "country": "IL",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=innoventory.runs-at.dev,e3fc74e04ec38b1b38d2"
+      ]
+    }
+  }
 }
