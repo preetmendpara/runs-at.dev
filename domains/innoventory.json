@@ -4,6 +4,8 @@
     "github": "kfireew"
   },
   "claimedAt": "2026-10-06T21:32:16.689Z",
-  "records": {},
+  "records": {
+    "CNAME": "innoventory.vercel.app"
+  },
   "country": "IL"
 }
