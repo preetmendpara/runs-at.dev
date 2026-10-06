@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "bd1e1fd226c30549.vercel-dns-017.com"
   },
-  "country": "IN",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=sachingorai.runs-at.dev,7fa55b202361289ccfad"
-      ]
-    }
-  }
+  "country": "IN"
 }

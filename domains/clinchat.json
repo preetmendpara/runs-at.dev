@@ -9,12 +9,5 @@
       "76.76.21.21"
     ]
   },
-  "country": "DE",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=clinchat.runs-at.dev,75de24070e70074beca3"
-      ]
-    }
-  }
+  "country": "DE"
 }
