@@ -22,12 +22,5 @@
       "76.76.21.21"
     ]
   },
-  "country": "IL",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=innoventory.runs-at.dev,e3fc74e04ec38b1b38d2"
-      ]
-    }
-  }
+  "country": "IL"
 }
