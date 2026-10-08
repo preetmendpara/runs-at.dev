@@ -10,6 +10,16 @@
       "185.199.109.153",
       "185.199.110.153",
       "185.199.111.153"
+    ],
+    "MX": [
+      {
+        "priority": 10,
+        "value": "mx1.improvmx.com"
+      },
+      {
+        "priority": 20,
+        "value": "mx2.improvmx.com"
+      }
     ]
   },
   "country": "DE"
