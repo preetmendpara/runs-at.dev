@@ -17,6 +17,10 @@
     ],
     "TXT": [
       "v=spf1 include:spf.improvmx.com ~all"
+    ],
+    "A": [
+      "162.159.143.30",
+      "172.66.3.26"
     ]
   },
   "country": "IN",
@@ -32,6 +36,16 @@
     "_cf-custom-hostname.www": {
       "TXT": [
         "0afe2895-8b91-4277-b82c-34415d4135f8"
+      ]
+    },
+    "_openai-site-verification": {
+      "TXT": [
+        "openai-site-verification=RafX7uGcbjbi2WIf2duwxXq64teq4FU7lh-FdNuwOSQ"
+      ]
+    },
+    "_cf-custom-hostname": {
+      "TXT": [
+        "7768f009-6106-4550-90f6-aa21370a12a2"
       ]
     }
   }
