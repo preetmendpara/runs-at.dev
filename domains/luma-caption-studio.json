@@ -4,7 +4,21 @@
     "github": "arjitmalviya89"
   },
   "claimedAt": "2026-10-08T16:26:29.418Z",
-  "records": {},
+  "records": {
+    "MX": [
+      {
+        "priority": 10,
+        "value": "mx1.improvmx.com"
+      },
+      {
+        "priority": 20,
+        "value": "mx2.improvmx.com"
+      }
+    ],
+    "TXT": [
+      "v=spf1 include:spf.improvmx.com ~all"
+    ]
+  },
   "country": "IN",
   "subdomains": {
     "www": {
