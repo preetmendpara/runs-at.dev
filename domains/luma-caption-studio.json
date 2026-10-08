@@ -5,5 +5,20 @@
   },
   "claimedAt": "2026-10-08T16:26:29.418Z",
   "records": {},
-  "country": "IN"
+  "country": "IN",
+  "subdomains": {
+    "www": {
+      "CNAME": "custom-domains.chatgpt.site"
+    },
+    "_openai-site-verification.www": {
+      "TXT": [
+        "openai-site-verification=agYShobk95QLfMM_ZwFSZpp9KpPv1YBBo8NcffbhFa8"
+      ]
+    },
+    "_cf-custom-hostname.www": {
+      "TXT": [
+        "0afe2895-8b91-4277-b82c-34415d4135f8"
+      ]
+    }
+  }
 }
