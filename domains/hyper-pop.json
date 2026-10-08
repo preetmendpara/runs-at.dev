@@ -4,6 +4,8 @@
     "github": "Lyte3075"
   },
   "claimedAt": "2026-10-08T00:40:48.538Z",
-  "records": {},
+  "records": {
+    "CNAME": "lyte3075.github.io"
+  },
   "country": "US"
 }
