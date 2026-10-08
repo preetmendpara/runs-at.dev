@@ -4,6 +4,10 @@
     "github": "ziegepapa"
   },
   "claimedAt": "2026-10-08T19:54:37.445Z",
-  "records": {},
+  "records": {
+    "A": [
+      "185.199.108.153"
+    ]
+  },
   "country": "DE"
 }
