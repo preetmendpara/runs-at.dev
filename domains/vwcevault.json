@@ -4,6 +4,8 @@
     "github": "ziegepapa"
   },
   "claimedAt": "2026-10-08T19:54:37.445Z",
-  "records": {},
+  "records": {
+    "CNAME": "ziegepapa.github.io"
+  },
   "country": "DE"
 }
