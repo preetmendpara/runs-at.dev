@@ -7,5 +7,9 @@
   "records": {
     "CNAME": "my-portfolio-63k.pages.dev"
   },
-  "country": "NG"
+  "country": "NG",
+  "profile": {
+    "name": "miracletestimony673-lang",
+    "bio": "Best"
+  }
 }
