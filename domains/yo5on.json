@@ -10,5 +10,12 @@
   "country": "IN",
   "profile": {
     "name": "yo5on"
+  },
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=yo5on.runs-at.dev,b1d777fd9a38d00afa49"
+      ]
+    }
   }
 }
