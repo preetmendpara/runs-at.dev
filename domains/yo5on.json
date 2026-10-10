@@ -4,7 +4,9 @@
     "github": "yo5on"
   },
   "claimedAt": "2026-10-10T11:31:55.354Z",
-  "records": {},
+  "records": {
+    "CNAME": "8970b46ddc5840ea.vercel-dns-017.com"
+  },
   "country": "IN",
   "profile": {
     "name": "yo5on"
