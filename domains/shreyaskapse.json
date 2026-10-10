@@ -4,12 +4,11 @@
     "github": "ShreyasKapse"
   },
   "claimedAt": "2026-10-10T18:58:05.787Z",
-  "records": {},
+  "records": {
+    "CNAME": "51b16d6bfa8bcb01.vercel-dns-017.com"
+  },
   "country": "IN",
   "subdomains": {
-    "shreyaskapse": {
-      "CNAME": "51b16d6bfa8bcb01.vercel-dns-017.com"
-    },
     "_vercel": {
       "TXT": [
         "vc-domain-verify=shreyaskapse.runs-at.dev,be0e59c7d0c67beeb78b"
