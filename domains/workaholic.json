@@ -1,3 +1,4 @@
+
 {
   "name": "workaholic",
   "owner": {
@@ -7,5 +8,12 @@
   "records": {
     "CNAME": "d0b3ad6679f651c8.vercel-dns-017.com"
   },
-  "country": "NG"
+  "country": "NG",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=workaholic.runs-at.dev,6090e2584807e4ecffc9"
+      ]
+    }
+  }
 }
