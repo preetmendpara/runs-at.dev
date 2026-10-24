@@ -1,0 +1,28 @@
+{
+  "name": "influenceros",
+  "owner": {
+    "github": "tswetc"
+  },
+  "claimedAt": "2026-10-10T17:13:33.829Z",
+  "records": {
+    "A": [
+      "185.199.108.153",
+      "185.199.109.153",
+      "185.199.110.153",
+      "185.199.111.153"
+    ],
+    "MX": [
+      {
+        "priority": 0,
+        "value": "mx1.forwardemail.net"
+      },
+      {
+        "priority": 0,
+        "value": "mx2.forwardemail.net"
+      }
+    ],
+    "TXT": [
+      "forward-email=founder:23kiksldns@gmail.com"
+    ]
+  }
+}
