@@ -4,6 +4,20 @@
     "github": "xmaple52"
   },
   "claimedAt": "2026-10-24T21:26:59.643Z",
-  "records": {},
-  "country": "KG"
+  "records": {
+    "CNAME": "custom-domains.chatgpt.site"
+  },
+  "country": "KG",
+  "subdomains": {
+    "_openai-site-verification": {
+      "TXT": [
+        "openai-site-verification=otv2La1Q9FWyGoG7uNo0SjkJTvWgw36cxB6h3ln2jSM"
+      ]
+    },
+    "_cf-custom-hostname": {
+      "TXT": [
+        "cac15e6d-3b35-48b6-9cea-4d68fc08e7cd"
+      ]
+    }
+  }
 }
