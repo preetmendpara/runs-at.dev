@@ -4,15 +4,6 @@
     "github": "idcare19"
   },
   "claimedAt": "2026-10-24T15:38:59.262Z",
-  "records": {
-    "CNAME": "3deaf1ccabba1902.vercel-dns-017.com"
-  },
-  "country": "IN",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=webora.runs-at.dev,ea80ca5241f59b25b93e"
-      ]
-    }
-  }
+  "records": {},
+  "country": "IN"
 }
