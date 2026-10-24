@@ -27,6 +27,11 @@
   "subdomains": {
     "review": {
       "CNAME": "4503c80c8667cc94.vercel-dns-017.com"
+    },
+    "_vercel.review": {
+      "TXT": [
+        "vc-domain-verify=review.repomindai.runs-at.dev,fb55455af68eba78eba9"
+      ]
     }
   }
 }
