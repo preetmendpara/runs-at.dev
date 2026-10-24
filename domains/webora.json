@@ -11,7 +11,7 @@
   "subdomains": {
     "_vercel": {
       "TXT": [
-        "vc-domain-verify=webora.devs.surf,41ee2deef47c8eb634ba"
+        "vc-domain-verify=webora.runs-at.dev,ea80ca5241f59b25b93e"
       ]
     }
   }
