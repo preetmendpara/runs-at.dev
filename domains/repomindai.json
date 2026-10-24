@@ -9,6 +9,9 @@
       "64.29.17.1",
       "216.198.79.1"
     ],
+    "TXT": [
+      "v=spf1 include:spf.improvmx.com ~all"
+    ],
     "MX": [
       {
         "priority": 10,
@@ -18,10 +21,12 @@
         "priority": 20,
         "value": "mx2.improvmx.com"
       }
-    ],
-    "TXT": [
-      "v=spf1 include:spf.improvmx.com ~all"
     ]
   },
-  "country": "PL"
+  "country": "PL",
+  "subdomains": {
+    "review": {
+      "CNAME": "4503c80c8667cc94.vercel-dns-017.com"
+    }
+  }
 }
