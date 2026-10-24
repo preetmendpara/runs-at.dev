@@ -4,16 +4,18 @@
     "github": "idcare19"
   },
   "claimedAt": "2026-10-24T15:38:59.262Z",
-  "records": {},
+  "records": {
+    "CNAME": "webora-mu.vercel.app"
+  },
   "country": "IN",
   "subdomains": {
-    "webora": {
-      "CNAME": "3deaf1ccabba1902.vercel-dns-017.com"
-    },
     "_vercel": {
       "TXT": [
         "vc-domain-verify=webora.devs.surf,41ee2deef47c8eb634ba"
       ]
+    },
+    "webora": {
+      "CNAME": "3deaf1ccabba1902.vercel-dns-017.com"
     }
   }
 }
