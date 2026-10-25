@@ -4,6 +4,8 @@
     "github": "fettacheibrahim-cloud"
   },
   "claimedAt": "2026-10-25T01:08:26.032Z",
-  "records": {},
+  "records": {
+    "CNAME": "fettacheibrahim-cloud.github.io"
+  },
   "country": "MA"
 }
