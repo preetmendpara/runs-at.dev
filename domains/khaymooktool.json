@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "47407c4f300bb01f.vercel-dns-017.com"
   },
-  "country": "VN",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=khaymooktool.runs-at.dev,0294c8bb86f6295c612b"
-      ]
-    }
-  }
+  "country": "VN"
 }
