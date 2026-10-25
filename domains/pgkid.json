@@ -4,6 +4,8 @@
     "github": "muhazidan358-hub"
   },
   "claimedAt": "2026-10-25T21:21:01.924Z",
-  "records": {},
+  "records": {
+    "CNAME": "muhazidan358-hub.github.io"
+  },
   "country": "ID"
 }
