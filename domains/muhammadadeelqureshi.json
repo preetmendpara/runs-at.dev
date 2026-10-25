@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "634cba4f8a9af304.vercel-dns-017.com"
   },
-  "country": "PK"
+  "country": "PK",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=muhammadadeelqureshi.runs-at.dev,26c978e0dcea1782853d"
+      ]
+    }
+  }
 }
