@@ -4,6 +4,10 @@
     "github": "arslanbasharat-o-o"
   },
   "claimedAt": "2026-10-25T21:48:24.239Z",
-  "records": {},
+  "records": {
+    "A": [
+      "145.79.26.193"
+    ]
+  },
   "country": "PK"
 }
