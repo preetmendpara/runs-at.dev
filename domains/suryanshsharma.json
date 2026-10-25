@@ -4,6 +4,8 @@
     "github": "Offx-suryansh"
   },
   "claimedAt": "2026-10-25T08:33:07.190Z",
-  "records": {},
+  "records": {
+    "CNAME": "offx-suryansh.github.io"
+  },
   "country": "IN"
 }
