@@ -3,9 +3,11 @@
   "included": 1,
   "adminGranted": 0,
   "names": [
-    "aqualine"
+    "aqualine-game"
   ],
-  "pending": {},
+  "pending": {
+    "aqualine-game": "2026-10-26T18:58:13.309Z"
+  },
   "pullRequests": {},
   "history": []
 }
