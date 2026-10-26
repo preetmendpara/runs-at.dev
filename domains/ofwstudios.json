@@ -5,5 +5,9 @@
   },
   "claimedAt": "2026-10-26T15:25:24.389Z",
   "records": {},
-  "country": "IN"
+  "country": "IN",
+  "profile": {
+    "name": "lynx",
+    "bio": "sf01"
+  }
 }
