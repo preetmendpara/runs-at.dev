@@ -4,6 +4,8 @@
     "github": "TorMT"
   },
   "claimedAt": "2026-10-26T09:22:07.060Z",
-  "records": {},
+  "records": {
+    "CNAME": "tormt.github.io"
+  },
   "country": "NO"
 }
