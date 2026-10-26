@@ -4,6 +4,11 @@
     "github": "gleydsongg123098-pixel"
   },
   "claimedAt": "2026-10-26T01:28:55.484Z",
-  "records": {},
-  "country": "BR"
+  "records": {
+    "CNAME": "gleydsongg123098-pixel.github.io"
+  },
+  "country": "BR",
+  "profile": {
+    "name": "gleydson"
+  }
 }
