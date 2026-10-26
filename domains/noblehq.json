@@ -4,7 +4,9 @@
     "github": "noblefx0"
   },
   "claimedAt": "2026-10-26T18:19:22.245Z",
-  "records": {},
+  "records": {
+    "CNAME": "noblefx0.github.io"
+  },
   "country": "NG",
   "profile": {
     "name": "noble",
