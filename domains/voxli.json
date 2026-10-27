@@ -4,6 +4,8 @@
     "github": "yassine-2026"
   },
   "claimedAt": "2026-10-27T11:37:46.994Z",
-  "records": {},
+  "records": {
+    "CNAME": "groq-speech-to-text-2kao.onrender.com"
+  },
   "country": "DZ"
 }
