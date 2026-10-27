@@ -4,6 +4,15 @@
     "github": "yonisadon"
   },
   "claimedAt": "2026-10-27T12:56:59.003Z",
-  "records": {},
-  "country": "IL"
+  "records": {
+    "CNAME": "29133dd199d31560.vercel-dns-017.com"
+  },
+  "country": "IL",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=yonibiztest.runs-at.dev,3575103e07365d07dad9"
+      ]
+    }
+  }
 }
