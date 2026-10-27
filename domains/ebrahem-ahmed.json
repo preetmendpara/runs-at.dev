@@ -4,12 +4,11 @@
     "github": "Ebrahem-Ahmed"
   },
   "claimedAt": "2026-10-27T13:34:50.322Z",
-  "records": {},
+  "records": {
+    "CNAME": "81361620897cf612.vercel-dns-017.com"
+  },
   "country": "EG",
   "subdomains": {
-    "ebrahem-ahmed": {
-      "CNAME": "81361620897cf612.vercel-dns-017.com"
-    },
     "_vercel": {
       "TXT": [
         "vc-domain-verify=ebrahem-ahmed.runs-at.dev,750e0e6c8d96f91f8818"
