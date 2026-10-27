@@ -13,6 +13,11 @@
       "TXT": [
         "vc-domain-verify=yonibiztest.runs-at.dev,3575103e07365d07dad9"
       ]
+    },
+    "_torahtrainer-verification": {
+      "TXT": [
+        "torahtrainer-verification=9dfeef0b-5d7e-4173-b651-0b76dfb20b56"
+      ]
     }
   }
 }
