@@ -4,6 +4,17 @@
     "github": "ferasalrifai-oss"
   },
   "claimedAt": "2026-10-28T07:28:43.135Z",
-  "records": {},
-  "country": "SA"
+  "records": {
+    "A": [
+      "76.76.21.21"
+    ]
+  },
+  "country": "SA",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=salaf-articles.runs-at.dev,de87346845c17e88b5ac"
+      ]
+    }
+  }
 }
