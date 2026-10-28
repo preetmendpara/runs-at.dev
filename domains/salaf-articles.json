@@ -12,12 +12,5 @@
       "cloudflare_oauth_client_publisher=706be2f2c0037416c6b4da2e03b1aad1"
     ]
   },
-  "country": "SA",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=salaf-articles.runs-at.dev,de87346845c17e88b5ac"
-      ]
-    }
-  }
+  "country": "SA"
 }

@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "81361620897cf612.vercel-dns-017.com"
   },
-  "country": "EG",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=ebrahem-ahmed.runs-at.dev,750e0e6c8d96f91f8818"
-      ]
-    }
-  }
+  "country": "EG"
 }
