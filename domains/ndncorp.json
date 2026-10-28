@@ -4,6 +4,8 @@
     "github": "DADY20003"
   },
   "claimedAt": "2026-10-28T17:16:58.701Z",
-  "records": {},
+  "records": {
+    "CNAME": "ndn-corps.dadynoa-ndn-corps.workers.dev"
+  },
   "country": "FR"
 }
