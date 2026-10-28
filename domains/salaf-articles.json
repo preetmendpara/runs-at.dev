@@ -7,6 +7,9 @@
   "records": {
     "A": [
       "76.76.21.21"
+    ],
+    "TXT": [
+      "cloudflare_oauth_client_publisher=706be2f2c0037416c6b4da2e03b1aad1"
     ]
   },
   "country": "SA",
