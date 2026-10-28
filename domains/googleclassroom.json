@@ -5,5 +5,12 @@
   },
   "claimedAt": "2026-10-28T22:24:09.915Z",
   "records": {},
-  "country": "US"
+  "country": "US",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=googleclassroom.runs-at.dev,db6b92270db4c1c93c40"
+      ]
+    }
+  }
 }
