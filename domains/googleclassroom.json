@@ -4,13 +4,15 @@
     "github": "Bluudud1337"
   },
   "claimedAt": "2026-10-28T22:24:09.915Z",
-  "records": {},
+  "records": {
+    "TXT": [
+      "vc-domain-verify=googleclassroom.runs-at.dev,db6b92270db4c1c93c40"
+    ]
+  },
   "country": "US",
   "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=googleclassroom.runs-at.dev,db6b92270db4c1c93c40"
-      ]
+    "school": {
+      "CNAME": "275ba22542a0e236.vercel-dns-017.com"
     }
   }
 }
