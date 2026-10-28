@@ -5,14 +5,14 @@
   },
   "claimedAt": "2026-10-28T22:24:09.915Z",
   "records": {
-    "TXT": [
-      "vc-domain-verify=googleclassroom.runs-at.dev,db6b92270db4c1c93c40"
-    ]
+    "CNAME": "275ba22542a0e236.vercel-dns-017.com"
   },
   "country": "US",
   "subdomains": {
-    "school": {
-      "CNAME": "275ba22542a0e236.vercel-dns-017.com"
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=googleclassroom.runs-at.dev,db6b92270db4c1c93c40"
+      ]
     }
   }
 }
