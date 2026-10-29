@@ -11,7 +11,7 @@
   "subdomains": {
     "_vercel": {
       "TXT": [
-        "vc-domain-verify=sai.runs-at.dev,6c108489440db439f4f"
+        "vc-domain-verify=sai.runs-at.dev,6c108489440db4d39f4f"
       ]
     }
   }
