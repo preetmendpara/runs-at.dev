@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "275ba22542a0e236.vercel-dns-017.com"
   },
-  "country": "US",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=googleclassroom.runs-at.dev,db6b92270db4c1c93c40"
-      ]
-    }
-  }
+  "country": "US"
 }
