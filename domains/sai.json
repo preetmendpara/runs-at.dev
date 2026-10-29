@@ -5,7 +5,14 @@
   },
   "claimedAt": "2026-10-29T02:24:14.405Z",
   "records": {
-    "CNAME": "3-d-avatar-webpage.vercel.app"
+    "CNAME": "99e7af72c610a2a2.vercel-dns-017.com"
   },
-  "country": "IN"
+  "country": "IN",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=sai.runs-at.dev,6c108489440db439f4f"
+      ]
+    }
+  }
 }
