@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "63cd71c9751f7614.vercel-dns-017.com"
   },
-  "country": "TW",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=zhixin-sync.runs-at.dev,fa3ef36c9ae69e2b0b39"
-      ]
-    }
-  }
+  "country": "TW"
 }
