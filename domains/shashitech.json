@@ -7,21 +7,6 @@
   "records": {},
   "country": "IN",
   "subdomains": {
-    "shashitech": {
-      "TXT": [
-        "v=spf1 include:spf.improvmx.com ~all"
-      ],
-      "MX": [
-        {
-          "priority": 10,
-          "value": "mx1.improvmx.com"
-        },
-        {
-          "priority": 20,
-          "value": "mx1.improvmx.com"
-        }
-      ]
-    },
     "subdomain-owner-verification": {
       "TXT": [
         "363efd068a44fee4171ab7591b24d6ee"
