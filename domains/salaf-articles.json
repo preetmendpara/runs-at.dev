@@ -9,7 +9,8 @@
       "76.76.21.21"
     ],
     "TXT": [
-      "cloudflare_oauth_client_publisher=706be2f2c0037416c6b4da2e03b1aad1"
+      "cloudflare_oauth_client_publisher=706be2f2c0037416c6b4da2e03b1aad1",
+      "cloudflare_oauth_client_publisher=37d1351519a44c7ccd5502fb8906411e"
     ]
   },
   "country": "SA"
