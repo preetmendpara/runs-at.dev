@@ -5,5 +5,9 @@
   },
   "claimedAt": "2026-10-30T21:52:12.162Z",
   "records": {},
-  "country": "PH"
+  "country": "PH",
+  "profile": {
+    "name": "JohnUtol",
+    "bio": "Deym"
+  }
 }
