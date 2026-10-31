@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "af37cfc252e7b196.vercel-dns-017.com"
   },
-  "country": "IN",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=webora.runs-at.dev,7852fc81065019269238"
-      ]
-    }
-  }
+  "country": "IN"
 }
