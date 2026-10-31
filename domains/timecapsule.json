@@ -4,6 +4,8 @@
     "github": "ZenxPrince"
   },
   "claimedAt": "2026-10-31T21:51:38.392Z",
-  "records": {},
+  "records": {
+    "CNAME": "zenxprince.github.io"
+  },
   "country": "IN"
 }
