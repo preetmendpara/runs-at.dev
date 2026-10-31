@@ -4,6 +4,8 @@
     "github": "Gauravpathak52"
   },
   "claimedAt": "2026-10-31T10:49:44.307Z",
-  "records": {},
+  "records": {
+    "CNAME": "gpathak.pages.dev"
+  },
   "country": "IN"
 }
