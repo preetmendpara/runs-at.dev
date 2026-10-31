@@ -15,7 +15,9 @@
       ]
     },
     "shashitech": {
-      "CNAME": "shashitech.netlify.app"
+      "TXT": [
+        "zoho-verification=zb98222942.zmverify.zoho.in"
+      ]
     }
   },
   "profile": {
