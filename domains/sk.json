@@ -4,6 +4,10 @@
     "github": "SKTARVANI"
   },
   "claimedAt": "2026-11-01T05:01:48.490Z",
-  "records": {},
+  "records": {
+    "A": [
+      "140.245.251.17"
+    ]
+  },
   "country": "IN"
 }
