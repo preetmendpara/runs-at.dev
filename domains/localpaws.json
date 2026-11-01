@@ -4,6 +4,10 @@
     "github": "Nasmako"
   },
   "claimedAt": "2026-11-01T13:31:24.163Z",
-  "records": {},
+  "records": {
+    "A": [
+      "185.50.25.48"
+    ]
+  },
   "country": "LT"
 }
