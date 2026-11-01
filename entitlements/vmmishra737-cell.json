@@ -3,9 +3,11 @@
   "included": 1,
   "adminGranted": 0,
   "names": [
-    "codefroge"
+    "codeforge"
   ],
-  "pending": {},
+  "pending": {
+    "codeforge": "2026-11-01T14:38:19.745Z"
+  },
   "pullRequests": {},
   "history": []
 }
