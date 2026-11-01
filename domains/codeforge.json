@@ -9,7 +9,7 @@
   },
   "country": "IN",
   "subdomains": {
-    "vercel": {
+    "_vercel": {
       "TXT": [
         "vc-domain-verify=codeforge.runs-at.dev,d247e7968bd8518a045f"
       ]
