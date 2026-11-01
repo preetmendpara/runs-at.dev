@@ -4,6 +4,8 @@
     "github": "aw4683136-crypto"
   },
   "claimedAt": "2026-11-01T13:53:26.712Z",
-  "records": {},
+  "records": {
+    "CNAME": "aw4683136-crypto.github.io"
+  },
   "country": "EG"
 }
