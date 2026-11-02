@@ -4,6 +4,8 @@
     "github": "VOC-RW"
   },
   "claimedAt": "2026-11-02T20:00:34.373Z",
-  "records": {},
+  "records": {
+    "CNAME": "voc-rw.github.io"
+  },
   "country": "NG"
 }
