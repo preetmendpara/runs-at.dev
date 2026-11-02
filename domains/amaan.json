@@ -4,7 +4,9 @@
     "github": "yt7442502-creator"
   },
   "claimedAt": "2026-11-02T08:38:12.242Z",
-  "records": {},
+  "records": {
+    "CNAME": "yt7442502-creator.github.io"
+  },
   "country": "IN",
   "subdomains": {
     "_github-pages-challenge-yt7442502-creator": {
