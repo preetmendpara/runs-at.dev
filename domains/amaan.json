@@ -4,13 +4,10 @@
     "github": "yt7442502-creator"
   },
   "claimedAt": "2026-11-02T08:38:12.242Z",
-  "records": {},
-  "country": "IN",
-  "subdomains": {
-    "_github-pages-challenge-yt7442502-creator.amaan": {
-      "TXT": [
-        "f7f86bfa11ba5d174bd3e243210cd4"
-      ]
-    }
-  }
+  "records": {
+    "TXT": [
+      "f7f86bfa11ba5d174bd3e243210cd4"
+    ]
+  },
+  "country": "IN"
 }
