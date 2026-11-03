@@ -4,6 +4,20 @@
     "github": "Coolfig"
   },
   "claimedAt": "2026-11-03T17:52:03.709Z",
-  "records": {},
-  "country": "US"
+  "records": {
+    "CNAME": "custom-domains.chatgpt.site"
+  },
+  "country": "US",
+  "subdomains": {
+    "_openai-site-verification": {
+      "TXT": [
+        "openai-site-verification=JsG44Em8zQL2Ew0qgBa0opJZdnfAsijTJl30HBFaxEw"
+      ]
+    },
+    "_cf-custom-hostname": {
+      "TXT": [
+        "556038df-de1d-43c4-99a8-5a59a66e87ee"
+      ]
+    }
+  }
 }
