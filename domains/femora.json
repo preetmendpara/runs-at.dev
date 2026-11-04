@@ -4,6 +4,15 @@
     "github": "omarhatemokasha1-droid"
   },
   "claimedAt": "2026-11-04T09:29:41.160Z",
-  "records": {},
-  "country": "EG"
+  "records": {
+    "CNAME": "e8df2ec11c457028.vercel-dns-017.com"
+  },
+  "country": "EG",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=femora.runs-at.dev,7fb2378479448251faad"
+      ]
+    }
+  }
 }
