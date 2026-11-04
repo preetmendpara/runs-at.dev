@@ -32,6 +32,11 @@
       "TXT": [
         "vc-domain-verify=review.repomindai.runs-at.dev,fb55455af68eba78eba9"
       ]
+    },
+    "_discord": {
+      "TXT": [
+        "dh=655227fda4599ed00258b8695fa846d727b4e003"
+      ]
     }
   }
 }
