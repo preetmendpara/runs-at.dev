@@ -4,6 +4,8 @@
     "github": "Andre123890123"
   },
   "claimedAt": "2026-11-05T03:45:38.271Z",
-  "records": {},
+  "records": {
+    "CNAME": "qavriqo.pages.dev"
+  },
   "country": "CA"
 }
