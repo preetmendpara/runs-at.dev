@@ -4,6 +4,8 @@
     "github": "InvalidCastX"
   },
   "claimedAt": "2026-11-05T13:15:19.700Z",
-  "records": {},
+  "records": {
+    "CNAME": "friendstr.pages.dev"
+  },
   "country": "PH"
 }
