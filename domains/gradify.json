@@ -4,6 +4,8 @@
     "github": "AB-DALRAHM-AN"
   },
   "claimedAt": "2026-11-06T13:58:40.199Z",
-  "records": {},
+  "records": {
+    "CNAME": "74ca836f0c045119.vercel-dns-017.com"
+  },
   "country": "EG"
 }
