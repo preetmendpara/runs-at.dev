@@ -4,6 +4,8 @@
     "github": "alirezasadeghi10301-web"
   },
   "claimedAt": "2026-11-04T13:29:04.681Z",
-  "records": {},
+  "records": {
+    "CNAME": "alirezasadeghi10301-web.github.io"
+  },
   "country": "IR"
 }
