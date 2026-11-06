@@ -9,5 +9,10 @@
       "google-site-verification=RbilyxB_jSd7ZczQAe3f4IE3Vg8iZcUrknuDBLjr0HM"
     ]
   },
-  "country": "EG"
+  "country": "EG",
+  "subdomains": {
+    "gradify": {
+      "CNAME": "74ca836f0c045119.vercel-dns-017.com"
+    }
+  }
 }
