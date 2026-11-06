@@ -4,18 +4,10 @@
     "github": "rehanilyas20196-design"
   },
   "claimedAt": "2026-10-11T09:27:33.213Z",
-  "records": {},
-  "country": "PK",
-  "subdomains": {
-    "rehanilyas": {
-      "CNAME": "46fe9cd6e38b9da8.vercel-dns-017.com"
-    },
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=rehanilyas.runs-at.dev,58d9748402f402b33b70"
-      ]
-    }
+  "records": {
+    "CNAME": "46fe9cd6e38b9da8.vercel-dns-017.com"
   },
+  "country": "PK",
   "profile": {
     "name": "rehanikyas20196-design"
   }
