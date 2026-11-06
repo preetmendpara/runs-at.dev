@@ -5,14 +5,9 @@
   },
   "claimedAt": "2026-11-06T13:58:40.199Z",
   "records": {
-    "CNAME": "74ca836f0c045119.vercel-dns-017.com"
+    "TXT": [
+      "google-site-verification=RbilyxB_jSd7ZczQAe3f4IE3Vg8iZcUrknuDBLjr0HM"
+    ]
   },
-  "country": "EG",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=gradify.runs-at.dev,92a302c33cc9a139b598"
-      ]
-    }
-  }
+  "country": "EG"
 }
