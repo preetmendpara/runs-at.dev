@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "74ca836f0c045119.vercel-dns-017.com"
   },
-  "country": "EG"
+  "country": "EG",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=gradify.runs-at.dev,92a302c33cc9a139b598"
+      ]
+    }
+  }
 }
