@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "ff6ac1b9ea4998b1.vercel-dns-017.com"
   },
-  "country": "IN"
+  "country": "IN",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "dhwani-ai.runs-at.dev"
+      ]
+    }
+  }
 }
