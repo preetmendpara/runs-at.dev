@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "07987e56b0e48cdf.vercel-dns-017.com"
   },
-  "country": "NP",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=polarapi.runs-at.dev,8c912af0a0b33bb56b44"
-      ]
-    }
-  }
+  "country": "NP"
 }
