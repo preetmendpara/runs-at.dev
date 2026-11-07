@@ -4,6 +4,20 @@
     "github": "OrignalBruh"
   },
   "claimedAt": "2026-11-07T01:28:31.400Z",
-  "records": {},
-  "country": "NO"
+  "records": {
+    "CNAME": "custom-domains.chatgpt.site"
+  },
+  "country": "NO",
+  "subdomains": {
+    "_openai-site-verification": {
+      "TXT": [
+        "openai-site-verification=GHzYGwyfHWfLCRVGTBn_OZdnWFrN4jERMHn7gVk0eKs"
+      ]
+    },
+    "_cf-custom-hostname": {
+      "TXT": [
+        "3718b396-e71c-4898-962d-f2774ad65927"
+      ]
+    }
+  }
 }
