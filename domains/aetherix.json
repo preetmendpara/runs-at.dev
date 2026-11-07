@@ -4,6 +4,20 @@
     "github": "Aetherix-1603"
   },
   "claimedAt": "2026-11-07T08:29:27.596Z",
-  "records": {},
+  "records": {
+    "MX": [
+      {
+        "priority": 0,
+        "value": "mx1.forwardemail.net"
+      },
+      {
+        "priority": 0,
+        "value": "mx2.forwardemail.net"
+      }
+    ],
+    "TXT": [
+      "forward-email=QW9GVzFsdllBNTVmZmRzcjNyY0E3WlI5RmJLc0JPUFdIV3NNSHQ3SjZLLVBYdzlsSUdGaWhKbFF3eG45MG9rTVdrRGc2aElQQVhCbkRYaERCZw=="
+    ]
+  },
   "country": "VN"
 }
