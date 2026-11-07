@@ -11,7 +11,7 @@
   "subdomains": {
     "_vercel": {
       "TXT": [
-        "dhwani-ai.runs-at.dev"
+        "vc-domain-verify=dhwani-ai.runs-at.dev,db949ab0a4688985e3dd"
       ]
     }
   }
