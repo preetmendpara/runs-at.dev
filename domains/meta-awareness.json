@@ -4,6 +4,8 @@
     "github": "DJ-BREAK"
   },
   "claimedAt": "2026-11-08T01:29:50.214Z",
-  "records": {},
+  "records": {
+    "CNAME": "dj-break.github.io"
+  },
   "country": "BO"
 }
