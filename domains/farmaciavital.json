@@ -4,6 +4,8 @@
     "github": "HarleyM1301"
   },
   "claimedAt": "2026-11-08T04:15:08.718Z",
-  "records": {},
+  "records": {
+    "CNAME": "harleym1301.github.io"
+  },
   "country": "CO"
 }
