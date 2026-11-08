@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "91c64719969d6d79.vercel-dns-017.com"
   },
-  "country": "JP",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=jaku.runs-at.dev,516d3a44e71721e1e0c7"
-      ]
-    }
-  }
+  "country": "JP"
 }
