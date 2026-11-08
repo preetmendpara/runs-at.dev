@@ -4,6 +4,8 @@
     "github": "saijaku1"
   },
   "claimedAt": "2026-11-08T02:53:38.096Z",
-  "records": {},
+  "records": {
+    "CNAME": "91c64719969d6d79.vercel-dns-017.com"
+  },
   "country": "JP"
 }
