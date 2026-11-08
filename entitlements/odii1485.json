@@ -2,12 +2,8 @@
   "github": "odii1485",
   "included": 1,
   "adminGranted": 0,
-  "names": [
-    "catalogguard"
-  ],
+  "names": [],
   "pending": {},
-  "pullRequests": {
-    "catalogguard": 23
-  },
+  "pullRequests": {},
   "history": []
 }
