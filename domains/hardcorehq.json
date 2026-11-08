@@ -4,6 +4,20 @@
     "github": "Grow-a-garden-shop"
   },
   "claimedAt": "2026-11-08T23:06:56.369Z",
-  "records": {},
-  "country": "NL"
+  "records": {
+    "CNAME": "custom-domains.chatgpt.site"
+  },
+  "country": "NL",
+  "subdomains": {
+    "_openai-site-verification": {
+      "TXT": [
+        "openai-site-verification=gO-w6Ug60diyZRGUyRyh3az0gj2rxn-AwyJE1XAONsw"
+      ]
+    },
+    "_cf-custom-hostname": {
+      "TXT": [
+        "c025cdc4-3553-4d78-a6bf-568dd60fe885"
+      ]
+    }
+  }
 }
