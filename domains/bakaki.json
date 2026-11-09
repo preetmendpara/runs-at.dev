@@ -4,6 +4,15 @@
     "github": "bakakiyunus6-arch"
   },
   "claimedAt": "2026-11-09T19:57:31.644Z",
-  "records": {},
-  "country": "UG"
+  "records": {
+    "CNAME": "bakakiyunusu-portfolio.netlify.app"
+  },
+  "country": "UG",
+  "subdomains": {
+    "subdomain-owner-verification": {
+      "TXT": [
+        "ff539a3512473d51a0295dfb965055d0"
+      ]
+    }
+  }
 }
