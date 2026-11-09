@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "6aea0f8fa2855c1c.vercel-dns-017.com"
   },
-  "country": "IN",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=crixxlabs.runs-at.dev,ed83f234fd44cfe47da7"
-      ]
-    }
-  }
+  "country": "IN"
 }
