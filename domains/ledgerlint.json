@@ -4,6 +4,20 @@
     "github": "gtkeny070-cmd"
   },
   "claimedAt": "2026-11-09T22:33:01.238Z",
-  "records": {},
-  "country": "LV"
+  "records": {
+    "CNAME": "custom-domains.chatgpt.site"
+  },
+  "country": "LV",
+  "subdomains": {
+    "_openai-site-verification": {
+      "TXT": [
+        "openai-site-verification=v6Pbq5QquFSJ777b44m1Mfr6UYbvjapSBZDC8R_cpX8"
+      ]
+    },
+    "_cf-custom-hostname": {
+      "TXT": [
+        "b31a5d94-3d13-42ec-aff5-10acdbdd3adc"
+      ]
+    }
+  }
 }
