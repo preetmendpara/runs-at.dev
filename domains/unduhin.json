@@ -4,6 +4,17 @@
     "github": "fair1734"
   },
   "claimedAt": "2026-11-09T05:48:54.466Z",
-  "records": {},
-  "country": "ID"
+  "records": {
+    "A": [
+      "172.93.101.78"
+    ]
+  },
+  "country": "ID",
+  "subdomains": {
+    "_tokenkoding": {
+      "TXT": [
+        "tokenkoding-verifikasi=f81e6b1bca75d52a8366c9932367d6b6"
+      ]
+    }
+  }
 }
