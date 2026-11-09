@@ -4,18 +4,6 @@
     "github": "pulsedailypd"
   },
   "claimedAt": "2026-11-09T17:18:42.419Z",
-  "records": {
-    "CNAME": "fa9b9049235a7d08.vercel-dns-017.com"
-  },
-  "country": "IN",
-  "subdomains": {
-    "aam": {
-      "CNAME": "fa9b9049235a7d08.vercel-dns-017.com"
-    },
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=aam.runs-at.dev,f1a34987b1d9082fb460"
-      ]
-    }
-  }
+  "records": {},
+  "country": "IN"
 }
