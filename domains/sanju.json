@@ -4,6 +4,8 @@
     "github": "sanju-zxt"
   },
   "claimedAt": "2026-11-10T05:31:38.798Z",
-  "records": {},
+  "records": {
+    "CNAME": "sanju-zxt.github.io"
+  },
   "country": "IN"
 }
