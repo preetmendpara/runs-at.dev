@@ -4,7 +4,9 @@
     "github": "adinewone"
   },
   "claimedAt": "2026-11-10T05:28:18.901Z",
-  "records": {},
+  "records": {
+    "CNAME": "adinewone.github.io"
+  },
   "country": "IN",
   "profile": {
     "name": "Aditya"
