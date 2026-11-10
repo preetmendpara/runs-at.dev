@@ -4,6 +4,8 @@
     "github": "pulsedailypd"
   },
   "claimedAt": "2026-11-09T17:18:42.419Z",
-  "records": {},
+  "records": {
+    "CNAME": "fa9b9049235a7d08.vercel-dns-017.com"
+  },
   "country": "IN"
 }
