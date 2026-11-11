@@ -5,7 +5,14 @@
   },
   "claimedAt": "2026-11-11T20:12:21.096Z",
   "records": {
-    "CNAME": "ebmc-drozdovboze.msk1.amvera.tech"
+    "CNAME": "edge.msk1.amvera.tech"
   },
-  "country": "DE"
+  "country": "DE",
+  "subdomains": {
+    "_amvera.ebmc": {
+      "TXT": [
+        "drozdovboze-ebmc"
+      ]
+    }
+  }
 }
