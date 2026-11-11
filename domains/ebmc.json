@@ -9,7 +9,7 @@
   },
   "country": "DE",
   "subdomains": {
-    "_amvera.ebmc": {
+    "_amvera": {
       "TXT": [
         "drozdovboze-ebmc"
       ]
