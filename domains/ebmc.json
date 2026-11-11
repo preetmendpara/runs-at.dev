@@ -4,6 +4,15 @@
     "github": "mcwkrsk"
   },
   "claimedAt": "2026-11-11T20:12:21.096Z",
-  "records": {},
-  "country": "DE"
+  "records": {
+    "CNAME": "edge.msk1.amvera.tech"
+  },
+  "country": "DE",
+  "subdomains": {
+    "_amvera": {
+      "TXT": [
+        "drozdovboze-ebmc"
+      ]
+    }
+  }
 }
