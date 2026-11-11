@@ -4,6 +4,15 @@
     "github": "ProjectsByAshar"
   },
   "claimedAt": "2026-11-10T18:22:30.506Z",
-  "records": {},
-  "country": "PK"
+  "records": {
+    "CNAME": "08e88a3256ed8fc7.vercel-dns-017.com"
+  },
+  "country": "PK",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=meadow-launcher.runs-at.dev,7d3baafecf3a8f6710cb"
+      ]
+    }
+  }
 }
