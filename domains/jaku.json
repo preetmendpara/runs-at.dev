@@ -7,5 +7,10 @@
   "records": {
     "CNAME": "91c64719969d6d79.vercel-dns-017.com"
   },
-  "country": "JP"
+  "country": "JP",
+  "subdomains": {
+    "admin": {
+      "CNAME": "0d8cad509a37ea87.vercel-dns-017.com"
+    }
+  }
 }
