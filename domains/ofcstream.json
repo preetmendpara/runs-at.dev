@@ -5,5 +5,12 @@
   },
   "claimedAt": "2026-11-12T15:29:53.667Z",
   "records": {},
-  "country": "PK"
+  "country": "PK",
+  "subdomains": {
+    "mail": {
+      "A": [
+        "169.58.223.142"
+      ]
+    }
+  }
 }
