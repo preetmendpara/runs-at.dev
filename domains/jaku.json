@@ -12,7 +12,7 @@
     "admin": {
       "CNAME": "0d8cad509a37ea87.vercel-dns-017.com"
     },
-    "_vercel": {
+    "_vercel.admin": {
       "TXT": [
         "vc-domain-verify=admin.jaku.runs-at.dev,f6afb4a0de6f30a2c261"
       ]
