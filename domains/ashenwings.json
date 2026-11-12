@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "c353ede2c3486166.vercel-dns-017.com"
   },
-  "country": "IN"
+  "country": "IN",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=ashenwings.runs-at.dev,101c7426b0ff91914ee6"
+      ]
+    }
+  }
 }
