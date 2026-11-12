@@ -4,6 +4,8 @@
     "github": "jakirulji"
   },
   "claimedAt": "2026-11-12T23:00:05.327Z",
-  "records": {},
+  "records": {
+    "CNAME": "jakirulji.github.io"
+  },
   "country": "BD"
 }
