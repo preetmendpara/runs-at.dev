@@ -4,6 +4,8 @@
     "github": "stalinbot-test"
   },
   "claimedAt": "2026-11-12T13:57:50.140Z",
-  "records": {},
+  "records": {
+    "CNAME": "c353ede2c3486166.vercel-dns-017.com"
+  },
   "country": "IN"
 }
