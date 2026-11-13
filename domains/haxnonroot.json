@@ -4,6 +4,8 @@
     "github": "Nacer-22"
   },
   "claimedAt": "2026-11-13T02:41:24.195Z",
-  "records": {},
+  "records": {
+    "CNAME": "nacer-22.github.io"
+  },
   "country": "DZ"
 }
