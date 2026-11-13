@@ -4,6 +4,20 @@
     "github": "bellawu31-png"
   },
   "claimedAt": "2026-11-13T02:10:12.329Z",
-  "records": {},
-  "country": "TW"
+  "records": {
+    "CNAME": "custom-domains.chatgpt.site"
+  },
+  "country": "TW",
+  "subdomains": {
+    "_openai-site-verification": {
+      "TXT": [
+        "openai-site-verification=DIiHhL7gu6sR2RlLqBKQcUHH3NAzdrf-X0k6cnw2xtE"
+      ]
+    },
+    "_cf-custom-hostname": {
+      "TXT": [
+        "71a04f6e-9d26-4330-a81e-59c9c74728c2"
+      ]
+    }
+  }
 }
