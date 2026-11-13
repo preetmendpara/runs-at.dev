@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "596f40450e881dd1.vercel-dns-017.com"
   },
-  "country": "US"
+  "country": "US",
+  "subdomains": {
+    "_dmarc.send": {
+      "TXT": [
+        "v=DMARC1; p=none;"
+      ]
+    }
+  }
 }
