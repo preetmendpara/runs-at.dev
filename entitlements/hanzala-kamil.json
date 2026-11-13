@@ -2,8 +2,12 @@
   "github": "hanzala-kamil",
   "included": 1,
   "adminGranted": 0,
-  "names": [],
-  "pending": {},
+  "names": [
+    "adsimple"
+  ],
+  "pending": {
+    "adsimple": "2026-11-13T14:21:50.706Z"
+  },
   "pullRequests": {},
   "history": []
 }
