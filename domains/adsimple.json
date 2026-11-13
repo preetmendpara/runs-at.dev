@@ -5,5 +5,15 @@
   },
   "claimedAt": "2026-11-13T14:21:50.534Z",
   "records": {},
-  "country": "PK"
+  "country": "PK",
+  "subdomains": {
+    "adsimple": {
+      "CNAME": "087863f9b168d570.vercel-dns-017.com"
+    },
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=adsimple.runs-at.dev,616d695eda3268292b07"
+      ]
+    }
+  }
 }
