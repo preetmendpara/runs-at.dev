@@ -4,6 +4,8 @@
     "github": "WickedXeno"
   },
   "claimedAt": "2026-11-13T20:24:16.827Z",
-  "records": {},
+  "records": {
+    "CNAME": "fineclient.pages.dev"
+  },
   "country": "US"
 }
