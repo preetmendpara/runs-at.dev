@@ -10,5 +10,12 @@
   "country": "PK",
   "profile": {
     "name": "Hanzala Kamil"
+  },
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=adsimple.runs-at.dev,616d695eda3268292b07"
+      ]
+    }
   }
 }
