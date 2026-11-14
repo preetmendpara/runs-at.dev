@@ -19,5 +19,9 @@
       }
     ]
   },
-  "country": "BD"
+  "country": "BD",
+  "profile": {
+    "name": "Mikasa",
+    "bio": "AOT Mikasa of arens"
+  }
 }
