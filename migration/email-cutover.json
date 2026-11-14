@@ -1,0 +1,15 @@
+{
+  "note": "Email Routing replacement (Forward Email), applied to the PowerDNS zone ONLY at cutover, together with removing Cloudflare's route1-3 MX. Aliases preserved from Cloudflare Email Routing (2 enabled rules: claude@, abuse@; catch-all disabled). Destinations are encrypted with Forward Email's /v1/encrypt; only Forward Email can read them.",
+  "remove": [
+    { "type": "MX", "name": "", "value": "route1.mx.cloudflare.net" },
+    { "type": "MX", "name": "", "value": "route2.mx.cloudflare.net" },
+    { "type": "MX", "name": "", "value": "route3.mx.cloudflare.net" }
+  ],
+  "add": [
+    { "type": "MX", "name": "", "priority": 10, "value": "mx1.forwardemail.net" },
+    { "type": "MX", "name": "", "priority": 10, "value": "mx2.forwardemail.net" },
+    { "type": "TXT", "name": "", "value": "forward-email=QXM2blNMenR1QTZBS0hHdGZpZkJrN2tINkU3SUxBOUR2cG83NVZLN2R1V2ozT1JmeGxIdlFjUzNxdFVwZUlPZElwclRKTmZwZVFJSDFEeWdsNHBFb3BaOTVBV2w1X3Etc0tGVkIwQlRWTXU0SzVyQVRUbw==" }
+  ],
+  "spf": "replace v=spf1 include:_spf.mx.cloudflare.net ~all  ->  v=spf1 include:spf.forwardemail.net ~all",
+  "keep": ["cf2024-1._domainkey TXT (unchanged, as required)", "all other apex TXT"]
+}

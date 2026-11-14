@@ -118,22 +118,17 @@ jobs:
           echo 'files<<EOF' >> $GITHUB_OUTPUT
           git diff --name-only "$RANGE" '${{ github.event.after }}' -- domains/ >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
-      # PowerDNS only: join the tailnet as tag:ci-dns, the one tag the tailnet
-      # policy (infra/tailscale/policy.hujson) lets reach ns1's API port. The
-      # API itself listens on ns1's loopback and is exposed only to the tailnet
-      # by `tailscale serve`; it is never on a public interface. This job runs
+      # PowerDNS only: open the WireGuard deploy tunnel to ns1
+      # (infra/wireguard). The PowerDNS API listens on ns1's loopback and is
+      # reachable only through this tunnel, only from 10.99.0.2. This job runs
       # only for pushes to main, maintainer dispatches and health-check's
       # call -- never for pull-request code.
-      # The repository allows GitHub-owned actions only, so Tailscale is
-      # installed from its official package repository instead of an action.
-      # An OAuth client secret is accepted as an auth key for tagged,
-      # ephemeral nodes.
       - if: vars.DNS_PROVIDER == 'powerdns'
-        run: |
-          curl -fsSL https://tailscale.com/install.sh | sh
-          sudo tailscale up --auth-key="${TS_OAUTH_SECRET}?ephemeral=true&preauthorized=true"             --advertise-tags=tag:ci-dns --hostname="gha-${GITHUB_RUN_ID}" --accept-routes=false
+        run: bash .github/scripts/wg-up.sh
         env:
-          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
+          WG_CI_PRIVATE_KEY: ${{ secrets.WG_CI_PRIVATE_KEY }}
+          PDNS_WG_PUBLIC_KEY: ${{ vars.PDNS_WG_PUBLIC_KEY }}
+          PDNS_WG_ENDPOINT: ${{ vars.PDNS_WG_ENDPOINT }}
       - id: sync
         run: node scripts/sync-dns.mjs
         env:

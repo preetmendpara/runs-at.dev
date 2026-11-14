@@ -1,0 +1,49 @@
+name: pdns-api-tunnel-check
+
+# Read-only proof that GitHub Actions reaches ns1's private PowerDNS API
+# through the WireGuard tunnel, and that the API is NOT reachable directly.
+on:
+  push:
+    branches: [feat/powerdns-migration]
+    paths:
+      - .github/workflows/pdns-api-tunnel-check.yml
+      - .github/scripts/wg-up.sh
+      - infra/wireguard/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: API not reachable from the internet
+        run: |
+          code=$(curl -s -o /dev/null -m 8 -w '%{http_code}' "http://${{ vars.PDNS_PRIMARY_IP }}:8081/" || true)
+          echo "direct http://ns1:8081 -> ${code:-no answer}" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$code" = 000 ] || [ -z "$code" ]
+      - name: Tunnel up
+        run: bash .github/scripts/wg-up.sh
+        env:
+          WG_CI_PRIVATE_KEY: ${{ secrets.WG_CI_PRIVATE_KEY }}
+          PDNS_WG_PUBLIC_KEY: ${{ vars.PDNS_WG_PUBLIC_KEY }}
+          PDNS_WG_ENDPOINT: ${{ vars.PDNS_WG_ENDPOINT }}
+      - name: Read the zone through the tunnel (GET only)
+        env:
+          PDNS_API_KEY: ${{ secrets.PDNS_API_KEY }}
+          PDNS_API_URL: ${{ vars.PDNS_API_URL }}
+        run: |
+          set -euo pipefail
+          noauth=$(curl -s -o /dev/null -w '%{http_code}' "$PDNS_API_URL/api/v1/servers/localhost/zones/runs-at.dev")
+          curl -sf -H "X-API-Key: $PDNS_API_KEY" "$PDNS_API_URL/api/v1/servers/localhost/zones/runs-at.dev" -o zone.json
+          n=$(jq '[.rrsets[].records | length] | add' zone.json); serial=$(jq '.serial' zone.json); rm -f zone.json
+          { echo "without API key -> $noauth"; echo "with API key: serial $serial, $n records"; } | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$noauth" = 401 ]
+      - name: Tunnel down
+        if: always()
+        run: sudo wg-quick down wg0 > /dev/null 2>&1 || true

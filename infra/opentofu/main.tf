@@ -120,7 +120,8 @@ resource "oci_core_instance" "ns" {
     assign_public_ip = false # the reserved IP below is attached instead
     hostname_label   = each.key
     # 80/443 only on ns2, and only while it hosts the edge (edge.tf).
-    nsg_ids = each.key == "ns2" && var.edge_host == "ns2" ? [oci_core_network_security_group.edge[0].id] : []
+    # 80/443 on ns2 only while it hosts the edge; UDP 51820 on ns1 only (deploy tunnel).
+    nsg_ids = each.key == "ns1" ? [oci_core_network_security_group.wg.id] : (var.edge_host == "ns2" ? [oci_core_network_security_group.edge[0].id] : [])
   }
 
   source_details {
@@ -165,4 +166,26 @@ resource "oci_core_public_ip" "ns" {
 output "glue" {
   description = "Feed these to export-zone.mjs (NS1_IPV4/NS2_IPV4) and to the new registrar's host records."
   value       = { for k, ip in oci_core_public_ip.ns : k => ip.ip_address }
+}
+
+# WireGuard deploy tunnel to ns1's PowerDNS API (infra/wireguard). Only ns1,
+# only UDP 51820; WireGuard answers nothing without a valid peer key.
+resource "oci_core_network_security_group" "wg" {
+  compartment_id = var.compartment_ocid
+  vcn_id         = oci_core_vcn.dns.id
+  display_name   = "ns1-wireguard"
+}
+
+resource "oci_core_network_security_group_security_rule" "wg_in" {
+  network_security_group_id = oci_core_network_security_group.wg.id
+  direction                 = "INGRESS"
+  protocol                  = "17"
+  source                    = "0.0.0.0/0"
+  source_type               = "CIDR_BLOCK"
+  udp_options {
+    destination_port_range {
+      min = 51820
+      max = 51820
+    }
+  }
 }

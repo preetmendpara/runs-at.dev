@@ -22,6 +22,8 @@ SSH=(ssh -i "${SSH_KEY:-$HOME/.ssh/runs_at_oci}" -o ConnectTimeout=20)
         printf 'RFC2136_TSIG_SECRET=%s\n' \"\$S\"; } | sudo install -m 0600 /dev/stdin /etc/runs-at-edge/acme-tsig.env
       unset S"
 printf 'ACME_EMAIL=%s\n' "$EMAIL" | "${SSH[@]}" "ubuntu@$EDGE" 'sudo install -m 0600 /dev/stdin /etc/runs-at-edge/acme.env'
+# systemd masks these files for Caddy only if they exist when Caddy starts.
+"${SSH[@]}" "ubuntu@$EDGE" 'sudo systemctl try-restart caddy'
 "${SSH[@]}" "ubuntu@$EDGE" 'sudo grep -c "^RFC2136_TSIG_SECRET=." /etc/runs-at-edge/acme-tsig.env' | grep -qx 1 \
   || { echo "edge did not receive the key"; exit 1; }
 echo "ACME key and contact installed on the edge. Next: sudo /usr/local/sbin/renew-cert.sh, then systemctl enable --now caddy"
