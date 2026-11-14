@@ -4,7 +4,7 @@
 #
 # Always Free fit: ns1/ns2 on the default VM.Standard.E2.1.Micro (the 2 free
 # AMD micro instances); the edge is one VM.Standard.A1.Flex with 1 OCPU and
-# 6 GB (the free Ampere pool is 4 OCPU / 24 GB). Three boot volumes of 50 GB
+# 6 GB (Oracle docs, 2026-11: the free Ampere allowance is 1,500 OCPU-hours and 9,000 GB-hours a month, i.e. 2 OCPU / 12 GB running continuously). Three boot volumes of 50 GB
 # stay within the 200 GB free block storage. The edge is optional
 # (enable_edge) and refuses to plan if ns1/ns2 already use the Ampere pool in a
 # way that would exceed it.
@@ -82,8 +82,8 @@ resource "oci_core_instance" "edge" {
   lifecycle {
     ignore_changes = [source_details[0].source_id, metadata["user_data"]]
     precondition {
-      condition     = !local.is_flex || var.a1_ocpus * 2 + 1 <= 4 && var.a1_memory_gbs * 2 + 6 <= 24
-      error_message = "ns1/ns2 on A1.Flex plus the edge would exceed the free Ampere pool (4 OCPU / 24 GB)."
+      condition     = !local.is_flex || var.a1_ocpus * 2 + 1 <= 2 && var.a1_memory_gbs * 2 + 6 <= 12
+      error_message = "ns1/ns2 on A1.Flex plus the edge would exceed the free Ampere allowance (2 OCPU / 12 GB)."
     }
     precondition {
       condition     = var.boot_volume_gbs * 3 <= 200

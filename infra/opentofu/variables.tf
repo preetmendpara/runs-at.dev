@@ -29,7 +29,7 @@ variable "ssh_allowed_cidr" {
 
 variable "shape" {
   type        = string
-  description = "VM.Standard.E2.1.Micro (Always Free, x86) or VM.Standard.A1.Flex (Always Free up to 4 OCPU / 24 GB total)."
+  description = "VM.Standard.E2.1.Micro (Always Free, x86) or VM.Standard.A1.Flex (Always Free up to 2 OCPU / 12 GB total)."
   default     = "VM.Standard.E2.1.Micro"
   validation {
     condition     = contains(["VM.Standard.E2.1.Micro", "VM.Standard.A1.Flex"], var.shape)
@@ -39,21 +39,21 @@ variable "shape" {
 
 variable "a1_ocpus" {
   type        = number
-  description = "Per instance, only for A1.Flex. 2 x 2 = 4 OCPU stays inside Always Free."
+  description = "Per instance, only for A1.Flex. 2 x 1 = 2 OCPU is the whole Always Free A1 allowance (1,500 OCPU-hours a month)."
   default     = 1
   validation {
-    condition     = var.a1_ocpus >= 1 && var.a1_ocpus <= 2
-    error_message = "Keep a1_ocpus at 1 or 2 so two instances stay within the 4 OCPU free limit."
+    condition     = var.a1_ocpus == 1
+    error_message = "Keep a1_ocpus at 1: two instances use the whole 2 OCPU free allowance."
   }
 }
 
 variable "a1_memory_gbs" {
   type        = number
-  description = "Per instance, only for A1.Flex. 2 x 12 = 24 GB stays inside Always Free."
+  description = "Per instance, only for A1.Flex. 2 x 6 = 12 GB is the whole Always Free A1 allowance (9,000 GB-hours a month)."
   default     = 6
   validation {
-    condition     = var.a1_memory_gbs >= 1 && var.a1_memory_gbs <= 12
-    error_message = "Keep a1_memory_gbs at most 12 so two instances stay within 24 GB."
+    condition     = var.a1_memory_gbs >= 1 && var.a1_memory_gbs <= 6
+    error_message = "Keep a1_memory_gbs at most 6 so two instances stay within 12 GB."
   }
 }
 
