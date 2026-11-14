@@ -60,7 +60,7 @@ export function render(role) {
     'package_update: true',
     'package_upgrade: true',
     'packages:',
-    ...['unattended-upgrades', 'bind9-dnsutils', 'openssl', ...packages].map((p) => `  - ${p}`),
+    ...['unattended-upgrades', 'bind9-dnsutils', 'openssl', 'age', ...packages].map((p) => `  - ${p}`),
     'write_files:',
   ];
   for (const [from, path, mode] of files) {

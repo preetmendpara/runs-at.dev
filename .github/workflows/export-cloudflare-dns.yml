@@ -55,6 +55,8 @@ jobs:
           CF_READ_TOKEN: ${{ secrets.CLOUDFLARE_DNS_READ_TOKEN }}
           CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
           AGE_RECIPIENT: ${{ secrets.MIGRATION_BACKUP_AGE_RECIPIENT }}
+          # Write-only pre-authenticated request for the private Oracle bucket.
+          OCI_BACKUP_PAR_URL: ${{ secrets.OCI_BACKUP_PAR_URL }}
         run: |
           set +x
           umask 077
@@ -93,6 +95,15 @@ jobs:
             rm -rf "$b" migration/backup/live-dns-export.json
             sha256sum "$out/runs-at-migration-backup.tar.age" | sed 's#  .*/#  #' > "$out/SHA256SUMS"
             echo "Encrypted backup: $(cut -d' ' -f1 "$out/SHA256SUMS")" | tee -a "$GITHUB_STEP_SUMMARY"
+            # Off-site copy of the ciphertext; the URL goes to curl on stdin.
+            if [ -n "$OCI_BACKUP_PAR_URL" ]; then
+              obj="backups/registry/runs-at-migration-backup-$(date -u +%Y%m%dT%H%M%SZ).tar.age"
+              printf 'url = "%s%s"
+upload-file = "%s"
+' "$OCI_BACKUP_PAR_URL" "$obj" "$out/runs-at-migration-backup.tar.age"                 | curl -sS -f -K - -o /dev/null
+              echo "Off-site copy: $obj" | tee -a "$GITHUB_STEP_SUMMARY"
+            fi
+            unset OCI_BACKUP_PAR_URL
           else
             echo "No MIGRATION_BACKUP_AGE_RECIPIENT: encrypted backup skipped" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
