@@ -116,11 +116,16 @@ export function resolveGlue({ placeholder = false, env = process.env } = {}) {
   return { ns1, ns2, placeholder: false };
 }
 
-export function buildZone({ claims, live, glue, serial }) {
+// `extra`: operator-supplied records that exist in the Cloudflare zone but in
+// no registry file and no live-export system name (the undeclared record(s)
+// the sanitized reconciliation counts). Passed with --extra <file.json>, kept
+// out of Git; each becomes source 'system:operator-extra'.
+export function buildZone({ claims, live, glue, serial, extra = [] }) {
   const records = [];
   const seen = new Set();
   const duplicates = [];
-  for (const r of [...systemRecords(live), ...zoneVerificationRecords(claims), ...registryRecords(claims)]) {
+  const operator = extra.map((r) => ({ ...r, source: 'system:operator-extra' }));
+  for (const r of [...systemRecords(live), ...operator, ...zoneVerificationRecords(claims), ...registryRecords(claims)]) {
     const key = canonical(r);
     if (seen.has(key)) { duplicates.push(key); continue; }
     seen.add(key);
@@ -189,7 +194,8 @@ async function main(argv) {
   const glue = resolveGlue({ placeholder });
   const claims = await loadClaims(arg('--domains') ?? 'domains');
   const live = JSON.parse(await readFile(liveFile, 'utf8'));
-  const zone = buildZone({ claims, live, glue, serial });
+  const extra = arg('--extra') ? JSON.parse(await readFile(arg('--extra'), 'utf8')) : [];
+  const zone = buildZone({ claims, live, glue, serial, extra });
   const text = renderZone(zone, { placeholder });
 
   const countBy = (rs) => rs.reduce((m, r) => ((m[r.type] = (m[r.type] ?? 0) + 1), m), {});

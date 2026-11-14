@@ -9,10 +9,13 @@ test('cloud-init yaml is in sync with infra/powerdns', () => {
   }
 });
 
-test('API is loopback-only and transfers are limited to ns2', () => {
+test('API is loopback-only and transfers need TSIG (no IP may AXFR unsigned)', () => {
   const p = readFileSync('infra/powerdns/pdns-primary.conf', 'utf8');
   assert.match(p, /^webserver-address=127\.0\.0\.1$/m);
-  assert.match(p, /^allow-axfr-ips=10\.53\.1\.12\/32$/m);
+  // Any address listed here could AXFR without the key; TSIG-ALLOW-AXFR is
+  // the only path. infra/test/pdns-ci.sh checks an unsigned AXFR is refused.
+  assert.match(p, /^allow-axfr-ips=$/m);
+  assert.match(p, /^also-notify=10\.53\.1\.12$/m);
   assert.match(p, /^gpgsql-host=127\.0\.0\.1$/m);
   assert.doesNotMatch(p, /^\s*(gpgsql-password|api-key)\s*=/m);
 });

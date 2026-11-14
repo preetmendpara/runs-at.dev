@@ -1,0 +1,83 @@
+name: powerdns-integration
+
+# Isolated PowerDNS test on an ephemeral GitHub-hosted runner: a primary
+# (PostgreSQL backend, as in production) and a secondary (SQLite, TSIG AXFR)
+# on loopback test ports, loaded through the real DNS_PROVIDER=powerdns path
+# of scripts/sync-dns.mjs, then checked record by record on both servers over
+# UDP and TCP, including the records Cloudflare does not serve today.
+#
+# Uses no secrets and talks to no external DNS provider: every key is
+# generated on the runner and discarded with it. Nothing here can change
+# production DNS. See infra/test/pdns-ci.sh.
+on:
+  push:
+    branches: [feat/powerdns-migration]
+    paths:
+      - infra/**
+      - lib/dns/**
+      - scripts/sync-dns.mjs
+      - scripts/export-zone.mjs
+      - domains/**
+      - migration/missing-from-cloudflare.json
+      - .github/workflows/powerdns-integration.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: powerdns-integration
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          # sync-dns reads released names from git history.
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: PowerDNS primary/secondary end-to-end
+        run: bash infra/test/pdns-ci.sh | tee "$RUNNER_TEMP/result.txt"
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo '## PowerDNS integration (isolated, test values only)'
+            echo '```'
+            grep -E '^(pdns |serial|unsigned|──|powerdns plan|verify |127\.|update|revert|PASS|FAIL)' "$RUNNER_TEMP/result.txt" || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # The off-Cloudflare wildcard edge (infra/edge/Caddyfile) against a stub
+  # app, compared with what cloudflare/worker.js does today.
+  edge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Wildcard edge behaviour
+        run: bash infra/test/edge-ci.sh | tee "$RUNNER_TEMP/edge.txt"
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo '## Wildcard edge (Caddy) behaviour'
+            echo '```'
+            cat "$RUNNER_TEMP/edge.txt" 2>/dev/null || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -71,7 +71,7 @@ async function main(argv) {
   const declared = registryRecords(claims);
   const zone = parseZone(await readFile(arg('--zone') ?? `migration/zone/${DOMAIN}.zone`, 'utf8'));
   const report = { zone: compare(declared, zone, zoneVerificationRecords(claims)) };
-  if (arg('--server')) report.live = await compareLive(declared, arg('--server'));
+  if (arg('--server')) report.live = await compareLive([...declared, ...zoneVerificationRecords(claims)], arg('--server'));
 
   if (argv.includes('--json')) console.log(JSON.stringify(report, null, 2));
   else {

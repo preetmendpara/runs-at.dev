@@ -32,9 +32,11 @@ write_files:
 
       primary=yes
       secondary=no
-      # Only ns2 (VCN private address) may transfer, and only with the TSIG key
-      # (TSIG-ALLOW-AXFR metadata is set by infra/README.md step 4).
-      allow-axfr-ips=10.53.1.12/32
+      # Transfers only with the TSIG key (TSIG-ALLOW-AXFR, infra/README.md step 4).
+      # allow-axfr-ips is left EMPTY on purpose: an address listed here may AXFR
+      # without TSIG, so listing ns2 would make the key optional. The CI harness
+      # (infra/test/pdns-ci.sh) asserts an unsigned AXFR is refused.
+      allow-axfr-ips=
       also-notify=10.53.1.12
       only-notify=10.53.1.12/32
       disable-axfr=no

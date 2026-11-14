@@ -22,3 +22,4 @@ migration/backup/cloudflare/
 migration/backup/
 migration/zone/
 migration/reports/
+migration/operator-extra.json

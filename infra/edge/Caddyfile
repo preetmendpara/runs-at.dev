@@ -1,0 +1,58 @@
+# Wildcard edge for *.runs-at.dev once DNS leaves Cloudflare. Replaces
+# cloudflare/worker.js (and the Cloudflare proxy in front of it) with the same
+# behaviour:
+#
+#   GET/HEAD /       -> the app's /_card/<name>, query kept, visitor cookies
+#                       NOT forwarded, Set-Cookie stripped, upstream redirects
+#                       (URL records) passed through as redirects
+#   any other path   -> 307 to https://runs-at.dev<path>?<query>
+#   other methods    -> 405, Allow: GET, HEAD
+#   multi-label/www  -> 404 here (they have their own DNS records; under
+#                       Cloudflare these fell through to the zone origin)
+#
+# Names with their own DNS records (CNAME/A to their host) never reach this
+# edge, exactly as DNS-only records never reached the Worker.
+#
+# TLS: one wildcard certificate obtained by DNS-01 against our own PowerDNS
+# (infra/edge/renew-cert.sh), read from files, so this file runs on stock
+# Caddy without plugins. Environment:
+#   APP_ORIGIN  upstream app, default https://runs-at.dev
+#   APP_HOST    Host header sent upstream, default runs-at.dev
+#   TLS_CERT / TLS_KEY  wildcard certificate files
+{
+	admin off
+	auto_https disable_redirects
+}
+
+*.runs-at.dev:{$EDGE_PORT:443} {
+	tls {$TLS_CERT:/etc/runs-at-edge/wildcard.crt} {$TLS_KEY:/etc/runs-at-edge/wildcard.key}
+
+	# Only single-label names are cards. www and deeper names are not ours.
+	@multilabel header_regexp Host ^(www\.runs-at\.dev|[^.]+\.[^.]+\.runs-at\.dev)(:\d+)?$
+	handle @multilabel {
+		respond "not found" 404
+	}
+
+	@badmethod not method GET HEAD
+	handle @badmethod {
+		header Allow "GET, HEAD"
+		respond "method not allowed" 405
+	}
+
+	@front path /
+	handle @front {
+		rewrite * /_card/{labels.2}{uri}
+		uri replace /_card/{labels.2}/ /_card/{labels.2}
+		reverse_proxy {$APP_ORIGIN:https://runs-at.dev} {
+			header_up Host {$APP_HOST:runs-at.dev}
+			# Forward only what the card needs, never visitor cookies.
+			header_up -Cookie
+			header_up -Authorization
+			header_down -Set-Cookie
+		}
+	}
+
+	handle {
+		redir https://runs-at.dev{uri} 307
+	}
+}
