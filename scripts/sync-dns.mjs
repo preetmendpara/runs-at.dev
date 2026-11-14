@@ -26,8 +26,66 @@ const changed = (process.env.CHANGED_FILES ?? '').split('\n').filter(Boolean);
 // Which DNS host holds the zone. runs-at.dev lives on Cloudflare; the Vercel
 // path is kept from the upstream runs-on.dev code so either one works.
 const PROVIDER = process.env.DNS_PROVIDER ?? 'cloudflare';
+
+// PowerDNS converges the whole zone through lib/dns/pipeline.js instead of the
+// per-name Cloudflare/Vercel flow below, which is left exactly as it was.
+// Needs PDNS_API_URL, PDNS_API_KEY, PDNS_ZONE (default runs-at.dev),
+// PDNS_PRIMARY_IP and PDNS_SECONDARY_IPS (comma-separated, at least one).
+// PDNS_DRY_RUN=1 prints the plan without applying it.
+if (PROVIDER === 'powerdns') {
+  const { createPowerDnsProvider } = await import('../lib/dns/powerdns.js');
+  const { runPipeline, serverResolver } = await import('../lib/dns/pipeline.js');
+  const { desiredFromClaims } = await import('../lib/dns/records.js');
+  const { claimLabel } = await import('../lib/dns/diff.js');
+  const zone = (process.env.PDNS_ZONE || DOMAIN).replace(/\.$/, '');
+  const secondaryIps = (process.env.PDNS_SECONDARY_IPS ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  const dryRun = process.env.PDNS_DRY_RUN === '1';
+  const need = ['PDNS_API_URL', 'PDNS_API_KEY', ...(dryRun ? [] : ['PDNS_PRIMARY_IP', 'PDNS_SECONDARY_IPS'])]
+    .filter((k) => !process.env[k]);
+  if (need.length) {
+    console.error(`sync-dns: missing required environment variable(s): ${need.join(', ')}`);
+    process.exit(1);
+  }
+
+  const claims = [];
+  for (const file of await readdir('domains')) {
+    if (file.endsWith('.json')) claims.push(JSON.parse(await readFile(`domains/${file}`, 'utf8')));
+  }
+  let released = [];
+  try {
+    released = execFileSync('git', releasedLogArgs(), { encoding: 'utf8' }).split('\n')
+      .map((file) => /^domains\/([a-z0-9-]+)\.json$/.exec(file)?.[1]).filter(Boolean);
+  } catch (err) {
+    console.log(`::warning::could not read released names from git, their records are left alone: ${err.message}`);
+  }
+  // Only claim labels (current or released) and the `_vercel` mirror host are
+  // ever deleted; records the operator placed under other labels are not ours.
+  const ownedLabels = new Set([...claims.map((c) => c.name), ...released]);
+  const vercelHost = `${ZONE_VERIFICATION_LABEL}.${zone}.`;
+  const report = await runPipeline({
+    zone,
+    dryRun,
+    desired: desiredFromClaims(claims, zone, { planDnsChanges, planZoneVerificationRecords }),
+    provider: createPowerDnsProvider({ zone }),
+    owned: (name) => name === vercelHost || ownedLabels.has(claimLabel(name, zone)),
+    // Hand-placed `_vercel` TXT values survive, as with reconcileZoneVerification.
+    keep: (r) => r.name === vercelHost && r.type === 'TXT' && !r.content.startsWith('"vc-domain-verify='),
+    primary: dryRun ? null : { name: `primary ${process.env.PDNS_PRIMARY_IP}`, resolve: serverResolver(process.env.PDNS_PRIMARY_IP) },
+    secondaries: secondaryIps.map((ip) => ({ name: `secondary ${ip}`, resolve: serverResolver(ip) })),
+  });
+  const p = report.plan;
+  if (p) console.log(`powerdns plan: ${p.creates.length} create, ${p.updates.length} update, ${p.deletes.length} delete, ${p.rejected.length} protected (skipped)`);
+  for (const s of p?.rejected ?? []) console.log(`::warning::protected name not applied: ${s.type} ${s.name}`);
+  for (const v of report.verification) {
+    console.log(`verify ${v.target}: ${v.ok ? 'ok' : `${v.mismatches.length} mismatch(es)`}`);
+    for (const m of v.mismatches.slice(0, 20)) console.log(`  ${m.type} ${m.name}: want ${JSON.stringify(m.want)} got ${JSON.stringify(m.got ?? m.error)}`);
+  }
+  for (const e of report.errors) console.log(`::error::sync-dns (${report.stage}): ${e}`);
+  process.exit(report.ok ? 0 : 1);
+}
+
 if (PROVIDER !== 'cloudflare' && PROVIDER !== 'vercel') {
-  console.error(`sync-dns: DNS_PROVIDER must be "cloudflare" or "vercel", got "${PROVIDER}"`);
+  console.error(`sync-dns: DNS_PROVIDER must be "cloudflare", "vercel" or "powerdns", got "${PROVIDER}"`);
   process.exit(1);
 }
 

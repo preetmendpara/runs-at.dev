@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "js-yaml": "^3.15.2",
     "tailwindcss": "^4"
   }
 }

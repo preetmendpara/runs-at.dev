@@ -1,0 +1,70 @@
+name: export-cloudflare-dns
+
+# Read-only snapshot of the Cloudflare zone for the PowerDNS migration
+# baseline, reconciled against the registry on the same runner.
+#
+# The raw export never leaves this runner: no artifact, no cache, no commit,
+# no log of record values. It is written under $RUNNER_TEMP (mode 700, umask
+# 077), compared with the registry in the same step, and deleted by both a
+# shell trap and an always() step. Only aggregate counts and the SHA-256 of
+# the whole export are published, to the job summary. This repository is
+# public, so anything uploaded would be public too.
+#
+# Token: CLOUDFLARE_DNS_READ_TOKEN, a separate API token scoped to
+# Zone -> DNS -> Read on runs-at.dev only. The existing CLOUDFLARE_API_TOKEN
+# is deliberately NOT used: sync-dns.yml writes records with it, so it holds
+# edit rights this export must not have. Until the read-only secret exists the
+# job fails at the export step without touching anything.
+#
+# Runs only on pushes to the migration branch that change the export code (a
+# push needs write access; forks cannot trigger push workflows here).
+on:
+  push:
+    branches: [feat/powerdns-migration]
+    paths:
+      - scripts/export-cloudflare-dns.mjs
+      - scripts/reconcile-cloudflare.mjs
+      - .github/workflows/export-cloudflare-dns.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: export-cloudflare-dns
+  cancel-in-progress: false
+
+defaults:
+  run:
+    # Explicit: no `set -x` tracing anywhere in this workflow.
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+jobs:
+  export:
+    # GitHub-hosted, ephemeral VM: a fresh machine per job, discarded after.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Export and reconcile (raw export stays on the runner)
+        env:
+          CF_READ_TOKEN: ${{ secrets.CLOUDFLARE_DNS_READ_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+        run: |
+          set +x
+          umask 077
+          dir="$RUNNER_TEMP/cf-export"
+          mkdir -m 700 "$dir"
+          trap 'rm -rf "$dir"' EXIT
+          # The token reaches only the exporter's environment, then is unset.
+          CLOUDFLARE_API_TOKEN="$CF_READ_TOKEN" CLOUDFLARE_ZONE_ID="$CF_ZONE_ID" \
+            node scripts/export-cloudflare-dns.mjs "$dir" --quiet
+          unset CF_READ_TOKEN CF_ZONE_ID
+          node scripts/reconcile-cloudflare.mjs "$dir" >> "$GITHUB_STEP_SUMMARY"
+      - name: Delete raw export
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/cf-export"

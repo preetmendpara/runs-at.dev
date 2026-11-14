@@ -13,3 +13,12 @@ cr.json
 # heading into a deployment that would then serve them for as long as the
 # deployment URL exists.
 worktrees/
+
+# Raw Cloudflare zone exports (origin targets of proxied records); keep local.
+migration/backup/cloudflare/
+# Migration outputs: backups, raw and live DNS exports, generated zone files
+# and record-level reports stay local. Only scripts and sanitized docs are
+# tracked. Regenerate with the scripts under migration/ and scripts/.
+migration/backup/
+migration/zone/
+migration/reports/
