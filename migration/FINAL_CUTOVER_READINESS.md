@@ -18,8 +18,11 @@ are external infrastructure and owner decisions (`PRODUCTION_DEPENDENCIES.md`).
 | URL entries kept as app behaviour (no DNS record) | Yes | `lib/dns.js planFor`, unchanged |
 | Cloudflare's 200 records classified (190 / 9 / 1) | Yes, 1 needs an owner decision | `FINAL_DATA_RECONCILIATION.md` §3 |
 | Provider architecture (Cloudflare default kept for rollback, PowerDNS opt-in) | Yes | `lib/dns/*`, `scripts/sync-dns.mjs`, unit tests |
-| PowerDNS primary + secondary serving every record over UDP and TCP, TSIG-only AXFR, updates reaching the secondary | Yes (isolated test) | CI run #43553075663: 209/209 records on both servers over UDP and TCP, all 19 Cloudflare-missing included; second sync a no-op; update and revert reached the secondary with matching serials; unsigned AXFR refused |
-| Wildcard edge replacing the Worker | Yes (isolated test) | CI run #43553075663: 11/11 behaviour checks against a stub app (`infra/test/edge-ci.sh`) |
+| PowerDNS primary + secondary serving every record over UDP and TCP, TSIG-only AXFR, updates reaching the secondary | Yes (isolated test) | CI runs #43553075663 and #43554908901: 209/209 records on both servers over UDP and TCP, all 19 Cloudflare-missing included; second sync a no-op; update and revert reached the secondary with matching serials; unsigned AXFR refused |
+| Wildcard edge replacing the Worker | Yes (isolated test) | CI run #43554908901: 11/11 behaviour checks against a stub app, plus 3/3 status/Location/content-type matches against production for a real card claim, a real URL-redirect claim and a path redirect (`infra/test/edge-ci.sh`) |
+| ACME DNS-01 updates scoped to `_acme-challenge` TXT | Yes (isolated test) | CI run #43554908901: the acme TSIG key can add the challenge TXT (reaches the secondary; sync-dns leaves it alone); claim names, apex, other types, other keys and unsigned updates are not applied |
+| OpenTofu package valid | Yes | CI run #43554908901: `tofu validate` (checksum-verified OpenTofu 1.8.5) |
+| Undeclared Cloudflare record identified | Yes | export run #43554118321 (sanitized): the 1 undeclared non-system record is a TXT DKIM key (`_domainkey`) for Cloudflare Email Routing; it is carried into the zone as a live system record, so no `--extra` file is needed for it |
 | Backups and restore verification | Yes | `scripts/verify-backup-restore.mjs`: 704/704 |
 | Unit tests / build | Yes | `npm test` 703/703; `npm run build` passes |
 | Oracle ns1/ns2 provisioned | **No** | no OCI credentials |
@@ -39,7 +42,7 @@ Each of the 19 is published by PowerDNS exactly as its owner declared it.
 ## Cutover order (when the blockers are cleared)
 
 1. Provision ns1/ns2 (OpenTofu), run `setup-primary.sh` / `setup-secondary.sh`, exchange the TSIG key.
-2. Export the zone with the real `NS1_IPV4`/`NS2_IPV4` (no `--placeholder-glue`), plus `--extra migration/operator-extra.json` if the undeclared record is kept; load on ns1; check `infra/test/check-servers.mjs <ns1> <ns2>`: 209/209 on both, UDP and TCP.
+2. Export the zone with the real `NS1_IPV4`/`NS2_IPV4` (no `--placeholder-glue`); load on ns1; check `infra/test/check-servers.mjs <ns1> <ns2>`: 209/209 on both, UDP and TCP.
 3. Bring up the edge, issue the wildcard certificate, point the wildcard A/AAAA at the edge in the zone; test cards on a few names with `curl --resolve`.
 4. Set up mail forwarding and swap the apex MX/SPF in the zone.
 5. Lower TTLs at Cloudflare; transfer the registrar; register glue; change NS; watch both NS sets answer identically.
