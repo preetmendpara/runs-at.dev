@@ -18,8 +18,8 @@ are external infrastructure and owner decisions (`PRODUCTION_DEPENDENCIES.md`).
 | URL entries kept as app behaviour (no DNS record) | Yes | `lib/dns.js planFor`, unchanged |
 | Cloudflare's 200 records classified (190 / 9 / 1) | Yes, 1 needs an owner decision | `FINAL_DATA_RECONCILIATION.md` §3 |
 | Provider architecture (Cloudflare default kept for rollback, PowerDNS opt-in) | Yes | `lib/dns/*`, `scripts/sync-dns.mjs`, unit tests |
-| PowerDNS primary + secondary serving every record over UDP and TCP, TSIG-only AXFR, updates reaching the secondary | Built; **not yet run** | `.github/workflows/powerdns-integration.yml` runs only on a push of this branch (pending approval) |
-| Wildcard edge replacing the Worker | Built; **not yet run** | `infra/edge/Caddyfile`, CI behaviour test `infra/test/edge-ci.sh` |
+| PowerDNS primary + secondary serving every record over UDP and TCP, TSIG-only AXFR, updates reaching the secondary | Yes (isolated test) | CI run #43553075663: 209/209 records on both servers over UDP and TCP, all 19 Cloudflare-missing included; second sync a no-op; update and revert reached the secondary with matching serials; unsigned AXFR refused |
+| Wildcard edge replacing the Worker | Yes (isolated test) | CI run #43553075663: 11/11 behaviour checks against a stub app (`infra/test/edge-ci.sh`) |
 | Backups and restore verification | Yes | `scripts/verify-backup-restore.mjs`: 704/704 |
 | Unit tests / build | Yes | `npm test` 703/703; `npm run build` passes |
 | Oracle ns1/ns2 provisioned | **No** | no OCI credentials |
