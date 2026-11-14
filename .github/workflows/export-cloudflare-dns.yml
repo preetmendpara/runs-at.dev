@@ -98,9 +98,8 @@ jobs:
             # Off-site copy of the ciphertext; the URL goes to curl on stdin.
             if [ -n "$OCI_BACKUP_PAR_URL" ]; then
               obj="backups/registry/runs-at-migration-backup-$(date -u +%Y%m%dT%H%M%SZ).tar.age"
-              printf 'url = "%s%s"
-upload-file = "%s"
-' "$OCI_BACKUP_PAR_URL" "$obj" "$out/runs-at-migration-backup.tar.age"                 | curl -sS -f -K - -o /dev/null
+              printf 'url = "%s%s"\nupload-file = "%s"\n' "$OCI_BACKUP_PAR_URL" "$obj" "$out/runs-at-migration-backup.tar.age" \
+                | curl -sS -f -K - -o /dev/null
               echo "Off-site copy: $obj" | tee -a "$GITHUB_STEP_SUMMARY"
             fi
             unset OCI_BACKUP_PAR_URL
