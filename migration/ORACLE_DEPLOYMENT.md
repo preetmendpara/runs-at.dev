@@ -34,7 +34,7 @@ Shapes and limits were checked before applying:
 
 ## Zone loaded on ns1
 
-- **Contents:** 223 records + SOA, exported with the real glue. The wildcard is left out until the edge has an address, at which point the zone becomes 224 records.
+- **Contents:** 222 records + SOA, exported with the real glue. The wildcard is left out until the edge has an address, at which point the zone becomes 223 records (the full production zone).
 - **Kind and metadata:** `primary`, `SOA-EDIT-API DEFAULT`, `TSIG-ALLOW-AXFR xfr-runs-at-dev`.
 - **Checks:** `pdnsutil check-zone` reports 0 errors.
 

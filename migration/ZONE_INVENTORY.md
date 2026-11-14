@@ -22,7 +22,7 @@ Cloudflare's 9 undeclared system records, by name and type (sanitized export): `
 - **Wildcard.** Cloudflare's anycast addresses stop serving the cards once the zone leaves Cloudflare. A production export now refuses to run without `EDGE_IPV4` (the `edge_ip` OpenTofu output) or `WILDCARD_CNAME`. The wildcard is then **one** `A` record pointing at the Caddy edge.
 - **Apex.** The apex is now **one** `ALIAS` record to the same Vercel target as `www`. That the two targets are identical was checked against the decrypted Cloudflare export. PowerDNS expands the ALIAS at query time (`expand-alias=yes` and `resolver=` on ns1 and ns2), so the apex does not depend on addresses that Vercel can change. CI step F checks the expansion on both servers.
 
-## Production zone: 224 records + SOA
+## Production zone: 223 records + SOA
 
 Generated with real `NS1_IPV4`/`NS2_IPV4`/`EDGE_IPV4` values (TEST-NET values in the check).
 
@@ -40,9 +40,9 @@ Generated with real `NS1_IPV4`/`NS2_IPV4`/`EDGE_IPV4` values (TEST-NET values in
 | Wildcard `*` A (Caddy edge) | 1 | `system:edge` |
 | ACME `_acme-challenge` TXT | 0 | Created only while a certificate is being issued, through the scoped TSIG key; sync-dns leaves it alone |
 | DMARC | 0 | No `_dmarc` record exists today (checked on public DNS); nothing to preserve |
-| **Total** | **224** | + SOA |
+| **Total** | **223** | + SOA |
 
-209 declared + 2 NS + 2 glue + 11 system = 224.
+209 declared + 2 NS + 2 glue + 10 system (ALIAS, 3 MX, 3 TXT, www, DKIM, wildcard) = 223.
 
 ## Coverage
 

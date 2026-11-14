@@ -39,9 +39,9 @@
      - logrotate
      - `/etc/cron.d/pdns-local`: a nightly backup at 03:17 and `check-dns.sh` every 5 minutes
 5. Load the zone (steps 4 and 5 of [dns-migration](dns-migration.md)).
-6. Set up TSIG for zone transfers. Never paste the secret anywhere else.
-   1. On ns1, run `pdnsutil list-tsig-keys`, then `pdnsutil set-meta runs-at.dev TSIG-ALLOW-AXFR xfr-runs-at-dev`.
-   2. On ns2, over SSH, run `pdnsutil import-tsig-key xfr-runs-at-dev hmac-sha256 '<secret>'`.
+6. Set up TSIG for zone transfers.
+   1. On ns1, run `pdnsutil set-meta runs-at.dev TSIG-ALLOW-AXFR xfr-runs-at-dev`.
+   2. From the operator's machine, run `infra/powerdns/rotate-xfr-tsig.sh <ns1> <ns2>`. It generates the key on ns1 and pipes it over SSH stdin into ns2, so the secret never appears in a command line, a log or a file. Then it checks that the key matches on both servers, a new serial transfers, and a wrong key is refused. Use the same command to rotate the key later.
    3. On ns2, rerun `/usr/local/sbin/setup-pdns.sh`.
 7. API access for `sync-dns` in PowerDNS mode. The API listens on loopback only, so reach it through an SSH tunnel: `ssh -L 8081:127.0.0.1:8081 ubuntu@<ns1>`.
    - CI would need new secrets (`PDNS_API_URL`, `PDNS_API_KEY`, `PDNS_PRIMARY_IP`, `PDNS_SECONDARY_IPS`) and a design for the tunnel.

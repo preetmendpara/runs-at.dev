@@ -26,7 +26,7 @@ are external infrastructure and owner decisions (`PRODUCTION_DEPENDENCIES.md`).
 | Backups and restore verification | Yes | `scripts/verify-backup-restore.mjs`: 704/704 |
 | Unit tests / build | Yes | `npm test` 703/703; `npm run build` passes |
 | Oracle ns1/ns2 provisioned | **No** | no OCI credentials |
-| Zone inventory explained (224 + SOA in production) | Yes | `migration/ZONE_INVENTORY.md`: the earlier 227 was a test export that copied Cloudflare's resolved wildcard (proxy) and flattened apex addresses; production now uses one edge A and one apex ALIAS |
+| Zone inventory explained (223 + SOA in production) | Yes | `migration/ZONE_INVENTORY.md`: the earlier 227 was a test export that copied Cloudflare's resolved wildcard (proxy) and flattened apex addresses; production now uses one edge A and one apex ALIAS |
 | Apex ALIAS expanded by both servers | Yes (isolated test) | CI run #43561512920 step F |
 | DNSSEC: ns1 signs, ns2 serves presigned, full validation with the new KSK as anchor; DS (13, 2) generated | Yes (isolated test) | CI run #43561512920 step G. Parent today: `delegationSigned=false` (RDAP 2026-11-14), so no stale DS to remove |
 | Encrypted backup made and restored | Yes | Run #43560748138: 770-file bundle (registry, Cloudflare export incl. DKIM, live DNS, zone, config), age-encrypted; decrypted on the owner's machine, all 770 file checksums and the export SHA-256 match, registry byte-identical to its commit. Durable copy: owner's machine only (not yet off-site; Object Storage needs OCI access) |

@@ -23,7 +23,10 @@ done
 CONF=/etc/pdns-backup
 if [ -s "$CONF/age-recipient" ] && [ -s "$CONF/par-url" ] && command -v age >/dev/null; then
   OBJ="backups/$(hostname -s)/pdns-$STAMP.tar.age"
-  tar -C "$DIR" -cf - $(cd "$DIR" && ls -- *"$STAMP"*)       -C / etc/powerdns etc/cron.d/pdns-local     | age -R "$CONF/age-recipient" > "$DIR/offsite-$STAMP.tar.age"
+  FILES=$(cd "$DIR" && ls -- *"$STAMP"* | grep -v '^offsite-')
+  # shellcheck disable=SC2086 # file names are generated above, no spaces
+  tar -C "$DIR" -cf - $FILES -C / etc/powerdns etc/cron.d/pdns-local \
+    | age -R "$CONF/age-recipient" > "$DIR/offsite-$STAMP.tar.age"
   printf 'url = "%s%s"\nupload-file = "%s"\n' "$(cat "$CONF/par-url")" "$OBJ" "$DIR/offsite-$STAMP.tar.age" \
     | curl -sS -f -K - -o /dev/null
   echo "$(date -u +%FT%TZ) offsite ok $OBJ sha256 $(sha256sum "$DIR/offsite-$STAMP.tar.age" | cut -c1-64)"
