@@ -54,7 +54,7 @@ jobs:
           {
             echo '## PowerDNS integration (isolated, test values only)'
             echo '```'
-            grep -E '^(pdns |serial|unsigned|──|powerdns plan|verify |127\.|update|revert|PASS|FAIL)' "$RUNNER_TEMP/result.txt" || true
+            grep -E '^(pdns |serial|unsigned|both|──|powerdns plan|verify |127\.|update|revert|PASS|FAIL)' "$RUNNER_TEMP/result.txt" || true
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 

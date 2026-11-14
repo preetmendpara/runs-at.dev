@@ -57,5 +57,6 @@ NS1_IPV4=<ns1> NS2_IPV4=<ns2> node scripts/export-zone.mjs
 node scripts/verify-parity.mjs                     # must exit 0
 # on ns1:
 pdnsutil load-zone runs-at.dev runs-at.dev.zone    # when reloading, run pdnsutil increase-serial afterwards
+pdns_control rediscover                            # refresh the zone cache, or pdns answers REFUSED
 ```
 ns2 then transfers the zone again from ns1. Use the pg_dump (with `pg_restore`) or the SQLite copy only when you need state that is not in Git, such as TSIG metadata or hand edits.

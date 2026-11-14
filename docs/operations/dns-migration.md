@@ -54,6 +54,7 @@ Never load the output of `--placeholder-glue`. It uses TEST-NET addresses (192.0
 ```sh
 # on ns1
 pdnsutil load-zone runs-at.dev runs-at.dev.zone
+pdns_control rediscover   # refresh the zone cache, or pdns answers REFUSED
 pdnsutil check-zone runs-at.dev
 # locally
 node scripts/verify-parity.mjs --server <ns1-public-ip>     # must exit 0

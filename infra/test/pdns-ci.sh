@@ -100,7 +100,22 @@ $U2 import-tsig-key xfr-runs-at-dev hmac-sha256 "$SECRET" > /dev/null
 unset SECRET
 $U2 create-secondary-zone $ZONE "$NS1:$NS1P" > /dev/null
 $U2 set-meta $ZONE AXFR-MASTER-TSIG xfr-runs-at-dev > /dev/null
+# PowerDNS 4.5+ keeps a zone cache: a zone created with pdnsutil while the
+# server runs is answered REFUSED until the cache is rebuilt. (Zones created
+# through the HTTP API update the cache themselves.)
+pdns_control --config-dir="$W/ns1" rediscover > /dev/null
+pdns_control --config-dir="$W/ns2" rediscover > /dev/null
 pdns_control --config-dir="$W/ns2" retrieve $ZONE > /dev/null || true
+# Both must now be authoritative (NOERROR, not REFUSED) before anything else.
+for s in "$NS1 $NS1P" "$NS2 $NS2P"; do
+  set -- $s
+  for _ in $(seq 1 20); do
+    dig @"$1" -p "$2" +time=1 +tries=1 $ZONE SOA | grep -q 'status: NOERROR' && break
+    sleep 1
+  done
+  dig @"$1" -p "$2" +time=1 +tries=1 $ZONE SOA | grep -q 'status: NOERROR' || fail "$1:$2 is not authoritative for $ZONE"
+done
+say "both servers authoritative: yes"
 
 # Unsigned AXFR from ns2's address must be refused; ns1 serves AXFR only with TSIG.
 if dig @$NS1 -p $NS1P -b $NS2 $ZONE AXFR +time=2 +tries=1 2>/dev/null | grep -q 'IN[[:space:]]SOA'; then
