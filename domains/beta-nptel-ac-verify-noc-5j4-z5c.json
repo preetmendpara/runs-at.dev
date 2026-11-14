@@ -4,6 +4,8 @@
     "github": "E-Sujaya"
   },
   "claimedAt": "2026-11-11T20:37:35.366Z",
-  "records": {},
+  "records": {
+    "CNAME": "e-sujaya.github.io"
+  },
   "country": "IN"
 }
