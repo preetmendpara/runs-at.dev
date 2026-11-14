@@ -31,3 +31,7 @@ systemctl restart pdns
 
 # TSIG key for transfers to ns2; copied to ns2 by hand (infra/README.md).
 pdnsutil list-tsig-keys | grep -q '^xfr-runs-at-dev\.' || pdnsutil generate-tsig-key xfr-runs-at-dev hmac-sha256 >/dev/null
+
+# TSIG key for the edge's ACME DNS-01 updates (acme-update-policy.lua allows
+# it to touch only TXT at _acme-challenge.runs-at.dev). Copy it to the edge.
+pdnsutil list-tsig-keys | grep -q '^acme-runs-at-dev.' || pdnsutil generate-tsig-key acme-runs-at-dev hmac-sha256 >/dev/null

@@ -67,6 +67,12 @@ export function systemRecords(live) {
     const s = Array.isArray(v) ? v.join('') : v;
     if (!s.startsWith('vc-domain-verify=')) add('TXT', '_vercel', s);
   }
+  // DKIM keys (<selector>._domainkey) published at Cloudflare, e.g. Email
+  // Routing's cf2024-1: kept verbatim until mail moves (PRODUCTION_DEPENDENCIES).
+  for (const [key, q] of Object.entries(live.system ?? {})) {
+    const m = /^(.+._domainkey).runs-at.dev TXT$/.exec(key);
+    if (m) for (const v of answers(q)) add('TXT', m[1], Array.isArray(v) ? v.join('') : v);
+  }
   // Wildcard: today a proxied Cloudflare record answered by cloudflare/worker.js.
   // Override with WILDCARD_CNAME once the off-Cloudflare card host is decided.
   if (process.env.WILDCARD_CNAME) add('CNAME', '*', process.env.WILDCARD_CNAME);

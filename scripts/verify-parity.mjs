@@ -29,7 +29,11 @@ export function compare(declared, zone, system = []) {
     else missing.push(canonical(r));
   }
   const extraAll = zone.filter((r) => !declSet.has(canonical(r)) && r.type !== 'SOA');
-  const extra = extraAll.filter((r) => !sysSet.has(canonical(r)) && !['', 'ns1', 'ns2', 'www', '*', '_vercel'].includes(r.name)).map(canonical);
+  // System names (apex, glue, www, wildcard, _vercel) and DKIM keys published
+  // by the mail provider (<selector>._domainkey, TXT) are zone-owned, not claims.
+  const isSystemName = (r) => ['', 'ns1', 'ns2', 'www', '*', '_vercel'].includes(r.name)
+    || (r.type === 'TXT' && /^[a-z0-9-]+\._domainkey$/.test(r.name));
+  const extra = extraAll.filter((r) => !sysSet.has(canonical(r)) && !isSystemName(r)).map(canonical);
   return {
     declared: declSet.size, zone: zoneSet.size, matched: declared.filter((r) => zoneSet.has(canonical(r))).length,
     missing, mismatched, extra, system: extraAll.length - extra.length,

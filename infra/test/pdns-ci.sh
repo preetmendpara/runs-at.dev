@@ -16,6 +16,8 @@
 #   B  second sync run is a no-op (idempotent)
 #   C  every declared record answers on both servers over UDP and TCP
 #   D  an update and its revert reach the secondary (serial and data)
+#   E  RFC 2136 (ACME DNS-01) is limited to TXT at _acme-challenge with the
+#      acme TSIG key: allowed there, refused everywhere else and unsigned
 # Prints only counts; exits non-zero on any failure.
 set -euo pipefail
 ZONE=runs-at.dev
@@ -62,7 +64,8 @@ render infra/powerdns/pdns-primary.conf "$W/ns1/pdns.conf" \
   -e "s#^local-port=.*#local-port=$NS1P#" \
   -e "s#^also-notify=.*#also-notify=$NS2:$NS2P#" \
   -e "s#^only-notify=.*#only-notify=$NS2/32#" \
-  -e "s#^include-dir=.*#include-dir=$W/ns1/pdns.d#"
+  -e "s#^lua-dnsupdate-policy-script=.*#lua-dnsupdate-policy-script=$W/ns1/acme-update-policy.lua#" \n  -e "s#^include-dir=.*#include-dir=$W/ns1/pdns.d#"
+cp infra/powerdns/acme-update-policy.lua "$W/ns1/acme-update-policy.lua"
 printf 'gpgsql-password=%s\napi-key=%s\nsocket-dir=%s\n' "$DBPASS" "$APIKEY" "$W/ns1" > "$W/ns1/pdns.d/secrets.conf"
 # Outgoing NOTIFY and queries from ns1's own address, as on the VCN (otherwise
 # loopback traffic leaves from 127.0.0.1 and ns2's allow-notify-from drops it).
@@ -173,5 +176,43 @@ wait_sync
 [ -z "$(dig @$NS2 -p $NS2P +short "$name" TXT)" ] || fail "revert not on secondary"
 say "revert visible on secondary: yes"
 git checkout -- domains/ 2>/dev/null || true
+
+say "── E: ACME DNS-01 updates are scoped to _acme-challenge TXT"
+$U1 generate-tsig-key acme-runs-at-dev hmac-sha256 > /dev/null
+ACME=$($U1 list-tsig-keys | awk '$1 ~ /^acme-runs-at-dev/ {print $3}')
+$U1 generate-tsig-key other-key hmac-sha256 > /dev/null
+OTHER=$($U1 list-tsig-keys | awk '$1 ~ /^other-key/ {print $3}')
+upd() { # key-spec|none  name  type  value  -> prints NOERROR/REFUSED/...
+  local keyopt=()
+  [ "$1" != none ] && keyopt=(-y "$1")
+  printf 'server %s %s
+zone %s
+update add %s 60 %s %s
+send
+' "$NS1" "$NS1P" "$ZONE" "$2" "$3" "$4"     | nsupdate "${keyopt[@]}" 2>&1 | grep -oE 'NOERROR|REFUSED|NOTAUTH|SERVFAIL' | head -1 || true
+}
+expect() { # description wanted got
+  if [ "$3" = "$2" ] || { [ "$2" = refused ] && [ "$3" != NOERROR ] && [ -n "$3" ]; } || { [ "$2" = refused ] && [ -z "$3" ]; }; then
+    say "ok   $1 ($3)"
+  else
+    fail "$1: wanted $2, got ${3:-no answer}"
+  fi
+}
+expect "acme key, TXT _acme-challenge" NOERROR "$(upd "hmac-sha256:acme-runs-at-dev:$ACME" _acme-challenge.$ZONE. TXT '"token-1"')"
+expect "acme key, TXT on a claim name" refused "$(upd "hmac-sha256:acme-runs-at-dev:$ACME" abdulloh.$ZONE. TXT '"x"')"
+expect "acme key, A at _acme-challenge" refused "$(upd "hmac-sha256:acme-runs-at-dev:$ACME" _acme-challenge.$ZONE. A 192.0.2.9)"
+expect "acme key, apex TXT" refused "$(upd "hmac-sha256:acme-runs-at-dev:$ACME" $ZONE. TXT '"x"')"
+expect "other key, TXT _acme-challenge" refused "$(upd "hmac-sha256:other-key:$OTHER" _acme-challenge.$ZONE. TXT '"x"')"
+expect "unsigned, TXT _acme-challenge" refused "$(upd none _acme-challenge.$ZONE. TXT '"x"')"
+unset ACME OTHER
+pdns_control --config-dir="$W/ns1" notify $ZONE > /dev/null 2>&1 || true
+wait_sync
+dig @$NS2 -p $NS2P +short +tcp _acme-challenge.$ZONE TXT | grep -q token-1 || fail "ACME TXT not on secondary"
+say "ACME TXT on secondary: yes"
+[ -z "$(dig @$NS1 -p $NS1P +short abdulloh.$ZONE TXT | grep -x '"x"')" ] || fail "refused update was applied"
+out=$(node scripts/sync-dns.mjs) || fail "sync-dns after ACME update failed"
+printf '%s
+' "$out" | grep -q '^powerdns plan: 0 create, 0 update, 0 delete' || fail "sync-dns wanted to touch the ACME record"
+say "sync-dns leaves _acme-challenge alone: yes"
 
 say "PASS"

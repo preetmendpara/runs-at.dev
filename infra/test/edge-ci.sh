@@ -67,5 +67,34 @@ check "URL-record redirect passed through, not followed" '[ "$code" = 302 ] && [
 code=$(req www /)
 check "www is not a card" '[ "$code" = 404 ]'
 
+echo "edge behaviour (stub app): $pass passed, $fail failed"
+
+# ── against the REAL application ─────────────────────────────────────────
+# Same edge, upstream = https://runs-at.dev (read-only GETs). For a real
+# card-only claim and a real URL-redirect claim, the edge's status, Location
+# and content type must equal what production (Cloudflare Worker) returns for
+# the same name today.
+kill $CADDY 2>/dev/null || true; sleep 1
+export APP_ORIGIN=https://runs-at.dev APP_HOST=runs-at.dev
+"$W/caddy" run --config infra/edge/Caddyfile --adapter caddyfile > "$W/caddy-live.log" 2>&1 &
+CADDY=$!
+trap 'kill $STUB $CADDY 2>/dev/null || true' EXIT
+sleep 2
+read -r CARD URLNAME < <(node -e '
+  const fs=require("fs");const cs=fs.readdirSync("domains").filter(f=>f.endsWith(".json")).map(f=>JSON.parse(fs.readFileSync("domains/"+f,"utf8")));
+  const card=cs.find(c=>!c.subdomains&&Object.keys(c.records||{}).length===0);
+  const url=cs.find(c=>c.records&&Object.keys(c.records).length===1&&c.records.URL);
+  console.log(card.name, url.name);')
+for n in "$CARD" "$URLNAME"; do
+  edge=$(curl -sk -o /dev/null -w '%{http_code} %{redirect_url} %{content_type}' --max-time 20 --resolve "$n.runs-at.dev:8443:127.0.0.1" "https://$n.runs-at.dev:8443/" | sed 's/;.*//')
+  prod=$(curl -sk -o /dev/null -w '%{http_code} %{redirect_url} %{content_type}' --max-time 20 "https://$n.runs-at.dev/" | sed 's/;.*//')
+  kind=$([ "$n" = "$CARD" ] && echo card || echo url-redirect)
+  check "real app, $kind claim: edge == production ($edge)" '[ "$edge" = "$prod" ]'
+  [ "$edge" = "$prod" ] || echo "     production: $prod"
+done
+edge=$(curl -sk -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 20 --resolve "$CARD.runs-at.dev:8443:127.0.0.1" "https://$CARD.runs-at.dev:8443/docs")
+prod=$(curl -sk -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 20 "https://$CARD.runs-at.dev/docs")
+check "real app, path redirect: edge == production ($edge)" '[ "$edge" = "$prod" ]'
+
 echo "edge behaviour: $pass passed, $fail failed"
 [ "$fail" = 0 ]

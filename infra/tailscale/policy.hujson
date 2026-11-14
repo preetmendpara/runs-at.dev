@@ -1,0 +1,23 @@
+// Tailnet policy for the runs-at.dev DNS deployment path. Paste into the
+// tailnet's Access controls. Default deny: only what is listed here works.
+//
+//   tag:ci-dns   ephemeral GitHub Actions nodes (OAuth client, tag-scoped)
+//   tag:pdns-ns1 ns1, which serves its loopback-only PowerDNS API to the
+//                tailnet on :8081 with `tailscale serve` (setup-tailscale.sh)
+//   tag:ops      the operator's own devices (SSH over the tailnet)
+{
+  "tagOwners": {
+    "tag:ci-dns":   ["autogroup:admin"],
+    "tag:pdns-ns1": ["autogroup:admin"],
+    "tag:pdns-ns2": ["autogroup:admin"],
+    "tag:edge":     ["autogroup:admin"],
+    "tag:ops":      ["autogroup:admin"],
+  },
+  "grants": [
+    // CI may reach the PowerDNS API on ns1 and nothing else.
+    { "src": ["tag:ci-dns"], "dst": ["tag:pdns-ns1"], "ip": ["tcp:8081"] },
+    // Operators may SSH to the DNS and edge hosts.
+    { "src": ["tag:ops"], "dst": ["tag:pdns-ns1", "tag:pdns-ns2", "tag:edge"], "ip": ["tcp:22"] },
+  ],
+  "ssh": [],
+}

@@ -56,6 +56,9 @@ const probe = `probe-${randomBytes(6).toString('hex')}.${D}`;
 const wildcard = { probe, A: await q(probe, 'A'), AAAA: await q(probe, 'AAAA'), CNAME: await q(probe, 'CNAME') };
 const system = {};
 for (const n of ['www', '_vercel']) for (const t of n === '_vercel' ? ['TXT'] : ['A', 'AAAA', 'CNAME']) system[`${n}.${D} ${t}`] = await q(`${n}.${D}`, t);
+// Cloudflare Email Routing's DKIM key (selector cf2024-1): a system record no
+// registry file declares. Captured so the zone keeps it with its exact value.
+system[`cf2024-1._domainkey.${D} TXT`] = await q(`cf2024-1._domainkey.${D}`, 'TXT');
 
 // Group declared records by fqdn+type so each lookup happens once.
 const groups = new Map();

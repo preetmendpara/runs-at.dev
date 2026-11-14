@@ -118,15 +118,33 @@ jobs:
           echo 'files<<EOF' >> $GITHUB_OUTPUT
           git diff --name-only "$RANGE" '${{ github.event.after }}' -- domains/ >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
+      # PowerDNS only: join the tailnet as tag:ci-dns, the one tag the tailnet
+      # policy (infra/tailscale/policy.hujson) lets reach ns1's API port. The
+      # API itself listens on ns1's loopback and is exposed only to the tailnet
+      # by `tailscale serve`; it is never on a public interface. This job runs
+      # only for pushes to main, maintainer dispatches and health-check's
+      # call -- never for pull-request code.
+      - if: vars.DNS_PROVIDER == 'powerdns'
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci-dns
       - id: sync
         run: node scripts/sync-dns.mjs
         env:
           CHANGED_FILES: ${{ steps.changed.outputs.files }}
-          # runs-at.dev's zone is on Cloudflare. Set DNS_PROVIDER to 'vercel'
-          # (and the VERCEL_* secrets) only if the zone ever moves to Vercel DNS.
-          DNS_PROVIDER: cloudflare
+          # Cloudflare until the repository variable DNS_PROVIDER is set to
+          # 'powerdns' at cutover; unsetting it is the rollback.
+          DNS_PROVIDER: ${{ vars.DNS_PROVIDER || 'cloudflare' }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          # PowerDNS: API over the tailnet; verification against both public
+          # nameservers so a secondary that never caught up fails the run.
+          PDNS_API_URL: ${{ vars.PDNS_API_URL }}
+          PDNS_API_KEY: ${{ secrets.PDNS_API_KEY }}
+          PDNS_PRIMARY_IP: ${{ vars.PDNS_PRIMARY_IP }}
+          PDNS_SECONDARY_IPS: ${{ vars.PDNS_SECONDARY_IPS }}
 
   # The zone mirror hit Vercel's 50-value cap and deferred some challenges.
   # Prune the ones whose claims have verified; the prune's push (deploy key,

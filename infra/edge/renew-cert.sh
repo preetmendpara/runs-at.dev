@@ -1,11 +1,15 @@
 #!/bin/bash
 # Obtain or renew the *.runs-at.dev wildcard certificate for infra/edge/Caddyfile
-# with an ACME DNS-01 challenge written straight into our own PowerDNS (lego's
-# "pdns" provider, through the primary's loopback-only API). Runs on ns1 from
-# cron; ns2's edge receives the files over the VCN (EDGE_PEER, optional).
+# with an ACME DNS-01 challenge, written to ns1 as an RFC 2136 dynamic update
+# (lego's "rfc2136" provider) signed with the acme-runs-at-dev TSIG key. ns1's
+# acme-update-policy.lua lets that key change only TXT at
+# _acme-challenge.runs-at.dev, so the edge never holds the PowerDNS API key.
+# Runs on the edge host from cron.
 #
-# Needs on ns1: lego (https://go-acme.github.io/lego/), caddy, and
-# /etc/powerdns/pdns.d/secrets.conf (written by setup-primary.sh).
+# Needs on the edge: lego (https://go-acme.github.io/lego/), caddy, and
+# /etc/runs-at-edge/acme-tsig.env with RFC2136_NAMESERVER (ns1's private
+# address:53), RFC2136_TSIG_KEY=acme-runs-at-dev., RFC2136_TSIG_SECRET and
+# RFC2136_TSIG_ALGORITHM=hmac-sha256. (mode 0600, copied from ns1.)
 # ACME_EMAIL is the Let's Encrypt account contact: a REAL value the operator
 # must provide; there is no default.
 set -euo pipefail
@@ -15,11 +19,12 @@ DIR=/etc/runs-at-edge
 LEGO_DIR=/var/lib/lego
 mkdir -p "$DIR" "$LEGO_DIR"
 
-PDNS_API_KEY=$(sed -n 's/^api-key=//p' /etc/powerdns/pdns.d/secrets.conf)
-export PDNS_API_URL=http://127.0.0.1:8081 PDNS_API_KEY
-export PDNS_PROPAGATION_TIMEOUT=300 PDNS_POLLING_INTERVAL=10
+set -a
+. "$DIR/acme-tsig.env"
+set +a
+export RFC2136_PROPAGATION_TIMEOUT=300 RFC2136_POLLING_INTERVAL=10
 
-args=(--accept-tos --path "$LEGO_DIR" --email "$ACME_EMAIL" --dns pdns --domains '*.runs-at.dev')
+args=(--accept-tos --path "$LEGO_DIR" --email "$ACME_EMAIL" --dns rfc2136 --domains '*.runs-at.dev')
 if [ -f "$LEGO_DIR/certificates/_.runs-at.dev.crt" ]; then
   lego "${args[@]}" renew --days 30
 else

@@ -52,6 +52,12 @@ export function reconcile({ cloudflare, declared }) {
     extraInCloudflare: extra.length,
     extraSystem: extra.filter(isSystem).length,
     extraOther: extra.filter((k) => !isSystem(k)).length,
+    // Category of each undeclared non-system record, never its name or value:
+    // a DKIM key (<selector>._domainkey) or something else, plus its type.
+    extraOtherKinds: extra.filter((k) => !isSystem(k)).map((k) => {
+      const rec = cf.get(k);
+      return `${rec.type} ${/(^|.)_domainkey$/.test(rec.name) ? 'DKIM key (_domainkey)' : 'other'}`;
+    }),
     sha: {
       declared: sha256(want.keys()),
       cloudflare: sha256(cf.keys()),
@@ -97,6 +103,8 @@ async function main(argv) {
     `| In Cloudflare, not declared: system names (apex, www, wildcard, _vercel) | ${r.extraSystem} |`,
     `| In Cloudflare, not declared: other | ${r.extraOther} |`,
     `| Outside the zone | ${r.outOfZone} |`,
+    '',
+    `Undeclared non-system records by kind: ${r.extraOtherKinds.length ? r.extraOtherKinds.join('; ') : 'none'}`,
     '',
     `Cloudflare records by type: ${Object.entries(byType).sort().map(([t, n]) => `${t} ${n}`).join(', ')}`,
     '',

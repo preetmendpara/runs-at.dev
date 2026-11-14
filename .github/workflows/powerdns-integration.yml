@@ -54,7 +54,7 @@ jobs:
           {
             echo '## PowerDNS integration (isolated, test values only)'
             echo '```'
-            grep -E '^(pdns |serial|unsigned|both|──|powerdns plan|verify |127\.|update|revert|PASS|FAIL)' "$RUNNER_TEMP/result.txt" || true
+            grep -E '^(pdns |serial|unsigned|both|──|powerdns plan|verify |127\.|update|revert|ok   |ACME|sync-dns leaves|PASS|FAIL)' "$RUNNER_TEMP/result.txt" || true
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -81,3 +81,20 @@ jobs:
             cat "$RUNNER_TEMP/edge.txt" 2>/dev/null || true
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # The OpenTofu package must at least initialise and validate. No OCI
+  # credentials exist here and none are needed: validate never calls OCI.
+  iac:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: opentofu/setup-opentofu@v1
+      - name: tofu validate
+        working-directory: infra/opentofu
+        run: |
+          tofu init -backend=false -input=false > /dev/null
+          tofu validate
+          tofu fmt -check -recursive || { echo "::warning::tofu fmt would change files"; true; }
