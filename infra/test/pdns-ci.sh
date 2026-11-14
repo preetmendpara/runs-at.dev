@@ -64,6 +64,9 @@ render infra/powerdns/pdns-primary.conf "$W/ns1/pdns.conf" \
   -e "s#^only-notify=.*#only-notify=$NS2/32#" \
   -e "s#^include-dir=.*#include-dir=$W/ns1/pdns.d#"
 printf 'gpgsql-password=%s\napi-key=%s\nsocket-dir=%s\n' "$DBPASS" "$APIKEY" "$W/ns1" > "$W/ns1/pdns.d/secrets.conf"
+# Outgoing NOTIFY and queries from ns1's own address, as on the VCN (otherwise
+# loopback traffic leaves from 127.0.0.1 and ns2's allow-notify-from drops it).
+printf 'query-local-address=%s\n' "$NS1" > "$W/ns1/pdns.d/local.conf"
 
 render infra/powerdns/pdns-secondary.conf "$W/ns2/pdns.conf" \
   -e "s#^gsqlite3-database=.*#gsqlite3-database=$W/ns2/pdns.sqlite3#" \
