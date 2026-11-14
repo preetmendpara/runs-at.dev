@@ -1,0 +1,49 @@
+name: verify-oracle-dns
+
+# Read-only check of the Oracle-hosted ns1/ns2 from outside Oracle's network:
+# every declared record over UDP and TCP on both servers, SOA serials, and
+# that zone transfers without TSIG are refused. Sends DNS queries only.
+on:
+  workflow_dispatch:
+    inputs:
+      ns1:
+        description: ns1 public IPv4
+        required: true
+      ns2:
+        description: ns2 public IPv4
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Check both servers
+        env:
+          NS1: ${{ inputs.ns1 }}
+          NS2: ${{ inputs.ns2 }}
+        run: |
+          set -euo pipefail
+          for ip in "$NS1" "$NS2"; do [[ "$ip" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || { echo "bad IP"; exit 1; }; done
+          {
+            echo '## Oracle ns1/ns2 from a GitHub runner'
+            echo '```'
+            for ip in "$NS1" "$NS2"; do
+              echo "SOA $ip: $(dig @"$ip" +short +norec runs-at.dev SOA | awk '{print $3}')"
+              echo "AA flag $ip: $(dig @"$ip" +norec runs-at.dev SOA | grep -c 'flags:.* aa')"
+              echo "apex ALIAS -> A on $ip: $(dig @"$ip" +short +norec runs-at.dev A | grep -cE '^[0-9.]+$') address(es)"
+              axfr=$(dig @"$ip" +tcp runs-at.dev AXFR | grep -cE 'IN[[:space:]]+SOA' || true)
+              echo "unsigned AXFR SOA lines from $ip: $axfr (0 = refused)"
+            done
+            node infra/test/check-servers.mjs "$NS1:53" "$NS2:53"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"

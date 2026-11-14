@@ -39,6 +39,8 @@ const roles = {
       ['powerdns/unattended-upgrades', '/etc/apt/apt.conf.d/52unattended-upgrades-local', '0644'],
     ],
     runcmd: [
+      // Oracle's Ubuntu images REJECT all inbound except 22 in iptables.
+      "  - [sh, -c, 'for p in 80 443; do iptables -C INPUT -p tcp --dport $p -j ACCEPT 2>/dev/null || iptables -I INPUT 5 -p tcp --dport $p -j ACCEPT; done; netfilter-persistent save']",
       '  - [mkdir, -p, -m, "0750", /etc/runs-at-edge]',
       '  - [chgrp, caddy, /etc/runs-at-edge]',
       // Caddy cannot start without the certificate; it is enabled after the
@@ -74,6 +76,10 @@ export function render(role) {
     // Ubuntu's systemd-resolved stub listens on 127.0.0.53:53, which does not
     // clash with pdns on 0.0.0.0:53 on Linux, but free it to be safe.
     "  - [sh, -c, 'mkdir -p /etc/systemd/resolved.conf.d && printf \"[Resolve]\\nDNSStubListener=no\\n\" > /etc/systemd/resolved.conf.d/no-stub.conf && ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf && systemctl restart systemd-resolved']",
+    // Oracle's Ubuntu images REJECT all inbound except 22 in iptables; open DNS.
+    "  - [sh, -c, 'for p in udp tcp; do iptables -C INPUT -p $p --dport 53 -j ACCEPT 2>/dev/null || iptables -I INPUT 5 -p $p --dport 53 -j ACCEPT; done; netfilter-persistent save']",
+    // The Debian package enables the BIND backend in pdns.d; this zone uses SQL only.
+    '  - [rm, -f, /etc/powerdns/pdns.d/bind.conf]',
     '  - [chown, root:pdns, /etc/powerdns/pdns.conf]',
     '  - [/usr/local/sbin/setup-pdns.sh]',
   );

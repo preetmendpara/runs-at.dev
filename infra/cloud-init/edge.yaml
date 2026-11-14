@@ -142,6 +142,7 @@ write_files:
       Unattended-Upgrade::Remove-Unused-Dependencies "true";
       Unattended-Upgrade::Automatic-Reboot "true";
 runcmd:
+  - [sh, -c, 'for p in 80 443; do iptables -C INPUT -p tcp --dport $p -j ACCEPT 2>/dev/null || iptables -I INPUT 5 -p tcp --dport $p -j ACCEPT; done; netfilter-persistent save']
   - [mkdir, -p, -m, "0750", /etc/runs-at-edge]
   - [chgrp, caddy, /etc/runs-at-edge]
   - [systemctl, disable, --now, caddy]
