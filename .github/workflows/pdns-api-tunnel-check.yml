@@ -22,6 +22,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: API not reachable from the internet
         run: |
           code=$(curl -s -o /dev/null -m 8 -w '%{http_code}' "http://${{ vars.PDNS_PRIMARY_IP }}:8081/" || true)
@@ -44,6 +45,18 @@ jobs:
           n=$(jq '[.rrsets[].records | length] | add' zone.json); serial=$(jq '.serial' zone.json); rm -f zone.json
           { echo "without API key -> $noauth"; echo "with API key: serial $serial, $n records"; } | tee -a "$GITHUB_STEP_SUMMARY"
           [ "$noauth" = 401 ]
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Registry vs live ns1 (sync-dns plan, dry run, nothing applied)
+        env:
+          DNS_PROVIDER: powerdns
+          PDNS_DRY_RUN: '1'
+          PDNS_API_KEY: ${{ secrets.PDNS_API_KEY }}
+          PDNS_API_URL: ${{ vars.PDNS_API_URL }}
+        run: |
+          node scripts/sync-dns.mjs 2>&1 | grep -E '^powerdns plan' | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Tunnel down
         if: always()
         run: sudo wg-quick down wg0 > /dev/null 2>&1 || true
