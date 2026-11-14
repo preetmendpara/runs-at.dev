@@ -64,7 +64,8 @@ render infra/powerdns/pdns-primary.conf "$W/ns1/pdns.conf" \
   -e "s#^local-port=.*#local-port=$NS1P#" \
   -e "s#^also-notify=.*#also-notify=$NS2:$NS2P#" \
   -e "s#^only-notify=.*#only-notify=$NS2/32#" \
-  -e "s#^lua-dnsupdate-policy-script=.*#lua-dnsupdate-policy-script=$W/ns1/acme-update-policy.lua#" \n  -e "s#^include-dir=.*#include-dir=$W/ns1/pdns.d#"
+  -e "s#^lua-dnsupdate-policy-script=.*#lua-dnsupdate-policy-script=$W/ns1/acme-update-policy.lua#" \
+  -e "s#^include-dir=.*#include-dir=$W/ns1/pdns.d#"
 cp infra/powerdns/acme-update-policy.lua "$W/ns1/acme-update-policy.lua"
 printf 'gpgsql-password=%s\napi-key=%s\nsocket-dir=%s\n' "$DBPASS" "$APIKEY" "$W/ns1" > "$W/ns1/pdns.d/secrets.conf"
 # Outgoing NOTIFY and queries from ns1's own address, as on the VCN (otherwise
