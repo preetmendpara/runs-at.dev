@@ -26,7 +26,12 @@ REPO="$PWD"
 mkdir -p "$W/ns1/pdns.d" "$W/ns2/pdns.d"
 
 say() { printf '%s\n' "$*"; }
-fail() { say "FAIL: $*"; exit 1; }
+fail() {
+  say "FAIL: $*"
+  # Server logs carry no secrets (keys are never logged); shown for diagnosis.
+  for n in ns1 ns2; do say "--- $n log (tail)"; tail -n 40 "$W/$n.log" 2>/dev/null | sed "s/^/  /"; done
+  exit 1
+}
 
 # ── packages ──────────────────────────────────────────────────────────────
 sudo apt-get update -qq
