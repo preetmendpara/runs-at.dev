@@ -233,6 +233,7 @@ say "sync-dns leaves _acme-challenge alone: yes"
 
 say "── F: apex ALIAS is expanded by both servers"
 $U1 add-record $ZONE @ ALIAS 300 example.com. > /dev/null
+$U1 increase-serial $ZONE > /dev/null   # pdnsutil edits do not bump the serial
 pdns_control --config-dir="$W/ns1" notify $ZONE > /dev/null 2>&1 || true
 wait_sync
 # Earlier steps cached "no apex A"; drop the packet/query caches first.
