@@ -258,7 +258,8 @@ $U2 set-presigned $ZONE > /dev/null
 pdns_control --config-dir="$W/ns2" rediscover > /dev/null
 pdns_control --config-dir="$W/ns1" notify $ZONE > /dev/null 2>&1 || true
 wait_sync
-$U1 export-zone-ds $ZONE | grep -q " DS 13 2 " || fail "no SHA-256 DS for ECDSAP256SHA256"
+ds=$($U1 export-zone-ds $ZONE)
+grep -Eq "IN[[:space:]]+DS[[:space:]]+[0-9]+[[:space:]]+13[[:space:]]+2[[:space:]]" <<< "$ds" || { echo "$ds" | awk '{print $1,$3,$4,$5,$6,$7}'; fail "no SHA-256 DS for ECDSAP256SHA256"; }
 say "DS (alg 13, digest 2) generated: yes"
 dig @$NS1 -p $NS1P +dnssec +norec $ZONE DNSKEY | grep -E "IN\s+DNSKEY" | grep -E "^\S+\s+\S+\s+IN\s+DNSKEY\s+257 " | sed -E 's/^\S+\s+\S+\s+IN\s+DNSKEY\s+/. IN DNSKEY /' > /dev/null
 for s in "$NS1 $NS1P" "$NS2 $NS2P"; do
