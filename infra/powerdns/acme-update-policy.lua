@@ -9,8 +9,9 @@
 -- ALLOW-DNSUPDATE-FROM and TSIG-ALLOW-DNSUPDATE: this function is the whole
 -- policy, so it checks the key itself. The update reaches ns2 through the
 -- normal NOTIFY/TSIG AXFR path.
-local ALLOWED_KEY = newDN("acme-runs-at-dev.")
-local ALLOWED_NAME = newDN("_acme-challenge.runs-at.dev.")
+-- DNSName:equal() takes a string in PowerDNS 4.8.
+local ALLOWED_KEY = "acme-runs-at-dev."
+local ALLOWED_NAME = "_acme-challenge.runs-at.dev."
 
 function updatepolicy(input)
   local key = input:getTsigName()

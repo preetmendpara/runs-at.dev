@@ -190,10 +190,14 @@ upd() { # key-spec|none  name  type  value  -> prints NOERROR/REFUSED/...
 zone %s
 update add %s 60 %s %s
 send
-' "$NS1" "$NS1P" "$ZONE" "$2" "$3" "$4"     | nsupdate "${keyopt[@]}" 2>&1 | grep -oE 'NOERROR|REFUSED|NOTAUTH|SERVFAIL' | head -1 || true
+' "$NS1" "$NS1P" "$ZONE" "$2" "$3" "$4" > "$W/upd.txt"
+  # nsupdate is silent and exits 0 only when the server answered NOERROR.
+  local out
+  if out=$(nsupdate "${keyopt[@]}" "$W/upd.txt" 2>&1); then echo NOERROR
+  else grep -oE 'REFUSED|NOTAUTH|SERVFAIL|NOTZONE|FORMERR' <<< "$out" | head -1 || echo "error"; fi
 }
 expect() { # description wanted got
-  if [ "$3" = "$2" ] || { [ "$2" = refused ] && [ "$3" != NOERROR ] && [ -n "$3" ]; } || { [ "$2" = refused ] && [ -z "$3" ]; }; then
+  if [ "$3" = "$2" ] || { [ "$2" = refused ] && [ "$3" = REFUSED ]; }; then
     say "ok   $1 ($3)"
   else
     fail "$1: wanted $2, got ${3:-no answer}"
