@@ -25,7 +25,7 @@ Shapes and limits were checked before applying:
 | VCN, subnet, internet gateway, route table, security list (53/udp+tcp open; 22 open only to the operator's IP) | Created |
 | ns1 `VM.Standard.E2.1.Micro`, reserved IP **130.210.29.239** | Running: PowerDNS primary (PostgreSQL); API on 127.0.0.1 only |
 | ns2 `VM.Standard.E2.1.Micro`, reserved IP **130.210.102.127** | Running: PowerDNS secondary (SQLite), TSIG AXFR from ns1 |
-| edge A1.Flex, NSG 80/443, reserved IP | **Not created**: Oracle returns `Out of host capacity` for A1 in Mumbai. A retry runs every 5 minutes |
+| Edge | **On ns2** (owner-approved: Mumbai A1 was out of capacity in every fault domain). Caddy 2.6.2, sandboxed; ports 80/443 opened by the `edge-https` NSG on ns2 only. See `docs/operations/edge-on-ns2.md` |
 
 ## Fixes found on the real hosts (now in cloud-init)
 
@@ -34,7 +34,7 @@ Shapes and limits were checked before applying:
 
 ## Zone loaded on ns1
 
-- **Contents:** 222 records + SOA, exported with the real glue. The wildcard is left out until the edge has an address, at which point the zone becomes 223 records (the full production zone).
+- **Contents:** 223 records + SOA (the full production zone), exported with the real glue. Wildcard `*` A 130.210.102.127 (ns2, the edge).
 - **Kind and metadata:** `primary`, `SOA-EDIT-API DEFAULT`, `TSIG-ALLOW-AXFR xfr-runs-at-dev`.
 - **Checks:** `pdnsutil check-zone` reports 0 errors.
 
@@ -52,7 +52,7 @@ Shapes and limits were checked before applying:
 
 ## Not done yet
 
-- **Edge:** waits for A1 capacity. Then: wildcard `A` to the edge IP, then the first certificate (needs `ACME_EMAIL`).
+- **Edge certificate:** a self-signed TEST certificate until delegation. Then: `provision-acme-key.sh`, a staging dry run, then issue (needs `ACME_EMAIL`).
 - **DNSSEC:** zone not signed. Sign only when the registrar transfer is scheduled, and publish the DS after the delegation.
 - **Tailscale:** no tailnet credentials. The ns1 API stays on loopback.
 - **Off-site backup:** an Object Storage bucket is possible within the 20 GB free tier, but not created yet.
