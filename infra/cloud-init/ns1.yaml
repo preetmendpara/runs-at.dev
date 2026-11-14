@@ -88,8 +88,8 @@ write_files:
           return false
         end
         -- TXT add/delete; also ANY for "delete all TXT at the name" cleanups.
-        local t = input:getQType():getCode()
-        return t == pdns.TXT or t == pdns.ANY
+        local t = input:getQType() -- a number in 4.8 (16 = TXT, 255 = ANY)
+        return t == 16 or t == 255
       end
   - path: /usr/local/sbin/setup-pdns.sh
     permissions: '0750'
