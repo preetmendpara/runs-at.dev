@@ -39,6 +39,8 @@ sudo netfilter-persistent save > /dev/null
 sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile > /dev/null 2>&1 || { sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile; exit 1; }
 sudo systemctl daemon-reload
 sudo systemctl restart pdns
+# A NOTIFY sent while pdns restarted is lost; pull the zone now.
+sudo pdns_control retrieve runs-at.dev > /dev/null 2>&1 || true
 sudo systemctl enable --now caddy > /dev/null 2>&1
 sudo systemctl restart caddy
 sleep 2

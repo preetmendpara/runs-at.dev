@@ -157,7 +157,7 @@ export function buildZone({ claims, live, glue, serial, extra = [] }) {
   const conflicts = [...byName].filter(([, t]) => t.includes('CNAME') && t.length > 1).map(([n]) => n || '@');
   if (conflicts.length) throw new Error(`CNAME coexists with other data at: ${conflicts.join(', ')}`);
 
-  const soa = { type: 'SOA', name: '', value: `ns1.${DOMAIN}. hostmaster.${DOMAIN}. ${serial} 3600 600 1209600 300` };
+  const soa = { type: 'SOA', name: '', value: `ns1.${DOMAIN}. hostmaster.${DOMAIN}. ${serial} 900 300 1209600 300` };
   const ns = ['ns1', 'ns2'].map((h) => ({ type: 'NS', name: '', value: `${h}.${DOMAIN}.` }));
   const glueRecs = ['ns1', 'ns2'].map((h) => ({ type: 'A', name: h, value: glue[h], source: 'system:glue' }));
   return { soa, ns, glue: glueRecs, records, duplicates };
