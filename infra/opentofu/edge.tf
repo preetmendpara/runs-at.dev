@@ -6,13 +6,22 @@
 # AMD micro instances); the edge is one VM.Standard.A1.Flex with 1 OCPU and
 # 6 GB (Oracle docs, 2026-11: the free Ampere allowance is 1,500 OCPU-hours and 9,000 GB-hours a month, i.e. 2 OCPU / 12 GB running continuously). Three boot volumes of 50 GB
 # stay within the 200 GB free block storage. The edge is optional
-# (enable_edge) and refuses to plan if ns1/ns2 already use the Ampere pool in a
+# (edge_host = "separate") and refuses to plan if ns1/ns2 already use the Ampere pool in a
 # way that would exceed it.
 
-variable "enable_edge" {
-  type        = bool
-  description = "Create the separate edge instance."
-  default     = true
+variable "edge_host" {
+  type        = string
+  description = "Where the wildcard edge runs: \"ns2\" (Caddy on the secondary; the deployed layout, since Mumbai had no A1 capacity), \"separate\" (its own A1 instance) or \"none\"."
+  default     = "ns2"
+  validation {
+    condition     = contains(["ns2", "separate", "none"], var.edge_host)
+    error_message = "edge_host must be ns2, separate or none."
+  }
+}
+
+locals {
+  edge_nsg      = var.edge_host != "none"
+  edge_separate = var.edge_host == "separate"
 }
 
 data "oci_core_images" "ubuntu_arm" {
@@ -27,14 +36,14 @@ data "oci_core_images" "ubuntu_arm" {
 # Only 80/443 for the edge, through a network security group attached to the
 # edge's VNIC alone; ns1/ns2 never accept web traffic.
 resource "oci_core_network_security_group" "edge" {
-  count          = var.enable_edge ? 1 : 0
+  count          = local.edge_nsg ? 1 : 0
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.dns.id
   display_name   = "edge-https"
 }
 
 resource "oci_core_network_security_group_security_rule" "edge_in" {
-  for_each                  = var.enable_edge ? { http = 80, https = 443 } : {}
+  for_each                  = local.edge_nsg ? { http = 80, https = 443 } : {}
   network_security_group_id = oci_core_network_security_group.edge[0].id
   direction                 = "INGRESS"
   protocol                  = "6"
@@ -49,7 +58,7 @@ resource "oci_core_network_security_group_security_rule" "edge_in" {
 }
 
 resource "oci_core_instance" "edge" {
-  count               = var.enable_edge ? 1 : 0
+  count               = local.edge_separate ? 1 : 0
   compartment_id      = var.compartment_ocid
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
   display_name        = "edge"
@@ -93,18 +102,18 @@ resource "oci_core_instance" "edge" {
 }
 
 data "oci_core_vnic_attachments" "edge" {
-  count          = var.enable_edge ? 1 : 0
+  count          = local.edge_separate ? 1 : 0
   compartment_id = var.compartment_ocid
   instance_id    = oci_core_instance.edge[0].id
 }
 
 data "oci_core_private_ips" "edge" {
-  count   = var.enable_edge ? 1 : 0
+  count   = local.edge_separate ? 1 : 0
   vnic_id = data.oci_core_vnic_attachments.edge[0].vnic_attachments[0].vnic_id
 }
 
 resource "oci_core_public_ip" "edge" {
-  count          = var.enable_edge ? 1 : 0
+  count          = local.edge_separate ? 1 : 0
   compartment_id = var.compartment_ocid
   lifetime       = "RESERVED"
   display_name   = "edge-runs-at-dev"
@@ -116,5 +125,5 @@ resource "oci_core_public_ip" "edge" {
 
 output "edge_ip" {
   description = "Point the zone's wildcard (*) A record here at cutover."
-  value       = var.enable_edge ? oci_core_public_ip.edge[0].ip_address : null
+  value       = local.edge_separate ? oci_core_public_ip.edge[0].ip_address : var.edge_host == "ns2" ? oci_core_public_ip.ns["ns2"].ip_address : null
 }

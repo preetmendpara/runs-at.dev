@@ -119,6 +119,8 @@ resource "oci_core_instance" "ns" {
     private_ip       = each.value.private_ip
     assign_public_ip = false # the reserved IP below is attached instead
     hostname_label   = each.key
+    # 80/443 only on ns2, and only while it hosts the edge (edge.tf).
+    nsg_ids = each.key == "ns2" && var.edge_host == "ns2" ? [oci_core_network_security_group.edge[0].id] : []
   }
 
   source_details {

@@ -1,6 +1,9 @@
+# /etc/cron.d/runs-at-edge
 # Renew the wildcard certificate daily (lego renews only within 30 days of
-# expiry). ACME_EMAIL lives in /etc/runs-at-edge/acme.env (operator-supplied).
+# expiry). ACME_EMAIL lives in /etc/runs-at-edge/acme.env (operator-supplied);
+# without it the job does nothing.
 SHELL=/bin/bash
-17 4 * * * root set -a; . /etc/runs-at-edge/acme.env; set +a; /usr/local/sbin/renew-cert.sh >> /var/log/runs-at-edge-renew.log 2>&1
-# Health: the edge must answer a card request locally; logged for monitoring.
-*/5 * * * * root curl -fsS -o /dev/null --resolve health-probe.runs-at.dev:443:127.0.0.1 https://health-probe.runs-at.dev/ -w '\%{http_code}\n' >> /var/log/runs-at-edge-health.log 2>&1 || echo "edge health FAIL $(date -Is)" >> /var/log/runs-at-edge-health.log
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+17 4 * * * root [ -s /etc/runs-at-edge/acme.env ] && { set -a; . /etc/runs-at-edge/acme.env; set +a; /usr/local/sbin/renew-cert.sh >> /var/log/runs-at-edge-renew.log 2>&1; }
+# Health every minute: HTTPS and HTTP must answer locally; DNS must still answer.
+* * * * * root /usr/local/sbin/edge-health.sh >> /var/log/runs-at-edge-health.log 2>&1

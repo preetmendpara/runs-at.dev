@@ -5,7 +5,7 @@
 # is contacted except the Caddy release download.
 set -euo pipefail
 W="$RUNNER_TEMP/edge"; mkdir -p "$W"
-CADDY_VERSION=2.8.4
+CADDY_VERSION=2.6.2   # same as Ubuntu 24.04 on ns2
 curl -fsSL -o "$W/caddy.tgz" "https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/caddy_${CADDY_VERSION}_linux_amd64.tar.gz"
 tar -xzf "$W/caddy.tgz" -C "$W" caddy
 
@@ -32,7 +32,7 @@ STUB=$!
 # Caddy answers 502 until the stub listens; wait for the stub itself.
 for _ in $(seq 1 30); do curl -sf http://127.0.0.1:9000/ > /dev/null 2>&1 && break; sleep 0.5; done
 
-export EDGE_PORT=8443 TLS_CERT="$W/c.pem" TLS_KEY="$W/k.pem" APP_ORIGIN=http://127.0.0.1:9000 APP_HOST=runs-at.dev
+export EDGE_PORT=8443 EDGE_HTTP_PORT=8080 TLS_CERT="$W/c.pem" TLS_KEY="$W/k.pem" APP_ORIGIN=http://127.0.0.1:9000 APP_HOST=runs-at.dev
 "$W/caddy" validate --config infra/edge/Caddyfile --adapter caddyfile > /dev/null 2>&1 || { echo "FAIL: Caddyfile invalid"; "$W/caddy" validate --config infra/edge/Caddyfile --adapter caddyfile; exit 1; }
 "$W/caddy" run --config infra/edge/Caddyfile --adapter caddyfile > "$W/caddy.log" 2>&1 &
 CADDY=$!
@@ -68,6 +68,11 @@ check "URL-record redirect passed through, not followed" '[ "$code" = 302 ] && [
 
 code=$(req www /)
 check "www is not a card" '[ "$code" = 404 ]'
+
+code=$(curl -s -o "$W/body" -w '%{http_code}' --resolve alice.runs-at.dev:8080:127.0.0.1 http://alice.runs-at.dev:8080/)
+check "plain HTTP serves the card too (as the Worker did)" '[ "$code" = 200 ] && grep -q "^path=/_card/alice$" "$W/body"'
+code=$(curl -s -o /dev/null -w '%{http_code}' --resolve a.b.runs-at.dev:8080:127.0.0.1 http://a.b.runs-at.dev:8080/)
+check "unknown host on HTTP -> 404, not an empty 200" '[ "$code" = 404 ]'
 
 echo "edge behaviour (stub app): $pass passed, $fail failed"
 

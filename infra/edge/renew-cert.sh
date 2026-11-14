@@ -24,19 +24,17 @@ set -a
 set +a
 export RFC2136_PROPAGATION_TIMEOUT=300 RFC2136_POLLING_INTERVAL=10
 
-args=(--accept-tos --path "$LEGO_DIR" --email "$ACME_EMAIL" --dns rfc2136 --domains '*.runs-at.dev')
+# ACME_SERVER: optional, e.g. Let's Encrypt staging for a dry run.
+args=(${ACME_SERVER:+--server "$ACME_SERVER"} --accept-tos --path "$LEGO_DIR" --email "$ACME_EMAIL" --dns rfc2136 --domains '*.runs-at.dev')
 if [ -f "$LEGO_DIR/certificates/_.runs-at.dev.crt" ]; then
   lego "${args[@]}" renew --days 30
 else
   lego "${args[@]}" run
 fi
 
-install -m 0644 "$LEGO_DIR/certificates/_.runs-at.dev.crt" "$DIR/wildcard.crt"
-install -m 0640 -g caddy "$LEGO_DIR/certificates/_.runs-at.dev.key" "$DIR/wildcard.key"
-systemctl reload caddy
-
-# Optional: copy to the second edge (ns2) over the private network.
-if [ -n "${EDGE_PEER:-}" ]; then
-  scp -q "$DIR/wildcard.crt" "$DIR/wildcard.key" "$EDGE_PEER:$DIR/"
-  ssh "$EDGE_PEER" 'chgrp caddy /etc/runs-at-edge/wildcard.key && systemctl reload caddy'
-fi
+# Caddy reads only the certificate directory (group caddy); it cannot see
+# $LEGO_DIR or the ACME key (InaccessiblePaths in caddy-override.conf).
+install -d -m 0750 -g caddy "$DIR/tls"
+install -m 0644 "$LEGO_DIR/certificates/_.runs-at.dev.crt" "$DIR/tls/wildcard.crt"
+install -m 0640 -g caddy "$LEGO_DIR/certificates/_.runs-at.dev.key" "$DIR/tls/wildcard.key"
+systemctl restart caddy

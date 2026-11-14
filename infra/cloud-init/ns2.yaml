@@ -225,5 +225,6 @@ runcmd:
   - [sh, -c, 'mkdir -p /etc/systemd/resolved.conf.d && printf "[Resolve]\nDNSStubListener=no\n" > /etc/systemd/resolved.conf.d/no-stub.conf && ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf && systemctl restart systemd-resolved']
   - [sh, -c, 'for p in udp tcp; do iptables -C INPUT -p $p --dport 53 -j ACCEPT 2>/dev/null || iptables -I INPUT 5 -p $p --dport 53 -j ACCEPT; done; netfilter-persistent save']
   - [rm, -f, /etc/powerdns/pdns.d/bind.conf]
+  - [systemctl, disable, --now, rpcbind.service, rpcbind.socket]
   - [chown, root:pdns, /etc/powerdns/pdns.conf]
   - [/usr/local/sbin/setup-pdns.sh]

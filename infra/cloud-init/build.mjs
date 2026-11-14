@@ -80,6 +80,8 @@ export function render(role) {
     "  - [sh, -c, 'for p in udp tcp; do iptables -C INPUT -p $p --dport 53 -j ACCEPT 2>/dev/null || iptables -I INPUT 5 -p $p --dport 53 -j ACCEPT; done; netfilter-persistent save']",
     // The Debian package enables the BIND backend in pdns.d; this zone uses SQL only.
     '  - [rm, -f, /etc/powerdns/pdns.d/bind.conf]',
+    // The Oracle image runs rpcbind on :111; nothing here needs it.
+    '  - [systemctl, disable, --now, rpcbind.service, rpcbind.socket]',
     '  - [chown, root:pdns, /etc/powerdns/pdns.conf]',
     '  - [/usr/local/sbin/setup-pdns.sh]',
   );

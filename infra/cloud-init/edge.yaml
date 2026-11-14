@@ -41,10 +41,19 @@ write_files:
       {
       	admin off
       	auto_https disable_redirects
+      	# HTTP/1.1 and HTTP/2 only: no UDP listener (HTTP/3) next to DNS.
+      	servers {
+      		protocols h1 h2
+      	}
+      	# Plain-text access log to stdout (journald, rotated by journald limits).
+      	log {
+      		output stdout
+      		format console
+      	}
       }
 
-      *.runs-at.dev:{$EDGE_PORT:443} {
-      	tls {$TLS_CERT:/etc/runs-at-edge/wildcard.crt} {$TLS_KEY:/etc/runs-at-edge/wildcard.key}
+      # Routing shared by HTTPS and plain HTTP.
+      (edge_routes) {
 
       	# Only single-label names are cards. www and deeper names are not ours.
       	@multilabel header_regexp Host ^(www\.runs-at\.dev|[^.]+\.[^.]+\.runs-at\.dev)(:\d+)?$
@@ -74,6 +83,23 @@ write_files:
       	handle {
       		redir https://runs-at.dev{uri} 307
       	}
+      }
+
+      *.runs-at.dev:{$EDGE_PORT:443} {
+      	tls {$TLS_CERT:/etc/runs-at-edge/tls/wildcard.crt} {$TLS_KEY:/etc/runs-at-edge/tls/wildcard.key}
+      	import edge_routes
+      }
+
+      # Plain HTTP serves the same responses: the Cloudflare Worker answered cards
+      # over http:// too, without redirecting to https.
+      http://*.runs-at.dev:{$EDGE_HTTP_PORT:80} {
+      	import edge_routes
+      }
+
+      # Any other host on plain HTTP (e.g. a.b.runs-at.dev, bare IP): 404 instead
+      # of Caddy's default empty 200.
+      http://:{$EDGE_HTTP_PORT:80} {
+      	respond "not found" 404
       }
   - path: /usr/local/sbin/renew-cert.sh
     permissions: '0750'
@@ -105,32 +131,33 @@ write_files:
       set +a
       export RFC2136_PROPAGATION_TIMEOUT=300 RFC2136_POLLING_INTERVAL=10
 
-      args=(--accept-tos --path "$LEGO_DIR" --email "$ACME_EMAIL" --dns rfc2136 --domains '*.runs-at.dev')
+      # ACME_SERVER: optional, e.g. Let's Encrypt staging for a dry run.
+      args=(${ACME_SERVER:+--server "$ACME_SERVER"} --accept-tos --path "$LEGO_DIR" --email "$ACME_EMAIL" --dns rfc2136 --domains '*.runs-at.dev')
       if [ -f "$LEGO_DIR/certificates/_.runs-at.dev.crt" ]; then
         lego "${args[@]}" renew --days 30
       else
         lego "${args[@]}" run
       fi
 
-      install -m 0644 "$LEGO_DIR/certificates/_.runs-at.dev.crt" "$DIR/wildcard.crt"
-      install -m 0640 -g caddy "$LEGO_DIR/certificates/_.runs-at.dev.key" "$DIR/wildcard.key"
-      systemctl reload caddy
-
-      # Optional: copy to the second edge (ns2) over the private network.
-      if [ -n "${EDGE_PEER:-}" ]; then
-        scp -q "$DIR/wildcard.crt" "$DIR/wildcard.key" "$EDGE_PEER:$DIR/"
-        ssh "$EDGE_PEER" 'chgrp caddy /etc/runs-at-edge/wildcard.key && systemctl reload caddy'
-      fi
+      # Caddy reads only the certificate directory (group caddy); it cannot see
+      # $LEGO_DIR or the ACME key (InaccessiblePaths in caddy-override.conf).
+      install -d -m 0750 -g caddy "$DIR/tls"
+      install -m 0644 "$LEGO_DIR/certificates/_.runs-at.dev.crt" "$DIR/tls/wildcard.crt"
+      install -m 0640 -g caddy "$LEGO_DIR/certificates/_.runs-at.dev.key" "$DIR/tls/wildcard.key"
+      systemctl restart caddy
   - path: /etc/cron.d/runs-at-edge
     permissions: '0644'
     defer: true
     content: |
+      # /etc/cron.d/runs-at-edge
       # Renew the wildcard certificate daily (lego renews only within 30 days of
-      # expiry). ACME_EMAIL lives in /etc/runs-at-edge/acme.env (operator-supplied).
+      # expiry). ACME_EMAIL lives in /etc/runs-at-edge/acme.env (operator-supplied);
+      # without it the job does nothing.
       SHELL=/bin/bash
-      17 4 * * * root set -a; . /etc/runs-at-edge/acme.env; set +a; /usr/local/sbin/renew-cert.sh >> /var/log/runs-at-edge-renew.log 2>&1
-      # Health: the edge must answer a card request locally; logged for monitoring.
-      */5 * * * * root curl -fsS -o /dev/null --resolve health-probe.runs-at.dev:443:127.0.0.1 https://health-probe.runs-at.dev/ -w '\%{http_code}\n' >> /var/log/runs-at-edge-health.log 2>&1 || echo "edge health FAIL $(date -Is)" >> /var/log/runs-at-edge-health.log
+      PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      17 4 * * * root [ -s /etc/runs-at-edge/acme.env ] && { set -a; . /etc/runs-at-edge/acme.env; set +a; /usr/local/sbin/renew-cert.sh >> /var/log/runs-at-edge-renew.log 2>&1; }
+      # Health every minute: HTTPS and HTTP must answer locally; DNS must still answer.
+      * * * * * root /usr/local/sbin/edge-health.sh >> /var/log/runs-at-edge-health.log 2>&1
   - path: /etc/apt/apt.conf.d/52unattended-upgrades-local
     permissions: '0644'
     defer: true
