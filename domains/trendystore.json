@@ -4,11 +4,8 @@
     "github": "mhamdmrsi-dev"
   },
   "claimedAt": "2026-11-14T14:47:16.665Z",
-  "records": {},
-  "country": "EG",
-  "subdomains": {
-    "mondy": {
-      "CNAME": "cname.easy-orders.net"
-    }
-  }
+  "records": {
+    "CNAME": "cname.easy-orders.net"
+  },
+  "country": "EG"
 }
