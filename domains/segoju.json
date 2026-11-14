@@ -5,19 +5,7 @@
   },
   "claimedAt": "2026-11-14T09:27:21.326Z",
   "records": {
-    "CNAME": "custom-domains.chatgpt.site"
+    "URL": "https://segoju.smadhavchary0584.chatgpt.site/"
   },
-  "country": "IN",
-  "subdomains": {
-    "_openai-site-verification": {
-      "TXT": [
-        "openai-site-verification=CdlGNGl6JkbsElyoAj2-w4o2MCrLQpnnOQXw8W1By-c"
-      ]
-    },
-    "_cf-custom-hostname": {
-      "TXT": [
-        "c70580eb-5b8c-4773-8b78-40607175d77f"
-      ]
-    }
-  }
+  "country": "IN"
 }
