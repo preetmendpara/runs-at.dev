@@ -83,7 +83,7 @@ jobs:
             trap 'rm -rf "$dir" "$b"' EXIT
             cp -r "$dir" "$b/cloudflare"
             mkdir "$b/registry" && git archive HEAD domains owners entitlements | tar -x -C "$b/registry"
-            node migration/inventory.mjs --export > /dev/null && cp migration/backup/live-dns-export.json "$b/"
+            mkdir -p -m 700 migration/backup && node migration/inventory.mjs --export > /dev/null && cp migration/backup/live-dns-export.json "$b/"
             node scripts/export-zone.mjs --placeholder-glue --out "$b/zone" > /dev/null
             mkdir "$b/config" && git archive HEAD infra lib/dns scripts | tar -x -C "$b/config"
             git rev-parse HEAD > "$b/GIT_COMMIT"
