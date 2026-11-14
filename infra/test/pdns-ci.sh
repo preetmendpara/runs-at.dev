@@ -29,7 +29,9 @@ say() { printf '%s\n' "$*"; }
 fail() {
   say "FAIL: $*"
   # Server logs carry no secrets (keys are never logged); shown for diagnosis.
-  for n in ns1 ns2; do say "--- $n log (tail)"; tail -n 40 "$W/$n.log" 2>/dev/null | sed "s/^/  /"; done
+  for n in ns1 ns2; do say "--- $n log (tail)"; tail -n 15 "$W/$n.log" 2>/dev/null | sed "s/^/  /"; done
+  say "--- dig SOA ns1"; dig @$NS1 -p $NS1P $ZONE SOA +time=2 +tries=1 2>&1 | sed "s/^/  /" || true
+  say "--- dig SOA ns2"; dig @$NS2 -p $NS2P $ZONE SOA +time=2 +tries=1 2>&1 | sed "s/^/  /" || true
   exit 1
 }
 
