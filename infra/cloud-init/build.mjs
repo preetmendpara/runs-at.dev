@@ -21,7 +21,7 @@ const common = [
 const roles = {
   ns1: {
     packages: ['pdns-server', 'pdns-backend-pgsql', 'postgresql', 'postgresql-client'],
-    files: [['powerdns/pdns-primary.conf', '/etc/powerdns/pdns.conf', '0640'], ['powerdns/acme-update-policy.lua', '/etc/powerdns/acme-update-policy.lua', '0644'], ['powerdns/setup-primary.sh', '/usr/local/sbin/setup-pdns.sh', '0750'], ['powerdns/apex-follow.sh', '/usr/local/sbin/apex-follow.sh', '0750'], ...common],
+    files: [['powerdns/pdns-primary.conf', '/etc/powerdns/pdns.conf', '0640'], ['powerdns/acme-update-policy.lua', '/etc/powerdns/acme-update-policy.lua', '0644'], ['powerdns/setup-primary.sh', '/usr/local/sbin/setup-pdns.sh', '0750'], ...common],
   },
   ns2: {
     packages: ['pdns-server', 'pdns-backend-sqlite3', 'sqlite3'],

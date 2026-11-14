@@ -20,7 +20,7 @@ Cloudflare's 9 undeclared system records, by name and type (sanitized export): `
 ## Fixes made
 
 - **Wildcard.** Cloudflare's anycast addresses stop serving the cards once the zone leaves Cloudflare. A production export now refuses to run without `EDGE_IPV4` (the `edge_ip` OpenTofu output) or `WILDCARD_CNAME`. The wildcard is then **one** `A` record pointing at the Caddy edge.
-- **Apex.** The apex follows the same Vercel target as `www` (identical in the decrypted Cloudflare export). An `ALIAS` record was tried first, but PowerDNS does not sign ALIAS answers under live DNSSEC signing: `delv` reported "insecurity proof failed". The signed zone therefore holds the resolved A records. ns1's `apex-follow.sh` re-resolves the target every 5 minutes and updates the records only when the addresses change. It never empties the apex.
+- **Apex.** Cloudflare served the apex as a flattened CNAME to the same Vercel target as `www`. Two approaches failed: an `ALIAS` record (PowerDNS does not sign ALIAS answers under live signing, so `delv` reported "insecurity proof failed"), and following the resolved target (Oracle's resolver alternated between two Vercel address sets, so the apex flipped every 5 minutes). The zone therefore pins Vercel's own rank-1 recommendation from its API, 216.198.79.1 and 64.29.17.1 (`migration/apex-vercel.json`). Both addresses serve runs-at.dev with a valid certificate.
 
 ## Production zone: 224 records + SOA
 
@@ -32,7 +32,7 @@ Generated with real `NS1_IPV4`/`NS2_IPV4`/`EDGE_IPV4` values (TEST-NET values in
 | Zone-level `_vercel` mirror TXT | 2 | `system:_vercel-mirror`; part of the 209 declared |
 | Apex NS | 2 | `system:ns` |
 | Glue (ns1/ns2 A) | 2 | `system:glue`; must also be registered as host objects at the new registrar |
-| Apex A (Vercel) | 2 | `system:apex-follow`; replaces Cloudflare's flattened apex CNAME. ns1's `apex-follow.sh` keeps them equal to the Vercel target's addresses (checked every 5 minutes) |
+| Apex A (Vercel) | 2 | `system:vercel-recommended`: Vercel API `recommendedIPv4` rank 1; replaces Cloudflare's flattened apex CNAME |
 | Apex MX (Email Routing route1–3) | 3 | `system:live-export` |
 | Apex TXT (SPF, Google site verification, one other verification token) | 3 | `system:live-export` |
 | `www` CNAME (Vercel) | 1 | `system:live-export` |

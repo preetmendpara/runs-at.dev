@@ -1,0 +1,5 @@
+{
+  "source": "Vercel API /v6/domains/runs-at.dev/config (team project), recommendedIPv4 rank 1, read 2026-11-14 by .github/workflows/inspect-vercel-apex.yml",
+  "apexA": ["216.198.79.1", "64.29.17.1"],
+  "note": "Static apex A records for the DNSSEC-signed zone (PowerDNS does not sign ALIAS answers under live signing). Resolving the Vercel CNAME target alternates between address sets, so the zone pins Vercel's own recommendation instead. Re-run inspect-vercel-apex if Vercel announces new apex addresses."
+}

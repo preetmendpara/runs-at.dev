@@ -1,15 +1,20 @@
 {
-  "note": "Email Routing replacement (Forward Email), applied to the PowerDNS zone ONLY at cutover, together with removing Cloudflare's route1-3 MX. Aliases preserved from Cloudflare Email Routing (2 enabled rules: claude@, abuse@; catch-all disabled). Destinations are encrypted with Forward Email's /v1/encrypt; only Forward Email can read them.",
+  "provider": "ImprovMX Free (1 domain, 25 aliases, 500 forwards/day; checked on improvmx.com/pricing 2026-11-14)",
+  "note": "Apply to the PowerDNS zone ONLY in the cutover window, after migration/improvmx-setup.mjs --apply and --smtp-test pass. Aliases (claude@, abuse@; catch-all off) and their destinations live in the ImprovMX account, created from the encrypted Cloudflare export, so they never appear in DNS, git or logs. Cloudflare Email Routing stays active until the nameservers change.",
   "remove": [
     { "type": "MX", "name": "", "value": "route1.mx.cloudflare.net" },
     { "type": "MX", "name": "", "value": "route2.mx.cloudflare.net" },
     { "type": "MX", "name": "", "value": "route3.mx.cloudflare.net" }
   ],
   "add": [
-    { "type": "MX", "name": "", "priority": 10, "value": "mx1.forwardemail.net" },
-    { "type": "MX", "name": "", "priority": 10, "value": "mx2.forwardemail.net" },
-    { "type": "TXT", "name": "", "value": "forward-email=QXM2blNMenR1QTZBS0hHdGZpZkJrN2tINkU3SUxBOUR2cG83NVZLN2R1V2ozT1JmeGxIdlFjUzNxdFVwZUlPZElwclRKTmZwZVFJSDFEeWdsNHBFb3BaOTVBV2w1X3Etc0tGVkIwQlRWTXU0SzVyQVRUbw==" }
+    { "type": "MX", "name": "", "priority": 10, "value": "mx1.improvmx.com" },
+    { "type": "MX", "name": "", "priority": 20, "value": "mx2.improvmx.com" }
   ],
-  "spf": "replace v=spf1 include:_spf.mx.cloudflare.net ~all  ->  v=spf1 include:spf.forwardemail.net ~all",
-  "keep": ["cf2024-1._domainkey TXT (unchanged, as required)", "all other apex TXT"]
+  "spf": { "from": "v=spf1 include:_spf.mx.cloudflare.net ~all", "to": "v=spf1 include:spf.improvmx.com ~all" },
+  "keep": [
+    "cf2024-1._domainkey TXT (unchanged)",
+    "apex google-site-verification TXT and the other verification TXT (unchanged)"
+  ],
+  "dmarc": "none today; not added by the migration",
+  "optional_after_cutover": "ImprovMX DKIM CNAMEs (dkimprovmx1/2._domainkey) only if sending through ImprovMX SMTP is wanted"
 }

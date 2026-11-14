@@ -11,6 +11,7 @@
 // nothing is invented. `_vercel` at the zone level is the same mirror
 // sync-dns.mjs maintains (planZoneVerificationRecords, capped, oldest first).
 import { readFile, readdir, writeFile, mkdir } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { isIP } from 'node:net';
 import { join } from 'node:path';
@@ -48,6 +49,7 @@ export function zoneVerificationRecords(claims) {
 }
 
 const answers = (q) => (q?.ok ? q.answers : []);
+const apexVercel = JSON.parse(readFileSync(new URL('../migration/apex-vercel.json', import.meta.url), 'utf8'));
 
 // Apex / www / wildcard as observed live. Throws if the export is missing,
 // rather than guessing values.
@@ -58,10 +60,10 @@ export function systemRecords(live) {
     out.push({ type, name, value, ...(priority !== undefined && { priority }), source: 'system:live-export' });
   // Cloudflare serves the apex as a flattened CNAME to the same Vercel target
   // as www. PowerDNS does not sign ALIAS answers under live DNSSEC signing,
-  // so the zone holds the resolved A/AAAA records and ns1's apex-follow.sh
-  // (cron, every 5 minutes) keeps them equal to the target's addresses.
-  for (const v of answers(live.apex.A)) out.push({ type: 'A', name: '', value: v, source: 'system:apex-follow' });
-  for (const v of answers(live.apex.AAAA)) out.push({ type: 'AAAA', name: '', value: v, source: 'system:apex-follow' });
+  // and resolving the target alternates between Vercel address sets, so the
+  // apex holds Vercel's own recommended A records (migration/apex-vercel.json,
+  // read from the Vercel API).
+  for (const v of apexVercel.apexA) out.push({ type: 'A', name: '', value: v, source: 'system:vercel-recommended' });
   for (const mx of answers(live.apex.MX)) add('MX', '', mx.value, mx.priority);
   for (const v of answers(live.apex.TXT)) add('TXT', '', Array.isArray(v) ? v.join('') : v);
   for (const v of answers(live.apex.CAA)) add('CAA', '', v);

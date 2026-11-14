@@ -3,4 +3,3 @@ SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 17 3 * * * root /usr/local/sbin/pdns-backup.sh >> /var/log/pdns-backup.log 2>&1
 */5 * * * * root NS1=10.53.1.11 NS2=10.53.1.12 /usr/local/sbin/check-dns.sh >> /var/log/check-dns.log 2>&1
-*/5 * * * * root [ -s /etc/powerdns/apex-target ] && /usr/local/sbin/apex-follow.sh >> /var/log/apex-follow.log 2>&1
