@@ -3,15 +3,16 @@ name: verify-oracle-dns
 # Read-only check of the Oracle-hosted ns1/ns2 from outside Oracle's network:
 # every declared record over UDP and TCP on both servers, SOA serials, and
 # that zone transfers without TSIG are refused. Sends DNS queries only.
+# The addresses come from the repository variables PDNS_PRIMARY_IP and
+# PDNS_SECONDARY_IPS (public glue addresses, not secrets).
 on:
+  push:
+    branches: [feat/powerdns-migration]
+    paths:
+      - .github/workflows/verify-oracle-dns.yml
+      - infra/cloud-init/**
+      - migration/ORACLE_DEPLOYMENT.md
   workflow_dispatch:
-    inputs:
-      ns1:
-        description: ns1 public IPv4
-        required: true
-      ns2:
-        description: ns2 public IPv4
-        required: true
 
 permissions:
   contents: read
@@ -29,8 +30,8 @@ jobs:
           node-version: '22'
       - name: Check both servers
         env:
-          NS1: ${{ inputs.ns1 }}
-          NS2: ${{ inputs.ns2 }}
+          NS1: ${{ vars.PDNS_PRIMARY_IP }}
+          NS2: ${{ vars.PDNS_SECONDARY_IPS }}
         run: |
           set -euo pipefail
           for ip in "$NS1" "$NS2"; do [[ "$ip" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || { echo "bad IP"; exit 1; }; done
