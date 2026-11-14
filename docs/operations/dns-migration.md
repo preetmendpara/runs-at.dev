@@ -42,7 +42,7 @@ Do this at least 48 hours before cutover:
 ## 4. Build the zone
 
 ```sh
-NS1_IPV4=<ns1> NS2_IPV4=<ns2> [WILDCARD_CNAME=<host>] node scripts/export-zone.mjs
+NS1_IPV4=<ns1> NS2_IPV4=<ns2> EDGE_IPV4=<edge_ip> node scripts/export-zone.mjs
 node scripts/verify-parity.mjs        # registry against the zone file; must exit 0
 ```
 Never load the output of `--placeholder-glue`. It uses TEST-NET addresses (192.0.2.x) and carries a NOT FOR PRODUCTION banner.

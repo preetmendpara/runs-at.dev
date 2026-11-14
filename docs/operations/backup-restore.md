@@ -53,7 +53,7 @@ These backups stay on the instance. Copy them off OCI, because idle reclamation 
 
 To restore a host, you can always rebuild the zone from Git instead of from a dump:
 ```sh
-NS1_IPV4=<ns1> NS2_IPV4=<ns2> node scripts/export-zone.mjs
+NS1_IPV4=<ns1> NS2_IPV4=<ns2> EDGE_IPV4=<edge_ip> node scripts/export-zone.mjs
 node scripts/verify-parity.mjs                     # must exit 0
 # on ns1:
 pdnsutil load-zone runs-at.dev runs-at.dev.zone    # when reloading, run pdnsutil increase-serial afterwards

@@ -75,8 +75,23 @@ jobs:
             sudo apt-get install -y -qq age > /dev/null
             out="$RUNNER_TEMP/cf-backup"
             mkdir -m 700 "$out"
-            tar -C "$dir" -cf - . | age -r "$AGE_RECIPIENT" -o "$out/cloudflare-export.tar.age"
-            sha256sum "$out/cloudflare-export.tar.age" | sed 's#  .*/#  #' > "$out/SHA256SUMS"
+            # Bundle: Cloudflare export (incl. the DKIM record), registry
+            # snapshot, live DNS answers, the generated zone (TEST-NET glue:
+            # record data only) and the deployable configuration, with a
+            # per-file SHA-256 manifest inside the ciphertext.
+            b="$RUNNER_TEMP/bundle"; mkdir -m 700 "$b"
+            trap 'rm -rf "$dir" "$b"' EXIT
+            cp -r "$dir" "$b/cloudflare"
+            mkdir "$b/registry" && git archive HEAD domains owners entitlements | tar -x -C "$b/registry"
+            node migration/inventory.mjs --export > /dev/null && cp migration/backup/live-dns-export.json "$b/"
+            node scripts/export-zone.mjs --placeholder-glue --out "$b/zone" > /dev/null
+            mkdir "$b/config" && git archive HEAD infra lib/dns scripts | tar -x -C "$b/config"
+            git rev-parse HEAD > "$b/GIT_COMMIT"
+            (cd "$b" && find . -type f ! -name MANIFEST.sha256 | LC_ALL=C sort | xargs sha256sum > MANIFEST.sha256)
+            echo "Bundle manifest SHA-256: $(sha256sum "$b/MANIFEST.sha256" | cut -d' ' -f1) ($(wc -l < "$b/MANIFEST.sha256") files)" | tee -a "$GITHUB_STEP_SUMMARY"
+            tar -C "$b" -cf - . | age -r "$AGE_RECIPIENT" -o "$out/runs-at-migration-backup.tar.age"
+            rm -rf "$b" migration/backup/live-dns-export.json
+            sha256sum "$out/runs-at-migration-backup.tar.age" | sed 's#  .*/#  #' > "$out/SHA256SUMS"
             echo "Encrypted backup: $(cut -d' ' -f1 "$out/SHA256SUMS")" | tee -a "$GITHUB_STEP_SUMMARY"
           else
             echo "No MIGRATION_BACKUP_AGE_RECIPIENT: encrypted backup skipped" | tee -a "$GITHUB_STEP_SUMMARY"

@@ -84,3 +84,13 @@ test('TXT with quotes and >255 chars round-trips', () => {
 test('CNAME next to other data is refused', () => {
   assert.throws(() => buildZone({ claims: [{ name: 'www', records: { TXT: ['x'] } }], live, glue, serial: 2026111301 }), /CNAME coexists/);
 });
+
+test('systemRecords: EDGE_IPV4 replaces the Cloudflare-proxied wildcard answers', async () => {
+  const { systemRecords } = await import('../scripts/export-zone.mjs');
+  const live = { apex: {}, wildcard: { A: { ok: true, answers: ['198.51.100.1', '198.51.100.2'] }, AAAA: { ok: true, answers: ['2001:db8::1'] } } };
+  process.env.EDGE_IPV4 = '192.0.2.21';
+  try {
+    const wild = systemRecords(live).filter((r) => r.name === '*');
+    assert.deepEqual(wild.map((r) => `${r.type} ${r.value}`), ['A 192.0.2.21']);
+  } finally { delete process.env.EDGE_IPV4; }
+});

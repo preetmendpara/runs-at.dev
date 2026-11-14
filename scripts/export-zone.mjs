@@ -73,9 +73,13 @@ export function systemRecords(live) {
     const m = /^(.+._domainkey).runs-at.dev TXT$/.exec(key);
     if (m) for (const v of answers(q)) add('TXT', m[1], Array.isArray(v) ? v.join('') : v);
   }
-  // Wildcard: today a proxied Cloudflare record answered by cloudflare/worker.js.
-  // Override with WILDCARD_CNAME once the off-Cloudflare card host is decided.
-  if (process.env.WILDCARD_CNAME) add('CNAME', '*', process.env.WILDCARD_CNAME);
+  // Wildcard: today ONE proxied Cloudflare record (answered by
+  // cloudflare/worker.js) that resolves to Cloudflare anycast addresses. Those
+  // addresses stop serving the cards once the zone leaves Cloudflare, so a
+  // production export points * at the Caddy edge (EDGE_IPV4, the edge_ip
+  // OpenTofu output) or WILDCARD_CNAME; main() refuses otherwise.
+  if (process.env.EDGE_IPV4) out.push({ type: 'A', name: '*', value: process.env.EDGE_IPV4, source: 'system:edge' });
+  else if (process.env.WILDCARD_CNAME) add('CNAME', '*', process.env.WILDCARD_CNAME);
   else {
     for (const v of answers(live.wildcard?.A)) add('A', '*', v);
     for (const v of answers(live.wildcard?.AAAA)) add('AAAA', '*', v);
@@ -198,6 +202,10 @@ async function main(argv) {
   if (!/^\d{10}$/.test(String(serial))) throw new Error(`serial must be YYYYMMDDnn, got ${serial}`);
 
   const glue = resolveGlue({ placeholder });
+  if (!placeholder && !process.env.EDGE_IPV4 && !process.env.WILDCARD_CNAME) {
+    throw new Error('EDGE_IPV4 (the edge_ip output) or WILDCARD_CNAME must be set: the live wildcard answers are Cloudflare proxy addresses that stop working off Cloudflare');
+  }
+  if (process.env.EDGE_IPV4 && !/^(\d{1,3}\.){3}\d{1,3}$/.test(process.env.EDGE_IPV4)) throw new Error('EDGE_IPV4 is not an IPv4 address');
   const claims = await loadClaims(arg('--domains') ?? 'domains');
   const live = JSON.parse(await readFile(liveFile, 'utf8'));
   const extra = arg('--extra') ? JSON.parse(await readFile(arg('--extra'), 'utf8')) : [];
