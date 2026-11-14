@@ -204,17 +204,26 @@ expect() { # description wanted got
   fi
 }
 expect "acme key, TXT _acme-challenge" NOERROR "$(upd "hmac-sha256:acme-runs-at-dev:$ACME" _acme-challenge.$ZONE. TXT '"token-1"')"
-expect "acme key, TXT on a claim name" refused "$(upd "hmac-sha256:acme-runs-at-dev:$ACME" abdulloh.$ZONE. TXT '"x"')"
-expect "acme key, A at _acme-challenge" refused "$(upd "hmac-sha256:acme-runs-at-dev:$ACME" _acme-challenge.$ZONE. A 192.0.2.9)"
-expect "acme key, apex TXT" refused "$(upd "hmac-sha256:acme-runs-at-dev:$ACME" $ZONE. TXT '"x"')"
-expect "other key, TXT _acme-challenge" refused "$(upd "hmac-sha256:other-key:$OTHER" _acme-challenge.$ZONE. TXT '"x"')"
-expect "unsigned, TXT _acme-challenge" refused "$(upd none _acme-challenge.$ZONE. TXT '"x"')"
+# PowerDNS 4.8 skips a record its policy rejects ("Not permitted by policy")
+# and may still answer NOERROR for the packet, so a refusal is proven by the
+# record being absent afterwards, not by the rcode alone.
+deny() { # description key-spec name type value
+  local rc; rc=$(upd "$2" "$3" "$4" "$5")
+  if [ -n "$(dig @$NS1 -p $NS1P +short +tcp "$3" "$4" | grep -xF -- "$5")" ]; then
+    fail "$1: update was applied (rcode $rc)"
+  fi
+  say "ok   $1 (rcode $rc, not applied)"
+}
+deny "acme key, TXT on a claim name" "hmac-sha256:acme-runs-at-dev:$ACME" abdulloh.$ZONE. TXT '"deny-1"'
+deny "acme key, A at _acme-challenge" "hmac-sha256:acme-runs-at-dev:$ACME" _acme-challenge.$ZONE. A 192.0.2.9
+deny "acme key, apex TXT" "hmac-sha256:acme-runs-at-dev:$ACME" $ZONE. TXT '"deny-3"'
+deny "other key, TXT _acme-challenge" "hmac-sha256:other-key:$OTHER" _acme-challenge.$ZONE. TXT '"deny-4"'
+deny "unsigned, TXT _acme-challenge" none _acme-challenge.$ZONE. TXT '"deny-5"'
 unset ACME OTHER
 pdns_control --config-dir="$W/ns1" notify $ZONE > /dev/null 2>&1 || true
 wait_sync
 dig @$NS2 -p $NS2P +short +tcp _acme-challenge.$ZONE TXT | grep -q token-1 || fail "ACME TXT not on secondary"
 say "ACME TXT on secondary: yes"
-[ -z "$(dig @$NS1 -p $NS1P +short abdulloh.$ZONE TXT | grep -x '"x"')" ] || fail "refused update was applied"
 out=$(node scripts/sync-dns.mjs) || fail "sync-dns after ACME update failed"
 printf '%s
 ' "$out" | grep -q '^powerdns plan: 0 create, 0 update, 0 delete' || fail "sync-dns wanted to touch the ACME record"
