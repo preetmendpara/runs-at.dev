@@ -255,6 +255,7 @@ $U1 rectify-zone $ZONE > /dev/null
 $U1 increase-serial $ZONE > /dev/null
 pdns_control --config-dir="$W/ns1" rediscover > /dev/null
 $U2 set-presigned $ZONE > /dev/null
+for n in ns1 ns2; do pdns_control --config-dir="$W/$n" purge > /dev/null; done
 pdns_control --config-dir="$W/ns2" rediscover > /dev/null
 pdns_control --config-dir="$W/ns1" notify $ZONE > /dev/null 2>&1 || true
 wait_sync
@@ -264,8 +265,8 @@ say "DS (alg 13, digest 2) generated: yes"
 dig @$NS1 -p $NS1P +dnssec +norec $ZONE DNSKEY | grep -E "IN\s+DNSKEY" | grep -E "^\S+\s+\S+\s+IN\s+DNSKEY\s+257 " | sed -E 's/^\S+\s+\S+\s+IN\s+DNSKEY\s+/. IN DNSKEY /' > /dev/null
 for s in "$NS1 $NS1P" "$NS2 $NS2P"; do
   set -- $s
-  n=$(dig @$1 -p $2 +dnssec +norec +tcp abdulloh.$ZONE CNAME | grep -c "RRSIG")
-  [ "$n" -ge 1 ] || fail "no RRSIG for a claim record on $1"
+  n=$(dig @$1 -p $2 +dnssec +norec +tcp abdulloh.$ZONE CNAME | grep -c "RRSIG" || true)
+  [ "$n" -ge 1 ] || { dig @$1 -p $2 +dnssec +norec +tcp abdulloh.$ZONE CNAME | grep -E "IN|status" | awk '{print $1,$2,$3,$4,$5,$6}'; fail "no RRSIG for a claim record on $1"; }
   say "RRSIG served by $1: yes"
 done
 # Full validation with the new KSK as the trust anchor (as a DS at the parent would make it).
