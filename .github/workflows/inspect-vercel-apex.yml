@@ -1,0 +1,40 @@
+name: inspect-vercel-apex
+
+# Read-only: ask Vercel which apex addresses it expects for runs-at.dev and
+# whether the six user hostnames are attached to this team's projects.
+# Prints only public DNS data (Vercel's recommended A values) and booleans.
+on:
+  push:
+    branches: [feat/powerdns-migration]
+    paths:
+      - .github/workflows/inspect-vercel-apex.yml
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          TEAM: ${{ vars.VERCEL_ORG_ID }}
+          PROJECT: ${{ vars.VERCEL_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          v() { curl -s -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com$1${1/*\?*/&}teamId=$TEAM" 2>/dev/null; }
+          get() { curl -s -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com$1"; }
+          sep() { case "$1" in *\?*) echo '&';; *) echo '?';; esac; }
+          q() { get "$1$(sep "$1")teamId=$TEAM"; }
+          {
+            echo "## Vercel apex configuration (public values only)"
+            q "/v6/domains/runs-at.dev/config" | jq -c '{misconfigured, configuredBy, recommendedIPv4, recommendedCNAME, aValues, cnames}'
+            q "/v6/domains/www.runs-at.dev/config" | jq -c '{name:"www", misconfigured, recommendedCNAME}'
+            q "/v9/projects/$PROJECT/domains?limit=50" | jq -c '[.domains[] | {name, redirect, verified}]'
+            for h in adsimple.adsimple ashenwings admin.jaku haxnonroot wutong ebmc; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v6/domains/$h.runs-at.dev/config?teamId=$TEAM")
+              attached=$(q "/v9/projects/$PROJECT/domains?limit=50" | jq --arg d "$h.runs-at.dev" '[.domains[].name] | index($d) != null')
+              echo "$h.runs-at.dev: in this team's project: $attached (config API $code)"
+            done
+          } | tee -a "$GITHUB_STEP_SUMMARY"
