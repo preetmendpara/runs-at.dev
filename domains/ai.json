@@ -4,6 +4,20 @@
     "github": "mtasin12"
   },
   "claimedAt": "2026-11-14T12:43:21.697Z",
-  "records": {},
+  "records": {
+    "TXT": [
+      "v=spf1 include:spf.improvmx.com ~all"
+    ],
+    "MX": [
+      {
+        "priority": 10,
+        "value": "mx1.improvmx.com"
+      },
+      {
+        "priority": 20,
+        "value": "mx2.improvmx.com"
+      }
+    ]
+  },
   "country": "BD"
 }
