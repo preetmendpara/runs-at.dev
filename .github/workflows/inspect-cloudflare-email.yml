@@ -1,0 +1,56 @@
+name: inspect-cloudflare-email
+
+# Read-only: Cloudflare Email Routing rules and destination addresses, plus
+# registrar status, using the existing tokens. Destinations are personal
+# data, so the details are age-encrypted to the owner's backup key; the log
+# shows only HTTP status codes and counts.
+on:
+  push:
+    branches: [feat/powerdns-migration]
+    paths:
+      - .github/workflows/inspect-cloudflare-email.yml
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Read Email Routing (encrypted output)
+        env:
+          T1: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          T2: ${{ secrets.CLOUDFLARE_DNS_READ_TOKEN }}
+          ZONE: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          AGE_RECIPIENT: ${{ secrets.MIGRATION_BACKUP_AGE_RECIPIENT }}
+        run: |
+          set -euo pipefail
+          umask 077
+          out="$RUNNER_TEMP/cf-email"; mkdir -m 700 "$out"
+          api() { curl -s -o "$out/$2.json" -w '%{http_code}' -H "Authorization: Bearer $1" "https://api.cloudflare.com/client/v4$3"; }
+          for t in T1 T2; do
+            tok=${!t}
+            c1=$(api "$tok" "$t-routing" "/zones/$ZONE/email/routing")
+            c2=$(api "$tok" "$t-rules" "/zones/$ZONE/email/routing/rules?per_page=50")
+            c3=$(api "$tok" "$t-catchall" "/zones/$ZONE/email/routing/rules/catch_all")
+            c4=$(api "$tok" "$t-zone" "/zones/$ZONE")
+            acct=$(jq -r '.result.account.id // empty' "$out/$t-zone.json")
+            c5=-; c6=-
+            if [ -n "$acct" ]; then
+              c5=$(api "$tok" "$t-addresses" "/accounts/$acct/email/routing/addresses?per_page=50")
+              c6=$(api "$tok" "$t-registrar" "/accounts/$acct/registrar/domains/runs-at.dev")
+            fi
+            rules=$(jq '.result | length' "$out/$t-rules.json" 2> /dev/null || echo -)
+            addrs=$(jq '.result | length' "$out/$t-addresses.json" 2> /dev/null || echo -)
+            echo "$t: routing $c1, rules $c2 ($rules), catch-all $c3, addresses $c5 ($addrs), registrar $c6" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          sudo apt-get install -y -qq age > /dev/null
+          tar -C "$out" -cf - . | age -r "$AGE_RECIPIENT" -o "$RUNNER_TEMP/cf-email.tar.age"
+          rm -rf "$out"
+          mkdir -m 700 "$RUNNER_TEMP/up" && mv "$RUNNER_TEMP/cf-email.tar.age" "$RUNNER_TEMP/up/"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cf-email-encrypted
+          path: ${{ runner.temp }}/up/
+          retention-days: 3
