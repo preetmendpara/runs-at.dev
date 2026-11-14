@@ -41,7 +41,7 @@ jobs:
             for ip in "$NS1" "$NS2"; do
               echo "SOA $ip: $(dig @"$ip" +short +norec runs-at.dev SOA | awk '{print $3}')"
               echo "AA flag $ip: $(dig @"$ip" +norec runs-at.dev SOA | grep -c 'flags:.* aa')"
-              echo "apex ALIAS -> A on $ip: $(dig @"$ip" +short +norec runs-at.dev A | grep -cE '^[0-9.]+$') address(es)"
+              echo "apex A on $ip: $(dig @"$ip" +short +norec runs-at.dev A | grep -cE '^[0-9.]+$') address(es)"
               axfr=$(dig @"$ip" +tcp runs-at.dev AXFR | grep -cE 'IN[[:space:]]+SOA' || true)
               echo "unsigned AXFR SOA lines from $ip: $axfr (0 = refused)"
             done
