@@ -16,6 +16,8 @@ pdnsutil list-autoprimaries 2>/dev/null | grep -q 10.53.1.11 || pdnsutil add-aut
 if pdnsutil list-tsig-keys | grep -q '^xfr-runs-at-dev\.'; then
   pdnsutil list-all-zones | grep -qx runs-at.dev || pdnsutil create-secondary-zone runs-at.dev 10.53.1.11
   pdnsutil set-meta runs-at.dev AXFR-MASTER-TSIG xfr-runs-at-dev
+  # The primary signs; ns2 serves the transferred RRSIGs as they are.
+  pdnsutil set-presigned runs-at.dev
   # PowerDNS keeps a zone cache; a zone created with pdnsutil while pdns runs
   # is answered REFUSED until the cache is rebuilt.
   pdns_control rediscover

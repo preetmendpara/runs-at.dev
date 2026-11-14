@@ -65,6 +65,7 @@ render infra/powerdns/pdns-primary.conf "$W/ns1/pdns.conf" \
   -e "s#^also-notify=.*#also-notify=$NS2:$NS2P#" \
   -e "s#^only-notify=.*#only-notify=$NS2/32#" \
   -e "s#^lua-dnsupdate-policy-script=.*#lua-dnsupdate-policy-script=$W/ns1/acme-update-policy.lua#" \
+  -e "s#^resolver=.*#resolver=127.0.0.53#" \
   -e "s#^include-dir=.*#include-dir=$W/ns1/pdns.d#"
 cp infra/powerdns/acme-update-policy.lua "$W/ns1/acme-update-policy.lua"
 printf 'gpgsql-password=%s\napi-key=%s\nsocket-dir=%s\n' "$DBPASS" "$APIKEY" "$W/ns1" > "$W/ns1/pdns.d/secrets.conf"
@@ -78,6 +79,7 @@ render infra/powerdns/pdns-secondary.conf "$W/ns2/pdns.conf" \
   -e "s#^local-port=.*#local-port=$NS2P#" \
   -e "s#^allow-notify-from=.*#allow-notify-from=$NS1/32#" \
   -e "s#^xfr-cycle-interval=.*#xfr-cycle-interval=5#" \
+  -e "s#^resolver=.*#resolver=127.0.0.53#" \
   -e "s#^include-dir=.*#include-dir=$W/ns2/pdns.d#"
 printf 'socket-dir=%s\n' "$W/ns2" > "$W/ns2/pdns.d/local.conf"
 sqlite3 "$W/ns2/pdns.sqlite3" < /usr/share/pdns-backend-sqlite3/schema/schema.sqlite3.sql
@@ -228,5 +230,46 @@ out=$(node scripts/sync-dns.mjs) || fail "sync-dns after ACME update failed"
 printf '%s
 ' "$out" | grep -q '^powerdns plan: 0 create, 0 update, 0 delete' || fail "sync-dns wanted to touch the ACME record"
 say "sync-dns leaves _acme-challenge alone: yes"
+
+say "── F: apex ALIAS is expanded by both servers"
+$U1 add-record $ZONE @ ALIAS 300 example.com. > /dev/null
+pdns_control --config-dir="$W/ns1" notify $ZONE > /dev/null 2>&1 || true
+wait_sync
+for s in "$NS1 $NS1P" "$NS2 $NS2P"; do
+  set -- $s
+  a=$(dig @$1 -p $2 +short $ZONE A | head -1)
+  [[ "$a" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "ALIAS not expanded on $1 (got '$a')"
+  say "ALIAS on $1: A answer ok"
+done
+
+say "── G: DNSSEC signed on ns1, served presigned by ns2, validates"
+$U1 secure-zone $ZONE > /dev/null
+$U1 rectify-zone $ZONE > /dev/null
+$U1 increase-serial $ZONE > /dev/null
+pdns_control --config-dir="$W/ns1" rediscover > /dev/null
+$U2 set-presigned $ZONE > /dev/null
+pdns_control --config-dir="$W/ns2" rediscover > /dev/null
+pdns_control --config-dir="$W/ns1" notify $ZONE > /dev/null 2>&1 || true
+wait_sync
+$U1 export-zone-ds $ZONE | grep -q " DS 13 2 " || fail "no SHA-256 DS for ECDSAP256SHA256"
+say "DS (alg 13, digest 2) generated: yes"
+dig @$NS1 -p $NS1P +dnssec +norec $ZONE DNSKEY | grep -E "IN\s+DNSKEY" | grep -E "^\S+\s+\S+\s+IN\s+DNSKEY\s+257 " | sed -E 's/^\S+\s+\S+\s+IN\s+DNSKEY\s+/. IN DNSKEY /' > /dev/null
+for s in "$NS1 $NS1P" "$NS2 $NS2P"; do
+  set -- $s
+  n=$(dig @$1 -p $2 +dnssec +norec +tcp abdulloh.$ZONE CNAME | grep -c "RRSIG")
+  [ "$n" -ge 1 ] || fail "no RRSIG for a claim record on $1"
+  say "RRSIG served by $1: yes"
+done
+# Full validation with the new KSK as the trust anchor (as a DS at the parent would make it).
+ksk=$(dig @$NS1 -p $NS1P +short $ZONE DNSKEY | awk '$1 == 257')
+printf 'trust-anchors {
+  %s. static-key %s %s %s "%s";
+};
+' $ZONE $(echo "$ksk" | awk '{print $1, $2, $3}') "$(echo "$ksk" | cut -d' ' -f4- | tr -d ' ')" > "$W/anchor.conf"
+for s in "$NS1 $NS1P" "$NS2 $NS2P"; do
+  set -- $s
+  delv @$1 -p $2 -a "$W/anchor.conf" +root=$ZONE abdulloh.$ZONE CNAME 2>&1 | grep -q "; fully validated" || { delv @$1 -p $2 -a "$W/anchor.conf" +root=$ZONE abdulloh.$ZONE CNAME 2>&1 | head -5; fail "DNSSEC validation failed on $1"; }
+  say "DNSSEC fully validated against $1: yes"
+done
 
 say "PASS"

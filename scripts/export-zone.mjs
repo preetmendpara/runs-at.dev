@@ -56,8 +56,17 @@ export function systemRecords(live) {
   const out = [];
   const add = (type, name, value, priority) =>
     out.push({ type, name, value, ...(priority !== undefined && { priority }), source: 'system:live-export' });
-  for (const v of answers(live.apex.A)) add('A', '', v);
-  for (const v of answers(live.apex.AAAA)) add('AAAA', '', v);
+  // Cloudflare serves the apex as a flattened CNAME to the same Vercel target
+  // as www (checked against the Cloudflare export). Pinning today's resolved
+  // addresses would break when Vercel changes them, so the apex becomes an
+  // ALIAS to that target (expand-alias in pdns.conf). Without a www CNAME the
+  // live A/AAAA answers are kept.
+  const wwwTarget = answers(live.system?.['www.runs-at.dev CNAME'])[0];
+  if (wwwTarget && answers(live.apex.A).length) add('ALIAS', '', wwwTarget);
+  else {
+    for (const v of answers(live.apex.A)) add('A', '', v);
+    for (const v of answers(live.apex.AAAA)) add('AAAA', '', v);
+  }
   for (const mx of answers(live.apex.MX)) add('MX', '', mx.value, mx.priority);
   for (const v of answers(live.apex.TXT)) add('TXT', '', Array.isArray(v) ? v.join('') : v);
   for (const v of answers(live.apex.CAA)) add('CAA', '', v);
@@ -98,7 +107,7 @@ function txtRdata(value) {
 
 export function rdata(r) {
   switch (r.type) {
-    case 'CNAME': return fqdn(r.value.toLowerCase());
+    case 'CNAME': case 'ALIAS': return fqdn(r.value.toLowerCase());
     case 'MX': return `${r.priority} ${fqdn(r.value.toLowerCase())}`;
     case 'TXT': return txtRdata(r.value);
     default: return r.value;
