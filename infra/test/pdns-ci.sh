@@ -235,9 +235,15 @@ say "── F: apex ALIAS is expanded by both servers"
 $U1 add-record $ZONE @ ALIAS 300 example.com. > /dev/null
 pdns_control --config-dir="$W/ns1" notify $ZONE > /dev/null 2>&1 || true
 wait_sync
+# Earlier steps cached "no apex A"; drop the packet/query caches first.
+for n in ns1 ns2; do pdns_control --config-dir="$W/$n" purge > /dev/null; done
 for s in "$NS1 $NS1P" "$NS2 $NS2P"; do
   set -- $s
-  a=$(dig @$1 -p $2 +short $ZONE A | head -1)
+  a=""
+  for _ in 1 2 3 4 5; do
+    a=$(dig @$1 -p $2 +short +tcp $ZONE A | head -1)
+    [ -n "$a" ] && break; sleep 1
+  done
   [[ "$a" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "ALIAS not expanded on $1 (got '$a')"
   say "ALIAS on $1: A answer ok"
 done

@@ -29,6 +29,8 @@ createServer((req, res) => {
 EOF
 node "$W/stub.mjs" &
 STUB=$!
+# Caddy answers 502 until the stub listens; wait for the stub itself.
+for _ in $(seq 1 30); do curl -sf http://127.0.0.1:9000/ > /dev/null 2>&1 && break; sleep 0.5; done
 
 export EDGE_PORT=8443 TLS_CERT="$W/c.pem" TLS_KEY="$W/k.pem" APP_ORIGIN=http://127.0.0.1:9000 APP_HOST=runs-at.dev
 "$W/caddy" validate --config infra/edge/Caddyfile --adapter caddyfile > /dev/null 2>&1 || { echo "FAIL: Caddyfile invalid"; "$W/caddy" validate --config infra/edge/Caddyfile --adapter caddyfile; exit 1; }
