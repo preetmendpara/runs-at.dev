@@ -110,3 +110,14 @@ test('exporter: success with --quiet prints only aggregate counts', () => {
   assert.equal(res.status, 0, res.stderr);
   assert.match(res.stdout, /^exported \d+ records over 1 page\(s\)\s*$/);
 });
+
+test('reconcile: undeclared system records are summarised by label and type only', () => {
+  const cloudflare = [
+    { type: 'A', name: '*.runs-at.dev', content: '192.0.2.50', proxied: true },
+    { type: 'MX', name: 'runs-at.dev', content: 'mx.example.net', priority: 10 },
+    { type: 'CNAME', name: 'www.runs-at.dev', content: 'host.example.net' },
+  ];
+  const r = reconcile({ cloudflare, declared: [] });
+  assert.deepEqual(r.extraSystemKinds, ['* A proxied 1', '@ MX 1', 'www CNAME 1']);
+  assert.ok(!JSON.stringify(r.extraSystemKinds).includes('192.0.2.50'));
+});

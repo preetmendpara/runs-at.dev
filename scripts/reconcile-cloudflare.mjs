@@ -26,7 +26,7 @@ export function fromCloudflare(r) {
     // Cloudflare may return TXT content as one or more quoted strings.
     value = [...value.matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((m) => m[1].replace(/\\(.)/g, '$1')).join('');
   }
-  return { name, type: r.type, value, ...(r.priority !== undefined ? { priority: r.priority } : {}) };
+  return { name, type: r.type, value, ...(r.priority !== undefined ? { priority: r.priority } : {}), ...(r.proxied ? { proxied: true } : {}) };
 }
 
 export function reconcile({ cloudflare, declared }) {
@@ -58,6 +58,14 @@ export function reconcile({ cloudflare, declared }) {
       const rec = cf.get(k);
       return `${rec.type} ${/(^|.)_domainkey$/.test(rec.name) ? 'DKIM key (_domainkey)' : 'other'}`;
     }),
+    // Undeclared system records as "<name> <type>[ proxied]" counts; the
+    // names are the fixed system labels, never a value.
+    extraSystemKinds: Object.entries(extra.filter(isSystem).reduce((acc, k) => {
+      const rec = cf.get(k);
+      const label = `${rec.name === '' ? '@' : rec.name} ${rec.type}${rec.proxied ? ' proxied' : ''}`;
+      acc[label] = (acc[label] ?? 0) + 1;
+      return acc;
+    }, {})).sort().map(([k, n]) => `${k} ${n}`),
     sha: {
       declared: sha256(want.keys()),
       cloudflare: sha256(cf.keys()),
@@ -103,6 +111,8 @@ async function main(argv) {
     `| In Cloudflare, not declared: system names (apex, www, wildcard, _vercel) | ${r.extraSystem} |`,
     `| In Cloudflare, not declared: other | ${r.extraOther} |`,
     `| Outside the zone | ${r.outOfZone} |`,
+    '',
+    `Undeclared system records by name and type: ${r.extraSystemKinds.join(', ') || 'none'}`,
     '',
     `Undeclared non-system records by kind: ${r.extraOtherKinds.length ? r.extraOtherKinds.join('; ') : 'none'}`,
     '',
