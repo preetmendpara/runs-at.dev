@@ -91,7 +91,16 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - uses: opentofu/setup-opentofu@v1
+      # GitHub-owned actions only in this repository: install the pinned
+      # OpenTofu release directly and check its published SHA-256.
+      - name: Install OpenTofu
+        run: |
+          V=1.8.5; cd "$RUNNER_TEMP"
+          curl -fsSLO "https://github.com/opentofu/opentofu/releases/download/v${V}/tofu_${V}_linux_amd64.zip"
+          curl -fsSLO "https://github.com/opentofu/opentofu/releases/download/v${V}/tofu_${V}_SHA256SUMS"
+          grep " tofu_${V}_linux_amd64.zip$" "tofu_${V}_SHA256SUMS" | sha256sum -c -
+          unzip -q "tofu_${V}_linux_amd64.zip" tofu -d "$RUNNER_TEMP/bin"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
       - name: tofu validate
         working-directory: infra/opentofu
         run: |

@@ -124,12 +124,16 @@ jobs:
       # by `tailscale serve`; it is never on a public interface. This job runs
       # only for pushes to main, maintainer dispatches and health-check's
       # call -- never for pull-request code.
+      # The repository allows GitHub-owned actions only, so Tailscale is
+      # installed from its official package repository instead of an action.
+      # An OAuth client secret is accepted as an auth key for tagged,
+      # ephemeral nodes.
       - if: vars.DNS_PROVIDER == 'powerdns'
-        uses: tailscale/github-action@v3
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci-dns
+        run: |
+          curl -fsSL https://tailscale.com/install.sh | sh
+          sudo tailscale up --auth-key="${TS_OAUTH_SECRET}?ephemeral=true&preauthorized=true"             --advertise-tags=tag:ci-dns --hostname="gha-${GITHUB_RUN_ID}" --accept-routes=false
+        env:
+          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
       - id: sync
         run: node scripts/sync-dns.mjs
         env:
