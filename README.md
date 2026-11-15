@@ -15,6 +15,17 @@
 </p>
 
 <p align="center">
+  <a href="#"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=900&color=F5A623&center=true&vCenter=true&width=640&lines=yourname.runs-at.dev;Free+subdomains+for+developers;Claim+in+seconds.+Point+anywhere.;The+registry+is+a+git+repo" alt="yourname.runs-at.dev"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js">
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=white" alt="React">
+  <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel">
+  <img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" alt="GitHub Actions">
+</p>
+
+<p align="center">
   <a href="https://runs-at.dev"><b>Claim a name</b></a>
   &nbsp;·&nbsp;
   <a href="https://runs-at.dev/docs/quickstart">Quickstart</a>
@@ -287,3 +298,13 @@ used and modified under the GNU Affero General Public License v3 (see
 [LICENSE](./LICENSE) and [NOTICE](./NOTICE)). It is not affiliated with or
 endorsed by runs-on.dev or Advance Labs. See
 [POLICY.md](./POLICY.md).
+
+---
+
+<p align="center">
+  Built by <a href="https://github.com/preetmendpara"><b>Preet Mendpara</b></a> · <a href="https://preetmendpara.qzz.io">Portfolio</a>
+</p>
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12&height=110&section=footer" width="100%" alt="">
+</p>
