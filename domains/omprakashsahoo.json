@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "e9a5c63ea962e4a0.vercel-dns-017.com"
   },
-  "country": "IN"
+  "country": "IN",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=omprakashsahoo.runs-at.dev,96aaf5454a61de39c932"
+      ]
+    }
+  }
 }
