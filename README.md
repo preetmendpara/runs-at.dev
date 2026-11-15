@@ -302,7 +302,7 @@ endorsed by runs-on.dev or Advance Labs. See
 ---
 
 <p align="center">
-  Built by <a href="https://github.com/preetmendpara"><b>Preet Mendpara</b></a> · <a href="https://preetmendpara.qzz.io">Portfolio</a>
+  Built by <a href="https://github.com/preetmendpara"><b>Preet Mendpara</b></a> · <a href="https://preetmendpara.in">Portfolio</a>
 </p>
 
 <p align="center">
