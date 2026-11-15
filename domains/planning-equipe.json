@@ -4,6 +4,8 @@
     "github": "lefeuvreda"
   },
   "claimedAt": "2026-11-15T10:42:03.429Z",
-  "records": {},
+  "records": {
+    "CNAME": "lefeuvreda.github.io"
+  },
   "country": "FR"
 }
