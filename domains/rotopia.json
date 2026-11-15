@@ -4,6 +4,20 @@
     "github": "klinus203-del"
   },
   "claimedAt": "2026-11-15T15:12:36.287Z",
-  "records": {},
-  "country": "SE"
+  "records": {
+    "CNAME": "custom-domains.chatgpt.site"
+  },
+  "country": "SE",
+  "subdomains": {
+    "_openai-site-verification": {
+      "TXT": [
+        "openai-site-verification=3rkp36Qj_zvumekDI8kHNS7oS_P3Fy2jBhzgcOlTjlc"
+      ]
+    },
+    "_cf-custom-hostname": {
+      "TXT": [
+        "d3c4813c-bb35-4909-bb61-2360007b22bd"
+      ]
+    }
+  }
 }
