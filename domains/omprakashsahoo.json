@@ -4,6 +4,8 @@
     "github": "omprkx-hq"
   },
   "claimedAt": "2026-11-15T04:53:36.104Z",
-  "records": {},
+  "records": {
+    "CNAME": "e9a5c63ea962e4a0.vercel-dns-017.com"
+  },
   "country": "IN"
 }
