@@ -5,5 +5,12 @@
   },
   "claimedAt": "2026-11-15T11:30:50.153Z",
   "records": {},
-  "country": "VN"
+  "country": "VN",
+  "subdomains": {
+    "verify-5uo1jy6udgl2gm5np01o2128": {
+      "TXT": [
+        "fa6fe0e42ef6b98bc4903b1347fe62d3ed25a0d54bac2bcbb5e49a2b2105abb"
+      ]
+    }
+  }
 }
