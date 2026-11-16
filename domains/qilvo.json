@@ -4,11 +4,12 @@
     "github": "Osman-Ai-lab"
   },
   "claimedAt": "2026-11-16T16:44:40.192Z",
-  "records": {
-    "CNAME": "c9a5462623a5cb84.vercel-dns-017.com"
-  },
+  "records": {},
   "country": "ID",
   "subdomains": {
+    "qilvo": {
+      "CNAME": "c9a5462623a5cb84.vercel-dns-017.com"
+    },
     "_vercel": {
       "TXT": [
         "vc-domain-verify=qilvo.runs-at.dev,81fdb178b2dc8741104f"
