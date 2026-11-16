@@ -4,10 +4,13 @@
     "github": "miftah-ab"
   },
   "claimedAt": "2026-11-16T06:03:29.565Z",
-  "records": {
-    "TXT": [
-      "vc-domain-verify=nunuza.runs-at.dev,5e7a884b228f11cb90c7"
-    ]
-  },
-  "country": "ET"
+  "records": {},
+  "country": "ET",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=nunuza.runs-at.dev,5e7a884b228f11cb90c7"
+      ]
+    }
+  }
 }
