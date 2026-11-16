@@ -9,7 +9,7 @@
   },
   "country": "PK",
   "subdomains": {
-    "vercal": {
+    "_vercel": {
       "TXT": [
         "vc-domain-verify=trinova-portfolio.runs-at.dev,77034455c83e74221793"
       ]
