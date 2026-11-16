@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "6f829579343a0592.vercel-dns-017.com"
   },
-  "country": "PK",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=trinova-portfolio.runs-at.dev,77034455c83e74221793"
-      ]
-    }
-  }
+  "country": "PK"
 }
