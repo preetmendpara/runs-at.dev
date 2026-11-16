@@ -7,5 +7,15 @@
   "records": {
     "URL": "https://my-portfolio-trinova.vercel.app/"
   },
-  "country": "PK"
+  "country": "PK",
+  "subdomains": {
+    "trinova": {
+      "CNAME": "6f829579343a0592.vercel-dns-017.com"
+    },
+    "vercel": {
+      "TXT": [
+        "vc-domain-verify=trinova.runs-at.dev,bcffbb9b011495c7020e"
+      ]
+    }
+  }
 }
