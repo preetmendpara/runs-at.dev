@@ -4,13 +4,8 @@
     "github": "miftah-ab"
   },
   "claimedAt": "2026-11-16T06:03:29.565Z",
-  "records": {},
-  "country": "ET",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=nunuza.runs-at.dev,5e7a884b228f11cb90c7"
-      ]
-    }
-  }
+  "records": {
+    "CNAME": "cname.vercel-dns.com"
+  },
+  "country": "ET"
 }
