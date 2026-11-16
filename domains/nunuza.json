@@ -4,6 +4,8 @@
     "github": "miftah-ab"
   },
   "claimedAt": "2026-11-16T06:03:29.565Z",
-  "records": {},
+  "records": {
+    "CNAME": "d0e0a86bfa708881.vercel-dns-017.com"
+  },
   "country": "ET"
 }
