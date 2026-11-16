@@ -4,6 +4,8 @@
     "github": "DanielAgyekumAmakyeGh"
   },
   "claimedAt": "2026-11-16T17:37:57.021Z",
-  "records": {},
+  "records": {
+    "CNAME": "danielagyekumamakyegh.github.io"
+  },
   "country": "GH"
 }
