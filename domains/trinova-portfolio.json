@@ -4,7 +4,9 @@
     "github": "786web"
   },
   "claimedAt": "2026-11-16T10:43:10.638Z",
-  "records": {},
+  "records": {
+    "CNAME": "6f829579343a0592.vercel-dns-017.com"
+  },
   "country": "PK",
   "subdomains": {
     "vercal": {
