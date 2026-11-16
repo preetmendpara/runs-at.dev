@@ -9,9 +9,6 @@
   },
   "country": "ID",
   "subdomains": {
-    "qilvo": {
-      "CNAME": "c9a5462623a5cb84.vercel-dns-017.com"
-    },
     "_vercel": {
       "TXT": [
         "vc-domain-verify=qilvo.runs-at.dev,81fdb178b2dc8741104f"
