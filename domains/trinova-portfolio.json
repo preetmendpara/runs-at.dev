@@ -4,7 +4,9 @@
     "github": "786web"
   },
   "claimedAt": "2026-11-16T10:43:10.638Z",
-  "records": {},
+  "records": {
+    "URL": "https://my-portfolio-trinova.vercel.app/"
+  },
   "country": "PK",
   "subdomains": {
     "vercal": {
