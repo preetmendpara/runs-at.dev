@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "cname.vercel-dns.com"
   },
-  "country": "ET"
+  "country": "ET",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=nunuza.runs-at.dev,5e7a884b228f11cb90c7"
+      ]
+    }
+  }
 }
