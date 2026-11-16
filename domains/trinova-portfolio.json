@@ -5,17 +5,7 @@
   },
   "claimedAt": "2026-11-16T10:43:10.638Z",
   "records": {
-    "URL": "https://my-portfolio-trinova.vercel.app/"
+    "CNAME": "6f829579343a0592.vercel-dns-017.com"
   },
-  "country": "PK",
-  "subdomains": {
-    "trinova": {
-      "CNAME": "6f829579343a0592.vercel-dns-017.com"
-    },
-    "vercel": {
-      "TXT": [
-        "vc-domain-verify=trinova.runs-at.dev,bcffbb9b011495c7020e"
-      ]
-    }
-  }
+  "country": "PK"
 }
