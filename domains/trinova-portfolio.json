@@ -13,9 +13,6 @@
       "TXT": [
         "vc-domain-verify=trinova-portfolio.runs-at.dev,77034455c83e74221793"
       ]
-    },
-    "trinova": {
-      "CNAME": "6f829579343a0592.vercel-dns-017.com"
     }
   }
 }
