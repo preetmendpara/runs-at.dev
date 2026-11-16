@@ -5,7 +5,9 @@
   },
   "claimedAt": "2026-11-16T06:03:29.565Z",
   "records": {
-    "CNAME": "d0e0a86bfa708881.vercel-dns-017.com"
+    "TXT": [
+      "vc-domain-verify=nunuza.runs-at.dev,5e7a884b228f11cb90c7"
+    ]
   },
   "country": "ET"
 }
