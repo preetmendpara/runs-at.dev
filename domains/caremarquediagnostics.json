@@ -4,6 +4,8 @@
     "github": "side-luck"
   },
   "claimedAt": "2026-11-17T07:12:39.381Z",
-  "records": {},
+  "records": {
+    "CNAME": "digiscan.pages.dev"
+  },
   "country": "IN"
 }
