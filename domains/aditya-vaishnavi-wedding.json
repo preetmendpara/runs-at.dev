@@ -4,6 +4,8 @@
     "github": "aditya-vaishnavi-wedding-invitation"
   },
   "claimedAt": "2026-11-13T02:41:51.869Z",
-  "records": {},
+  "records": {
+    "CNAME": "adityavaishnavi.runs-at.dev"
+  },
   "country": "IN"
 }
