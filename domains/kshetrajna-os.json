@@ -4,6 +4,11 @@
     "github": "ParramNainani"
   },
   "claimedAt": "2026-11-17T18:34:54.521Z",
-  "records": {},
+  "records": {"CNAME": "kshetrajna-os"},
+  "subdomains":{
+    "_vercel": {
+      "TXT" : ["vc-domain-verify=kshetrajna-os.runs-at.dev,73c73d6566406f31a84c"]
+    }
+  },
   "country": "IN"
 }
