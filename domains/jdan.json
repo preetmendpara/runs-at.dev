@@ -4,6 +4,15 @@
     "github": "DanielAgyekumAmakyeGh"
   },
   "claimedAt": "2026-11-16T17:37:57.021Z",
-  "records": {},
-  "country": "GH"
+  "records": {
+    "CNAME": "danielagyekumamakyegh.github.io"
+  },
+  "country": "GH",
+  "subdomains": {
+    "_github-pages-challenge-danielagyekumamakyegh": {
+      "TXT": [
+        "3a42f4462ef354e0754e292b8ad517"
+      ]
+    }
+  }
 }
