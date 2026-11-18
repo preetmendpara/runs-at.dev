@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "f46b76d817922afc.vercel-dns-017.com"
   },
-  "country": "IN"
+  "country": "IN",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=kshetrajna-os.runs-at.dev,73c73d6566406f31a84c"
+      ]
+    }
+  }
 }
