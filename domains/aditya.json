@@ -4,6 +4,15 @@
     "github": "CoderZ90"
   },
   "claimedAt": "2026-11-18T12:50:54.752Z",
-  "records": {},
-  "country": "IN"
+  "records": {
+    "CNAME": "helloadi.vercel.app"
+  },
+  "country": "IN",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=runs-at.dev,bc5af0dcdfca51059e56"
+      ]
+    }
+  }
 }
