@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "danielagyekumamakyegh.github.io"
   },
-  "country": "GH"
+  "country": "GH",
+  "subdomains": {
+    "_github-pages-challenge-danielagyekumamakyegh": {
+      "TXT": [
+        "3a42f4462ef354e0754e292b8ad517"
+      ]
+    }
+  }
 }
