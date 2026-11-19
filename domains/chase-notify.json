@@ -13,6 +13,11 @@
       "TXT": [
         "v=DMARC1; p=none;"
       ]
+    },
+    "mail": {
+      "TXT": [
+        "brevo-code:7ce4e05fefe4fd4ea8f40525e81db7e5"
+      ]
     }
   }
 }
