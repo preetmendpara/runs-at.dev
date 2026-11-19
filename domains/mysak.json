@@ -4,6 +4,11 @@
     "github": "kobadanielvitek"
   },
   "claimedAt": "2026-11-19T16:46:51.937Z",
-  "records": {},
-  "country": "CZ"
+  "records": {
+    "CNAME": "kobadanielvitek.github.io"
+  },
+  "country": "CZ",
+  "profile": {
+    "name": "kobadanielvitek.github.io"
+  }
 }
