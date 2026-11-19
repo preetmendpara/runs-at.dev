@@ -4,15 +4,16 @@
     "github": "xmokecursed"
   },
   "claimedAt": "2026-11-19T10:10:50.071Z",
-  "records": {
-    "CNAME": "bea259733299fe5a.vercel-dns-017.com"
-  },
+  "records": {},
   "country": "BD",
   "subdomains": {
     "_vercel": {
       "TXT": [
         "vc-domain-verify=xmoke.runs-at.dev,d5f4baf7dd17a6318181"
       ]
+    },
+    "xmoke": {
+      "CNAME": "bea259733299fe5a.vercel-dns-017.com"
     }
   }
 }
