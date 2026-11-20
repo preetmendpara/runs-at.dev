@@ -2,8 +2,12 @@
   "github": "kobadanielvitek",
   "included": 1,
   "adminGranted": 0,
-  "names": [],
+  "names": [
+    "mysak"
+  ],
   "pending": {},
-  "pullRequests": {},
+  "pullRequests": {
+    "mysak": 51
+  },
   "history": []
 }
