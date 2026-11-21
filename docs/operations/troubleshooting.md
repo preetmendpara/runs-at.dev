@@ -13,6 +13,18 @@
 
 Not recommended: making sync-dns ignore the error. That would hide the fact that claims are not published.
 
+**Status 2026-11-21:** still failing on every push since 2026-11-15. 29 declared values across 20 claims are not live (abdulloh, acidfairies, aditya, adsimple, caremarquediagnostics, cat, chase-notify, clinchat, dawcdm, hotdog, jdan, kshetrajna-os, mysak, novastudio, nunuza, qilvo, rotopia, trinova-portfolio, vortex, xmoke). The PowerDNS primary is missing 28 of the same 29, so the zone must be regenerated from the current registry and reloaded on ns1 right before cutover.
+
+## Homepage, map and /stats show different or old numbers
+
+**Cause (fixed on `feat/powerdns-migration`):** all three read `domains/` from the deployed bundle. Claims are data commits and never deploy, so the figures were the registry as of the last daily deploy, and `/stats` (built at a different time from the homepage lambda) could disagree with it. The map counts owners, not names.
+
+**Now:** both pages render from one cached snapshot (`lib/registry-cache.js`), read live from GitHub in one GraphQL request, tagged `registry`, TTL 300 s, invalidated by `/api/claim`, `/api/release`, `/api/swap` and the push webhook. If GitHub cannot be read, the deployed copy is served and `registry-snapshot:` is logged. The readout shows the commit time the numbers were counted at.
+
+## A name is reported to its owner as "not serving" when our DNS never published it
+
+**Cause (fixed):** the health check classified names before checking drift, so an unpublished CNAME (answered by the wildcard card) was `stuck` and got an owner nudge issue. Drift is now computed first; such names are `dns-missing` and never open an issue. Probe failures are split into `bad-target`, `tls`, `no-deployment`, `http-error` and `down`.
+
 ## revalidate-prs fails with "Unable to retry this workflow run because it was created over a month ago"
 
 **Cause:** `scripts/rerun-validate.sh` ran `gh run rerun` on the latest `validate` run for each PR. GitHub refuses to re-run runs older than 30 days, and `set -euo pipefail` let one such PR stop the whole loop.
