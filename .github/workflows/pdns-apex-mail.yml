@@ -1,0 +1,80 @@
+name: pdns-apex-mail
+
+# Stage the ImprovMX mail records at the apex of the PowerDNS zone
+# (migration/email-cutover.json): MX mx1/mx2.improvmx.com and the SPF include
+# swapped to spf.improvmx.com. Every other apex TXT (site verification, etc.)
+# is carried over unchanged. Apex records are protected from sync-dns, so they
+# are only ever changed here, on purpose.
+#
+# This edits the PowerDNS copy only. While the delegation still points at
+# Cloudflare it changes nothing anyone resolves; it takes effect with the
+# nameserver switch, which is exactly when Cloudflare Email Routing stops.
+# Rollback: re-run with MODE=cloudflare (restores the route1-3 MX and old SPF).
+on:
+  push:
+    branches: [feat/powerdns-migration]
+    paths: [.github/workflows/pdns-apex-mail.yml]
+
+permissions:
+  contents: read
+
+env:
+  MODE: improvmx
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Tunnel up
+        run: bash .github/scripts/wg-up.sh
+        env:
+          WG_CI_PRIVATE_KEY: ${{ secrets.WG_CI_PRIVATE_KEY }}
+          PDNS_WG_PUBLIC_KEY: ${{ vars.PDNS_WG_PUBLIC_KEY }}
+          PDNS_WG_ENDPOINT: ${{ vars.PDNS_WG_ENDPOINT }}
+      - name: Replace apex MX and SPF
+        env:
+          PDNS_API_KEY: ${{ secrets.PDNS_API_KEY }}
+          PDNS_API_URL: ${{ vars.PDNS_API_URL }}
+        run: |
+          set -euo pipefail
+          Z="$PDNS_API_URL/api/v1/servers/localhost/zones/runs-at.dev."
+          curl -sf -H "X-API-Key: $PDNS_API_KEY" "$Z" -o zone.json
+          if [ "$MODE" = improvmx ]; then
+            MX='[{"content":"10 mx1.improvmx.com.","disabled":false},{"content":"20 mx2.improvmx.com.","disabled":false}]'
+            SPF='"v=spf1 include:spf.improvmx.com ~all"'
+          else
+            MX='[{"content":"20 route1.mx.cloudflare.net.","disabled":false},{"content":"63 route2.mx.cloudflare.net.","disabled":false},{"content":"74 route3.mx.cloudflare.net.","disabled":false}]'
+            SPF='"v=spf1 include:_spf.mx.cloudflare.net ~all"'
+          fi
+          # Keep every apex TXT that is not SPF; append the one SPF value.
+          jq --argjson mx "$MX" --arg spf "$SPF" '
+            (.rrsets[] | select(.name=="runs-at.dev." and .type=="TXT") | .records | map(select(.content | test("v=spf1") | not))) as $keep
+            | (.rrsets[] | select(.name=="runs-at.dev." and .type=="TXT") | .ttl) as $txtttl
+            | (.rrsets[] | select(.name=="runs-at.dev." and .type=="MX") | .ttl) as $mxttl
+            | {rrsets: [
+                {name:"runs-at.dev.", type:"MX", ttl:($mxttl // 300), changetype:"REPLACE", records:$mx},
+                {name:"runs-at.dev.", type:"TXT", ttl:($txtttl // 300), changetype:"REPLACE", records:($keep + [{content:$spf, disabled:false}])}
+              ]}' zone.json > patch.json
+          echo "apex TXT kept (non-SPF): $(jq '.rrsets[1].records | length - 1' patch.json)"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X PATCH -H "X-API-Key: $PDNS_API_KEY" -H 'Content-Type: application/json' --data @patch.json "$Z")
+          rm -f zone.json patch.json
+          echo "PATCH -> $code"; [ "$code" = 204 ]
+      - name: Verify on both servers
+        env:
+          NS1: ${{ vars.PDNS_PRIMARY_IP }}
+          NS2: ${{ vars.PDNS_SECONDARY_IPS }}
+        run: |
+          sleep 20
+          for ip in "$NS1" "$NS2"; do
+            echo "== $ip serial $(dig @"$ip" +short runs-at.dev SOA | awk '{print $3}')"
+            dig @"$ip" +short runs-at.dev MX
+            dig @"$ip" +short runs-at.dev TXT | grep -c . | sed 's/^/TXT count /'
+            dig @"$ip" +short runs-at.dev TXT | grep spf1
+          done | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Tunnel down
+        if: always()
+        run: sudo wg-quick down wg0 > /dev/null 2>&1 || true
