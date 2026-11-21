@@ -65,7 +65,12 @@ if (PROVIDER === 'powerdns') {
   const report = await runPipeline({
     zone,
     dryRun,
-    desired: desiredFromClaims(claims, zone, { planDnsChanges, planZoneVerificationRecords }),
+    // The edge is ns2 (infra/edge): the same address the zone's `*` points at.
+    desired: desiredFromClaims(claims, zone, {
+      planDnsChanges,
+      planZoneVerificationRecords,
+      edgeIp: process.env.EDGE_IPV4 || secondaryIps[0],
+    }),
     provider: createPowerDnsProvider({ zone }),
     owned: (name) => name === vercelHost || ownedLabels.has(claimLabel(name, zone)),
     // Hand-placed `_vercel` TXT values survive, as with reconcileZoneVerification.
