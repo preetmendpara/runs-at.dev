@@ -98,7 +98,7 @@ done
 
 # ── step A: empty zone with system records, then the real sync path ──────
 $U1 create-zone $ZONE ns1.$ZONE > /dev/null
-$U1 add-record $ZONE @ NS 300 ns2.$ZONE. > /dev/null
+$U1 add-record $ZONE $ZONE NS 300 ns2.$ZONE. > /dev/null
 $U1 add-record $ZONE ns1 A 300 192.0.2.1 > /dev/null   # TEST-NET glue: test only
 $U1 add-record $ZONE ns2 A 300 192.0.2.2 > /dev/null   # TEST-NET glue: test only
 $U1 set-meta $ZONE SOA-EDIT-API DEFAULT > /dev/null
@@ -232,7 +232,7 @@ printf '%s
 say "sync-dns leaves _acme-challenge alone: yes"
 
 say "── F: apex ALIAS is expanded by both servers"
-$U1 add-record $ZONE @ ALIAS 300 example.com. > /dev/null
+$U1 add-record $ZONE $ZONE ALIAS 300 example.com. > /dev/null
 $U1 increase-serial $ZONE > /dev/null   # pdnsutil edits do not bump the serial
 pdns_control --config-dir="$W/ns1" notify $ZONE > /dev/null 2>&1 || true
 wait_sync
