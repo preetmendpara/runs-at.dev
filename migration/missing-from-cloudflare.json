@@ -1,0 +1,143 @@
+{
+  "note": "Records the registry declares that the Cloudflare zone did not serve (200-record quota). Source: domains/*.json via migration/missing-records.mjs. Public registry data.",
+  "checkedAgainst": "aida.ns.cloudflare.com",
+  "generatedAt": "2026-11-14T03:21:49.095Z",
+  "declared": 209,
+  "present": 190,
+  "missing": 19,
+  "records": [
+    {
+      "fqdn": "abdulloh.runs-at.dev",
+      "type": "CNAME",
+      "canonical": "abdulloh CNAME zadovla49.github.io.",
+      "claim": "abdulloh",
+      "owner": "zADovla49"
+    },
+    {
+      "fqdn": "adsimple.adsimple.runs-at.dev",
+      "type": "CNAME",
+      "canonical": "adsimple.adsimple CNAME 087863f9b168d570.vercel-dns-017.com.",
+      "claim": "adsimple",
+      "owner": "Hanzala-Kamil"
+    },
+    {
+      "fqdn": "_vercel.adsimple.runs-at.dev",
+      "type": "TXT",
+      "canonical": "_vercel.adsimple TXT \"vc-domain-verify=adsimple.runs-at.dev,616d695eda3268292b07\"",
+      "claim": "adsimple",
+      "owner": "Hanzala-Kamil"
+    },
+    {
+      "fqdn": "ashenwings.runs-at.dev",
+      "type": "CNAME",
+      "canonical": "ashenwings CNAME c353ede2c3486166.vercel-dns-017.com.",
+      "claim": "ashenwings",
+      "owner": "stalinbot-test"
+    },
+    {
+      "fqdn": "aureon.runs-at.dev",
+      "type": "CNAME",
+      "canonical": "aureon CNAME jakirulji.github.io.",
+      "claim": "aureon",
+      "owner": "jakirulji"
+    },
+    {
+      "fqdn": "_dmarc.send.chase-notify.runs-at.dev",
+      "type": "TXT",
+      "canonical": "_dmarc.send.chase-notify TXT \"v=DMARC1; p=none;\"",
+      "claim": "chase-notify",
+      "owner": "jastaylor518-gif"
+    },
+    {
+      "fqdn": "dsa-visualizer.runs-at.dev",
+      "type": "CNAME",
+      "canonical": "dsa-visualizer CNAME sarveshmalviya87-sys.github.io.",
+      "claim": "dsa-visualizer",
+      "owner": "sarveshmalviya87-sys"
+    },
+    {
+      "fqdn": "ebmc.runs-at.dev",
+      "type": "CNAME",
+      "canonical": "ebmc CNAME edge.msk1.amvera.tech.",
+      "claim": "ebmc",
+      "owner": "mcwkrsk"
+    },
+    {
+      "fqdn": "_amvera.ebmc.runs-at.dev",
+      "type": "TXT",
+      "canonical": "_amvera.ebmc TXT \"drozdovboze-ebmc\"",
+      "claim": "ebmc",
+      "owner": "mcwkrsk"
+    },
+    {
+      "fqdn": "fineclient.runs-at.dev",
+      "type": "CNAME",
+      "canonical": "fineclient CNAME fineclient.pages.dev.",
+      "claim": "fineclient",
+      "owner": "WickedXeno"
+    },
+    {
+      "fqdn": "free-manner.runs-at.dev",
+      "type": "CNAME",
+      "canonical": "free-manner CNAME rosy-birch-588c-1f066ada.pages.dev.",
+      "claim": "free-manner",
+      "owner": "big47665-lang"
+    },
+    {
+      "fqdn": "haxnonroot.runs-at.dev",
+      "type": "CNAME",
+      "canonical": "haxnonroot CNAME nacer-22.github.io.",
+      "claim": "haxnonroot",
+      "owner": "Nacer-22"
+    },
+    {
+      "fqdn": "admin.jaku.runs-at.dev",
+      "type": "CNAME",
+      "canonical": "admin.jaku CNAME 0d8cad509a37ea87.vercel-dns-017.com.",
+      "claim": "jaku",
+      "owner": "saijaku1"
+    },
+    {
+      "fqdn": "mail.ofcstream.runs-at.dev",
+      "type": "A",
+      "canonical": "mail.ofcstream A 169.58.223.142",
+      "claim": "ofcstream",
+      "owner": "Learning-dev-language"
+    },
+    {
+      "fqdn": "wutong.runs-at.dev",
+      "type": "CNAME",
+      "canonical": "wutong CNAME alcindora.github.io.",
+      "claim": "wutong",
+      "owner": "Alcindora"
+    },
+    {
+      "fqdn": "xinniankuaile.runs-at.dev",
+      "type": "CNAME",
+      "canonical": "xinniankuaile CNAME custom-domains.chatgpt.site.",
+      "claim": "xinniankuaile",
+      "owner": "bellawu31-png"
+    },
+    {
+      "fqdn": "_openai-site-verification.xinniankuaile.runs-at.dev",
+      "type": "TXT",
+      "canonical": "_openai-site-verification.xinniankuaile TXT \"openai-site-verification=DIiHhL7gu6sR2RlLqBKQcUHH3NAzdrf-X0k6cnw2xtE\"",
+      "claim": "xinniankuaile",
+      "owner": "bellawu31-png"
+    },
+    {
+      "fqdn": "_cf-custom-hostname.xinniankuaile.runs-at.dev",
+      "type": "TXT",
+      "canonical": "_cf-custom-hostname.xinniankuaile TXT \"71a04f6e-9d26-4330-a81e-59c9c74728c2\"",
+      "claim": "xinniankuaile",
+      "owner": "bellawu31-png"
+    },
+    {
+      "fqdn": "_vercel.runs-at.dev",
+      "type": "TXT",
+      "canonical": "_vercel TXT \"vc-domain-verify=adsimple.runs-at.dev,616d695eda3268292b07\"",
+      "claim": null,
+      "owner": null
+    }
+  ]
+}

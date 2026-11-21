@@ -1,7 +1,7 @@
 import { appendFile, readFile, readdir } from 'node:fs/promises';
 import {
   classifyClaim, planIssueClosures, planIssueOpens, diagnoseStuck, stuckIssueBody,
-  STUCK_LABEL, findDrift, normalizeAnswer, expectationKey,
+  STUCK_LABEL, findDrift, normalizeAnswer, expectationKey, probeErrorKind, looksUndeployed,
 } from '../lib/health.js';
 import { planDnsChanges, planZoneVerificationRecords } from '../lib/dns.js';
 import { Resolver } from 'node:dns/promises';
@@ -25,9 +25,17 @@ async function probe(name) {
     });
     const body = await res.text();
     const title = /<title[^>]*>([^<]*)<\/title>/i.exec(body)?.[1]?.trim() ?? '';
-    return { ok: true, finalHost: new URL(res.url).hostname, title };
-  } catch {
-    return { ok: false };
+    return {
+      ok: true,
+      status: res.status,
+      finalHost: new URL(res.url).hostname,
+      title,
+      noDeployment: looksUndeployed(res.status, body),
+    };
+  } catch (err) {
+    // Keep why it failed: a name that does not resolve, a bad certificate and
+    // a host that timed out are three different conversations with an owner.
+    return { ok: false, error: probeErrorKind(err) };
   }
 }
 
@@ -55,9 +63,27 @@ async function worker() {
 
 await Promise.all(Array.from({ length: Math.min(CONCURRENCY, queue.length) }, worker));
 
-const SEVERITY = { stuck: 0, down: 1, ok: 2, redirect: 3, card: 4 };
+// Drift is computed BEFORE classifying, and fed into it. A name whose declared
+// records never reached DNS is answered by the wildcard card, which looks
+// exactly like an owner who has not finished provider verification. Without
+// this, our own sync failure was reported as the owner's hosting failure and a
+// nudge issue was opened at them for it.
+const drift = await findDnsDrift(claims);
+const registryNames = new Set(claims.map((claim) => claim.name));
+const drifted = new Set(
+  drift
+    .map((record) => String(record.host).replace(`.${DOMAIN}`, '').split('.').pop())
+    .filter((name) => registryNames.has(name)),
+);
+
+const SEVERITY = {
+  'dns-missing': 0, stuck: 1, 'bad-target': 2, tls: 3, 'no-deployment': 4, 'http-error': 5, down: 6, ok: 7, redirect: 8, card: 9,
+};
 const rows = claims
-  .map((claim) => ({ name: claim.name, status: classifyClaim(claim, probes.get(claim.name)) }))
+  .map((claim) => ({
+    name: claim.name,
+    status: classifyClaim(claim, probes.get(claim.name), { dnsMissing: drifted.has(claim.name) }),
+  }))
   .sort((a, b) => SEVERITY[a.status] - SEVERITY[b.status] || a.name.localeCompare(b.name));
 
 const counts = {};
@@ -91,6 +117,20 @@ if (stuck.length > 0) {
   );
 }
 
+const unpublished = rows.filter((row) => row.status === 'dns-missing');
+if (unpublished.length > 0) {
+  lines.push(
+    '## Declared records not published in DNS (ours to fix)',
+    '',
+    'The registry holds records for these names that DNS does not serve, so the',
+    'wildcard answers them. This is a sync-dns failure, not the owner\'s hosting,',
+    'and no nudge issue is opened for them.',
+    '',
+    ...unpublished.map((row) => `- ${row.name}`),
+    '',
+  );
+}
+
 const report = lines.join('\n');
 process.stdout.write(report);
 if (process.env.GITHUB_STEP_SUMMARY) {
@@ -120,8 +160,6 @@ await openStuckIssues(rows, claims);
 // Drift is different. It means the registry declares a record that DNS does
 // not serve, which can only be sync-dns having failed silently. That is ours,
 // it is actionable, and nothing else looks for it.
-const drift = await findDnsDrift(claims);
-
 if (drift.length > 0) {
   console.error(`health: ${drift.length} declared record(s) missing from DNS`);
   for (const record of drift) console.error(`  ${record.type} ${record.host} -> ${record.want}`);
@@ -143,12 +181,7 @@ if (drift.length > 0) {
   // result is intersected with the registry -- sync-dns rebuilds the mirror on
   // every run regardless of which names it was given, so repairing any real
   // name repairs the mirror alongside it.
-  const registry = new Set(claims.map((claim) => claim.name));
-  const names = [...new Set(
-    drift
-      .map((record) => String(record.host).replace(`.${DOMAIN}`, '').split('.').pop())
-      .filter((name) => registry.has(name)),
-  )].sort();
+  const names = [...drifted].sort();
 
   if (names.length === 0) {
     console.error('health: drift is at the zone level only, which no per-name resync repairs');

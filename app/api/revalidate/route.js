@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
+import { registryChanged } from '../../../lib/registry-cache.js';
 
 export async function POST(request) {
   const secret = process.env.GITHUB_WEBHOOK_SECRET;
@@ -34,10 +35,18 @@ export async function POST(request) {
     ...(c.removed ?? []),
   ]);
 
+  let registry = false;
   for (const file of touched) {
     const match = file.match(/^domains\/([a-z0-9-]+)\.json$/);
-    if (match) revalidatePath(`/sites/${match[1]}`);
+    if (match) {
+      revalidatePath(`/sites/${match[1]}`);
+      registry = true;
+    }
   }
+  // Any claim file added, edited or removed -- including PR merges and hand
+  // edits that never pass through /api/claim -- refreshes the shared snapshot
+  // the homepage and /stats count from.
+  if (registry) registryChanged('push');
 
-  return Response.json({ revalidated: true });
+  return Response.json({ revalidated: true, registry });
 }

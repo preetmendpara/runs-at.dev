@@ -4,6 +4,7 @@ import { getContentsMeta } from '../../../lib/registry.js';
 import { updateOwnerIndex } from '../../../lib/owners.js';
 import { releaseSlot } from '../../../lib/entitlements.js';
 import { createRateLimiter, rateLimitHeaders } from '../../../lib/throttle.js';
+import { registryChanged } from '../../../lib/registry-cache.js';
 
 // Releases a claimed name: deletes domains/<name>.json from the repo,
 // making the name available for anyone to claim again. The sync-dns
@@ -85,6 +86,8 @@ export async function POST(request) {
   if (!res.ok) {
     return Response.json({ error: 'delete_failed', detail: `GitHub returned ${res.status}` }, { status: 502 });
   }
+
+  registryChanged('release');
 
   // Free the slot in the authoritative entitlement record, so the next claim
   // can use it straight away. If this write fails the slot is not lost: once

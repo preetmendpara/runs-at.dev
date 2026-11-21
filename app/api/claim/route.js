@@ -4,6 +4,7 @@ import { putRecord } from '../../../lib/registry.js';
 import { updateOwnerIndex } from '../../../lib/owners.js';
 import { reserveSlot, settleSlot } from '../../../lib/entitlements.js';
 import { createRateLimiter, rateLimitHeaders } from '../../../lib/throttle.js';
+import { registryChanged } from '../../../lib/registry-cache.js';
 
 const TOKEN = () => process.env.REGISTRY_TOKEN;
 
@@ -79,6 +80,9 @@ export async function POST(request) {
   }
 
   if (result.ok) {
+    // The homepage and /stats count from the cached registry snapshot; tell
+    // it now so the claimant's own name is in the very next render's count.
+    registryChanged('claim');
     // The owners/ index is derived (sync-owners rebuilds it from domains/ on
     // this push); updating it now only keeps /manage current in the meantime.
     const indexed = await updateOwnerIndex(session.login, (names) => (names.includes(name) ? null : [...names, name]), {

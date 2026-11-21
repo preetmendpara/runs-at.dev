@@ -1,0 +1,119 @@
+name: export-cloudflare-dns
+
+# Read-only snapshot of the Cloudflare zone for the PowerDNS migration
+# baseline, reconciled against the registry on the same runner.
+#
+# The raw export never leaves this runner: no artifact, no cache, no commit,
+# no log of record values. It is written under $RUNNER_TEMP (mode 700, umask
+# 077), compared with the registry in the same step, and deleted by both a
+# shell trap and an always() step. Only aggregate counts and the SHA-256 of
+# the whole export are published, to the job summary. This repository is
+# public, so anything uploaded would be public too.
+#
+# Token: CLOUDFLARE_DNS_READ_TOKEN, a separate API token scoped to
+# Zone -> DNS -> Read on runs-at.dev only. The existing CLOUDFLARE_API_TOKEN
+# is deliberately NOT used: sync-dns.yml writes records with it, so it holds
+# edit rights this export must not have. Until the read-only secret exists the
+# job fails at the export step without touching anything.
+#
+# Runs only on pushes to the migration branch that change the export code (a
+# push needs write access; forks cannot trigger push workflows here).
+on:
+  push:
+    branches: [feat/powerdns-migration]
+    paths:
+      - scripts/export-cloudflare-dns.mjs
+      - scripts/reconcile-cloudflare.mjs
+      - .github/workflows/export-cloudflare-dns.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: export-cloudflare-dns
+  cancel-in-progress: false
+
+defaults:
+  run:
+    # Explicit: no `set -x` tracing anywhere in this workflow.
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+jobs:
+  export:
+    # GitHub-hosted, ephemeral VM: a fresh machine per job, discarded after.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Export and reconcile (raw export stays on the runner)
+        env:
+          CF_READ_TOKEN: ${{ secrets.CLOUDFLARE_DNS_READ_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          AGE_RECIPIENT: ${{ secrets.MIGRATION_BACKUP_AGE_RECIPIENT }}
+          # Write-only pre-authenticated request for the private Oracle bucket.
+          OCI_BACKUP_PAR_URL: ${{ secrets.OCI_BACKUP_PAR_URL }}
+        run: |
+          set +x
+          umask 077
+          dir="$RUNNER_TEMP/cf-export"
+          mkdir -m 700 "$dir"
+          trap 'rm -rf "$dir"' EXIT
+          # The token reaches only the exporter's environment, then is unset.
+          CLOUDFLARE_API_TOKEN="$CF_READ_TOKEN" CLOUDFLARE_ZONE_ID="$CF_ZONE_ID" \
+            node scripts/export-cloudflare-dns.mjs "$dir" --quiet
+          unset CF_READ_TOKEN CF_ZONE_ID
+          # The sanitized report (counts, kinds, one checksum) goes to the job
+          # summary and the log; it contains no record names or values.
+          node scripts/reconcile-cloudflare.mjs "$dir" | tee -a "$GITHUB_STEP_SUMMARY"
+          # Durable backup, ONLY as ciphertext: encrypted to the owner's age
+          # public key (MIGRATION_BACKUP_AGE_RECIPIENT). The private key never
+          # exists in GitHub. Without the recipient, no backup leaves the runner.
+          if [ -n "$AGE_RECIPIENT" ]; then
+            sudo apt-get install -y -qq age > /dev/null
+            out="$RUNNER_TEMP/cf-backup"
+            mkdir -m 700 "$out"
+            # Bundle: Cloudflare export (incl. the DKIM record), registry
+            # snapshot, live DNS answers, the generated zone (TEST-NET glue:
+            # record data only) and the deployable configuration, with a
+            # per-file SHA-256 manifest inside the ciphertext.
+            b="$RUNNER_TEMP/bundle"; mkdir -m 700 "$b"
+            trap 'rm -rf "$dir" "$b"' EXIT
+            cp -r "$dir" "$b/cloudflare"
+            mkdir "$b/registry" && git archive HEAD domains owners entitlements | tar -x -C "$b/registry"
+            mkdir -p -m 700 migration/backup && node migration/inventory.mjs --export > /dev/null && cp migration/backup/live-dns-export.json "$b/"
+            node scripts/export-zone.mjs --placeholder-glue --out "$b/zone" > /dev/null
+            mkdir "$b/config" && git archive HEAD infra lib/dns scripts | tar -x -C "$b/config"
+            git rev-parse HEAD > "$b/GIT_COMMIT"
+            (cd "$b" && find . -type f ! -name MANIFEST.sha256 | LC_ALL=C sort | xargs sha256sum > MANIFEST.sha256)
+            echo "Bundle manifest SHA-256: $(sha256sum "$b/MANIFEST.sha256" | cut -d' ' -f1) ($(wc -l < "$b/MANIFEST.sha256") files)" | tee -a "$GITHUB_STEP_SUMMARY"
+            tar -C "$b" -cf - . | age -r "$AGE_RECIPIENT" -o "$out/runs-at-migration-backup.tar.age"
+            rm -rf "$b" migration/backup/live-dns-export.json
+            sha256sum "$out/runs-at-migration-backup.tar.age" | sed 's#  .*/#  #' > "$out/SHA256SUMS"
+            echo "Encrypted backup: $(cut -d' ' -f1 "$out/SHA256SUMS")" | tee -a "$GITHUB_STEP_SUMMARY"
+            # Off-site copy of the ciphertext; the URL goes to curl on stdin.
+            if [ -n "$OCI_BACKUP_PAR_URL" ]; then
+              obj="backups/registry/runs-at-migration-backup-$(date -u +%Y%m%dT%H%M%SZ).tar.age"
+              printf 'url = "%s%s"\nupload-file = "%s"\n' "$OCI_BACKUP_PAR_URL" "$obj" "$out/runs-at-migration-backup.tar.age" \
+                | curl -sS -f -K - -o /dev/null
+              echo "Off-site copy: $obj" | tee -a "$GITHUB_STEP_SUMMARY"
+            fi
+            unset OCI_BACKUP_PAR_URL
+          else
+            echo "No MIGRATION_BACKUP_AGE_RECIPIENT: encrypted backup skipped" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+      # Ciphertext only; the plaintext directory is never part of an upload.
+      - name: Upload encrypted backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudflare-export-encrypted
+          path: ${{ runner.temp }}/cf-backup/
+          retention-days: 90
+          if-no-files-found: ignore
+      - name: Delete raw export
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/cf-export"

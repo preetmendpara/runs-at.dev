@@ -42,8 +42,15 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
+          # One PR that cannot be re-validated must not stop the sweep for the
+          # rest; the job still fails at the end so the problem stays visible.
+          failed=""
           for pr in $(gh pr list --repo "$REPO" --state open --base main --limit 200 --json number --jq '.[].number'); do
             if gh pr view "$pr" --repo "$REPO" --json files --jq '.files[].path' | grep -qE '^(domains|entitlements)/'; then
-              bash scripts/rerun-validate.sh "$pr"
+              bash scripts/rerun-validate.sh "$pr" || failed="$failed #$pr"
             fi
           done
+          if [ -n "$failed" ]; then
+            echo "::error::could not re-validate:$failed"
+            exit 1
+          fi

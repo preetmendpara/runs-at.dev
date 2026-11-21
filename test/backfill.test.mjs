@@ -132,28 +132,33 @@ const workflow = (name) => readFileSync(join(import.meta.dirname, '..', '.github
 
 test('validate runs on every PR from the base-branch workflow file, and passes non-registry PRs', () => {
   const yml = workflow('validate.yml');
-  assert.match(yml, /on:\n  pull_request_target:\n    types: \[opened, synchronize, reopened\]\n\n/, 'no paths filter, base-branch YAML');
-  assert.doesNotMatch(yml, /^  pull_request:/m, 'a pull_request trigger would run the PR\'s own copy of this file');
-  assert.match(yml, /permissions:\n  contents: read\n  pull-requests: read/);
+  assert.ok(yml.includes('on:\n  pull_request_target:\n    types: [opened, synchronize, reopened]\n'), 'no paths filter, base-branch YAML');
+  assert.doesNotMatch(yml, /^  pull_request:/m, "a pull_request trigger would run the PR's own copy of this file");
+  assert.ok(yml.includes('\npermissions:\n  contents: read\n  pull-requests: read\n\n'), 'top-level token is read-only');
   assert.doesNotMatch(yml, /contents: write/);
-  // Every step after the scope check is gated on it; the check itself always succeeds.
-  const steps = yml.slice(yml.indexOf('id: scope')).split('\n      - ').slice(1);
+  // In the validate job, every step after the scope check is gated on it,
+  // except the final Result step, which only reports.
+  const job = yml.slice(yml.indexOf('\n  validate:\n'), yml.indexOf('\n  close:\n'));
+  const steps = job.slice(job.indexOf('id: scope')).split('\n      - ').slice(1).filter((s) => !s.startsWith('name: Result'));
   assert.ok(steps.length >= 6);
-  for (const step of steps) assert.match(step, /^if: steps\.scope\.outputs\.registry == 'true'/, step.slice(0, 60));
+  for (const step of steps) assert.ok(step.startsWith("if: steps.scope.outputs.registry == 'true'"), step.slice(0, 60));
   assert.ok(yml.includes("grep -qE '^(domains|entitlements)/'"));
-  // Every checkout is the base branch, and none keeps the token.
+  // Every checkout is the base branch (resolved from the PR), and none keeps the token.
   const checkouts = yml.split('uses: actions/checkout@v5').slice(1);
   assert.equal(checkouts.length, 2);
   for (const c of checkouts) {
-    assert.ok(c.includes('ref: ${{ github.event.pull_request.base.ref }}'));
+    assert.ok(c.includes('ref: ${{ steps.pr.outputs.base_ref }}'));
     assert.ok(c.includes('persist-credentials: false'));
   }
+  // base_ref comes from the PR's base, never its head.
+  assert.ok(yml.includes('EVENT_BASE_REF: ${{ github.event.pull_request.base.ref }}'));
+  assert.ok(yml.includes('echo "base_ref=$base_ref"'));
 });
 
 test('validate counts registry state at the live base tip, validator code at base too', () => {
   const yml = workflow('validate.yml');
   const registry = yml.slice(yml.indexOf('path: .base-registry') - 200, yml.indexOf('path: .base-registry'));
-  assert.match(registry, /ref: \$\{\{ github\.event\.pull_request\.base\.ref \}\}/);
+  assert.ok(registry.includes('ref: ${{ steps.pr.outputs.base_ref }}'));
   assert.doesNotMatch(yml, /head\.ref|head\.sha \}\}\n\s+path/);
   assert.match(yml, /REGISTRY_CHECKOUT: \.base-registry/);
 });

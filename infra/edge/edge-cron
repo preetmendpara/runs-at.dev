@@ -1,0 +1,9 @@
+# /etc/cron.d/runs-at-edge
+# Renew the wildcard certificate daily (lego renews only within 30 days of
+# expiry). ACME_EMAIL lives in /etc/runs-at-edge/acme.env (operator-supplied);
+# without it the job does nothing.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+17 4 * * * root [ -s /etc/runs-at-edge/acme.env ] && { set -a; . /etc/runs-at-edge/acme.env; set +a; /usr/local/sbin/renew-cert.sh >> /var/log/runs-at-edge-renew.log 2>&1; }
+# Health every minute: HTTPS and HTTP must answer locally; DNS must still answer.
+* * * * * root /usr/local/sbin/edge-health.sh >> /var/log/runs-at-edge-health.log 2>&1

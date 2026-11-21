@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars (gitignored by *.tfvars below) and fill in. No real values here.
+tenancy_ocid     = "ocid1.tenancy.oc1..REPLACE_ME"
+compartment_ocid = "ocid1.compartment.oc1..REPLACE_ME"
+region           = "REPLACE_ME"
+ssh_public_key   = "ssh-ed25519 AAAA...REPLACE_ME"
+ssh_allowed_cidr = "203.0.113.7/32"

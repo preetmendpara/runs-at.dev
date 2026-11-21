@@ -1,0 +1,20 @@
+{
+  "provider": "ImprovMX Free (1 domain, 25 aliases, 500 forwards/day; checked on improvmx.com/pricing 2026-11-14)",
+  "note": "Apply to the PowerDNS zone ONLY in the cutover window, after migration/improvmx-setup.mjs --apply and --smtp-test pass. Aliases (claude@, abuse@; catch-all off) and their destinations live in the ImprovMX account, created from the encrypted Cloudflare export, so they never appear in DNS, git or logs. Cloudflare Email Routing stays active until the nameservers change.",
+  "remove": [
+    { "type": "MX", "name": "", "value": "route1.mx.cloudflare.net" },
+    { "type": "MX", "name": "", "value": "route2.mx.cloudflare.net" },
+    { "type": "MX", "name": "", "value": "route3.mx.cloudflare.net" }
+  ],
+  "add": [
+    { "type": "MX", "name": "", "priority": 10, "value": "mx1.improvmx.com" },
+    { "type": "MX", "name": "", "priority": 20, "value": "mx2.improvmx.com" }
+  ],
+  "spf": { "from": "v=spf1 include:_spf.mx.cloudflare.net ~all", "to": "v=spf1 include:spf.improvmx.com ~all" },
+  "keep": [
+    "cf2024-1._domainkey TXT (unchanged)",
+    "apex google-site-verification TXT and the other verification TXT (unchanged)"
+  ],
+  "dmarc": "none today; not added by the migration",
+  "optional_after_cutover": "ImprovMX DKIM CNAMEs (dkimprovmx1/2._domainkey) only if sending through ImprovMX SMTP is wanted"
+}
