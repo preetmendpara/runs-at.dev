@@ -99,8 +99,8 @@ done
 # ── step A: empty zone with system records, then the real sync path ──────
 $U1 create-zone $ZONE ns1.$ZONE > /dev/null
 $U1 add-record $ZONE $ZONE NS 300 ns2.$ZONE. > /dev/null
-$U1 add-record $ZONE ns1 A 300 192.0.2.1 > /dev/null   # TEST-NET glue: test only
-$U1 add-record $ZONE ns2 A 300 192.0.2.2 > /dev/null   # TEST-NET glue: test only
+$U1 add-record $ZONE ns1.$ZONE A 300 192.0.2.1 > /dev/null   # TEST-NET glue: test only
+$U1 add-record $ZONE ns2.$ZONE A 300 192.0.2.2 > /dev/null   # TEST-NET glue: test only
 $U1 set-meta $ZONE SOA-EDIT-API DEFAULT > /dev/null
 $U1 generate-tsig-key xfr-runs-at-dev hmac-sha256 > /dev/null
 $U1 set-meta $ZONE TSIG-ALLOW-AXFR xfr-runs-at-dev > /dev/null
