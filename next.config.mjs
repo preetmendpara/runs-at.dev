@@ -4,8 +4,11 @@ export default {
   // time (it renders dynamically because of session state). Output tracing
   // cannot see the readdir, so the registry files must ship to the lambda
   // explicitly or the read comes up empty in production.
+  // /stats is incrementally regenerated now, and both pages fall back to the
+  // deployed copy when the live registry read fails, so both need the files.
   outputFileTracingIncludes: {
     '/': ['./domains/**'],
+    '/stats': ['./domains/**'],
   },
   // Every page (and the markdown twin) varies by Accept: agents negotiating
   // text/markdown get /llms-md content while browsers get HTML, and a cache

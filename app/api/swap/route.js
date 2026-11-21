@@ -5,6 +5,7 @@ import { getRecord, getContentsMeta, putRecord } from '../../../lib/registry.js'
 import { updateOwnerIndex } from '../../../lib/owners.js';
 import { swapSlot, unswapSlot, settleSlot } from '../../../lib/entitlements.js';
 import { createRateLimiter, rateLimitHeaders } from '../../../lib/throttle.js';
+import { registryChanged } from '../../../lib/registry-cache.js';
 
 // Swaps the user's claimed name for a new one. Releases the old name
 // FIRST, then creates the new record with everything carried over
@@ -156,6 +157,8 @@ export async function POST(request) {
   // cleanly. The old name is already released at this point; the user owns
   // nothing for the moment, which a retry fixes.
   const createResult = await putRecord(newRecord, { token, fetchImpl: uncachedFetch });
+  // `from` is gone whatever happened to `to`, so the counted registry changed.
+  registryChanged('swap');
   // Confirm `to`, or free the slot: `from` is already gone either way.
   await settleSlot(session.login, to, createResult.ok, { token, fetchImpl: uncachedFetch }).catch(() => null);
   if (!createResult.ok) {

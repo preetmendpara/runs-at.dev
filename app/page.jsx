@@ -6,7 +6,7 @@ import HomeMap from './components/home-map.jsx';
 import AdBanner from './components/ad-banner.jsx';
 import { CLAIM_GEO } from './components/claim-geo.js';
 import { geoPlacement } from '../lib/geo-placement.js';
-import { readRegistry } from '../lib/registry-files.js';
+import { getRegistrySnapshot } from '../lib/registry-cache.js';
 import countryCentroids from '../scripts/country-centroids.json';
 import { readSession, SESSION_COOKIE } from '../lib/session.js';
 import { getOwnerIndex } from '../lib/owners.js';
@@ -165,29 +165,27 @@ async function ownedName(session) {
   return { name, record };
 }
 
-// Map placement recounted against the live registry. The page renders
-// dynamically (session state is in the flow), but these numbers only change
-// when the registry does, i.e. on deploy, so the disk read is memoised per
-// lambda instance rather than paid per request.
-let registryMemo = null;
-function registry() {
-  if (!registryMemo) registryMemo = readRegistry();
-  return registryMemo;
-}
-
+// Counts, map and recent list all come from the one shared registry snapshot
+// (lib/registry-cache.js), the same object /stats renders from. It used to be
+// a per-lambda memo of the deployed domains/ folder, which only changed on
+// deploy -- and claims do not deploy -- so the readout lagged the registry by
+// every claim since the last scheduled build.
 export default async function Home() {
   const raw = (await cookies()).get(SESSION_COOKIE)?.value;
   const session = raw ? readSession(raw, process.env.SESSION_SECRET) : null;
-  const owned = await ownedName(session);
-  const registryList = registry();
+  const [owned, snapshot] = await Promise.all([ownedName(session), getRegistrySnapshot()]);
+  const registryList = snapshot.records;
   const placement = geoPlacement(registryList, CLAIM_GEO, countryCentroids);
   const recent = [...registryList]
     .sort((a, b) => String(b.claimedAt).localeCompare(String(a.claimedAt)))
     .slice(0, 8);
 
   const readout = [
-    ['Names', `${registryList.length} claimed`],
-    ['On map', `${placement.resolved} placed`],
+    ['Names', `${snapshot.claims} claimed`],
+    // The map places owners, not names (one dot per account), so it is said
+    // in owners: "258 placed" beside "265 claimed" read as 7 names missing.
+    ['On map', `${placement.resolved} of ${placement.total} owners`],
+    ['Updated', snapshot.asOf ? snapshot.asOf.slice(0, 16).replace('T', ' ') + ' UTC' : 'at last deploy'],
     ['Included', '1 per GitHub account'],
     ['Sign-in', 'GitHub'],
     ['Registry', 'public'],
@@ -306,7 +304,7 @@ export default async function Home() {
             </ol>
             <div className={`flex flex-wrap justify-between gap-2 border-t-2 border-(--line-strong) px-4 py-2 ${LABEL}`}>
               <span>
-                {recent.length} of {registryList.length} shown
+                {recent.length} of {snapshot.claims} shown
               </span>
               <a className="text-(--color-ink) underline" href={`${REPO_URL}/tree/main/domains`} target="_blank" rel="noopener noreferrer">
                 full registry ↗

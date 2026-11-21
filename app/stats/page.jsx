@@ -1,7 +1,5 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { summarize } from '../../lib/stats.js';
-import { readRegistry } from '../../lib/registry-files.js';
+import { getRegistrySnapshot } from '../../lib/registry-cache.js';
 import { geoPlacement } from '../../lib/geo-placement.js';
 import { CLAIM_GEO } from '../components/claim-geo.js';
 import countryCentroids from '../../scripts/country-centroids.json';
@@ -17,12 +15,15 @@ export const metadata = {
   openGraph: { title: 'Stats · runs-at.dev' },
 };
 
-// Read at build time, never per request. Deploys run from GitHub Actions on
-// merge to main, so a claim and this page's rebuild are the same event -- the
-// numbers are never more than one merge stale. Reading `domains/` off disk
-// also keeps the page off the GitHub API entirely, which matters because the
-// wildcard makes that quota trivially easy to exhaust (see app/sites).
-export const dynamic = 'force-static';
+// Incrementally regenerated from the shared registry snapshot, the same one
+// the homepage renders from. It was `force-static` on the assumption that a
+// claim and a deploy are the same event; they are not (data commits do not
+// deploy, see deploy.yml), so the page sat on the last scheduled build's
+// numbers. The snapshot is one GraphQL request per TTL or claim, not per
+// visitor, so the wildcard cannot drain REGISTRY_TOKEN's quota through this
+// page. Keep this literal equal to REGISTRY_TTL_SECONDS (Next reads segment
+// config statically, so it cannot be the import itself).
+export const revalidate = 300;
 
 const USAGE_LABELS = {
   card: 'Profile card',
@@ -88,8 +89,9 @@ function Ledger({ head, rows }) {
   );
 }
 
-export default function Stats() {
-  const registry = readRegistry();
+export default async function Stats() {
+  const snapshot = await getRegistrySnapshot();
+  const registry = snapshot.records;
   const stats = summarize(registry);
   const placement = geoPlacement(registry, CLAIM_GEO, countryCentroids);
   const usage = Object.entries(stats.usage).filter(([, count]) => count > 0);
@@ -102,7 +104,10 @@ export default function Stats() {
     <main className="mx-auto max-w-[1200px] px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
       <div className={`flex flex-wrap items-center justify-between gap-3 border-b border-(--line) pb-3 ${LABEL}`}>
         <span>runs-at.dev // registry statistics</span>
-        <span>source: domains/*.json</span>
+        <span>
+          source: domains/*.json
+          {snapshot.asOf ? ` @ ${snapshot.commit?.slice(0, 7)} · ${snapshot.asOf.slice(0, 16).replace('T', ' ')} UTC` : ' · as of last deploy'}
+        </span>
       </div>
 
       <div className="mt-10 grid gap-8 lg:mt-14 lg:grid-cols-[1fr_380px] lg:items-end lg:gap-16">
