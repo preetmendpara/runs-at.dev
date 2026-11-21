@@ -4,6 +4,20 @@
     "github": "Alanwu1234"
   },
   "claimedAt": "2026-11-21T07:04:40.832Z",
-  "records": {},
-  "country": "US"
+  "records": {
+    "CNAME": "custom-domains.chatgpt.site"
+  },
+  "country": "US",
+  "subdomains": {
+    "_openai-site-verification": {
+      "TXT": [
+        "openai-site-verification=QZUMXaX9FtTOWkHMZGJzoiiS5ba4u-9aUR88HmuTJwo"
+      ]
+    },
+    "_cf-custom-hostname": {
+      "TXT": [
+        "3fae2081-6556-4ffb-b843-03d99977c303"
+      ]
+    }
+  }
 }
