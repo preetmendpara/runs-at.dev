@@ -4,6 +4,8 @@
     "github": "GOTFeSports"
   },
   "claimedAt": "2026-11-21T19:59:17.544Z",
-  "records": {},
+  "records": {
+    "CNAME": "gotfesports.github.io"
+  },
   "country": "NL"
 }
