@@ -3,9 +3,11 @@
   "included": 1,
   "adminGranted": 0,
   "names": [
-    "alanwu"
+    "timetable"
   ],
-  "pending": {},
+  "pending": {
+    "timetable": "2026-11-21T07:12:36.197Z"
+  },
   "pullRequests": {},
   "history": []
 }
