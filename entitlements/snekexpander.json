@@ -2,8 +2,12 @@
   "github": "snekexpander",
   "included": 1,
   "adminGranted": 0,
-  "names": [],
-  "pending": {},
+  "names": [
+    "snekexpander"
+  ],
+  "pending": {
+    "snekexpander": "2026-11-22T17:16:21.555Z"
+  },
   "pullRequests": {},
   "history": []
 }
