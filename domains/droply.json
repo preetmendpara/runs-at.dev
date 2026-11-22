@@ -7,5 +7,12 @@
   "records": {
     "CNAME": "cfbab79f9a695270.vercel-dns-017.com"
   },
-  "country": "IQ"
+  "country": "IQ",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=droply.runs-at.dev,f168ee92c4923a97810f"
+      ]
+    }
+  }
 }
