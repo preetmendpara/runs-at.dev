@@ -4,6 +4,15 @@
     "github": "medic5923-dot"
   },
   "claimedAt": "2026-11-22T11:22:49.347Z",
-  "records": {},
-  "country": "KR"
+  "records": {
+    "CNAME": "45a24b16c15425f2.vercel-dns-017.com"
+  },
+  "country": "KR",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=after-gallery.runs-at.dev,21af3ea2402012f89c68"
+      ]
+    }
+  }
 }
