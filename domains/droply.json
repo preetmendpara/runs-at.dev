@@ -4,6 +4,8 @@
     "github": "a-scripter"
   },
   "claimedAt": "2026-11-22T13:22:59.888Z",
-  "records": {},
+  "records": {
+    "CNAME": "cfbab79f9a695270.vercel-dns-017.com"
+  },
   "country": "IQ"
 }
