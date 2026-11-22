@@ -4,6 +4,15 @@
     "github": "njangid22"
   },
   "claimedAt": "2026-11-22T06:26:56.574Z",
-  "records": {},
-  "country": "IN"
+  "records": {
+    "CNAME": "12a314f2df33a08f.vercel-dns-017.com"
+  },
+  "country": "IN",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=movihub.runs-at.dev,7587df6e9f6ec99ccbb3"
+      ]
+    }
+  }
 }
