@@ -4,6 +4,20 @@
     "github": "juanjro1072-source"
   },
   "claimedAt": "2026-11-22T16:09:14.804Z",
-  "records": {},
+  "records": {
+    "MX": [
+      {
+        "priority": 10,
+        "value": "mx1.improvmx.com"
+      },
+      {
+        "priority": 20,
+        "value": "mx2.improvmx.com"
+      }
+    ],
+    "TXT": [
+      "v=spf1 include:spf.improvmx.com ~all"
+    ]
+  },
   "country": "US"
 }
