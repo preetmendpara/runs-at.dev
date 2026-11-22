@@ -4,6 +4,10 @@
     "github": "ZainebKhalid8"
   },
   "claimedAt": "2026-11-22T08:32:21.861Z",
-  "records": {},
+  "records": {
+    "A": [
+      "82.25.87.225"
+    ]
+  },
   "country": "PK"
 }
