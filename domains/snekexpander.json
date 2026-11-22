@@ -7,5 +7,10 @@
   "records": {
     "CNAME": "snekexpander.github.io"
   },
-  "country": "DE"
+  "country": "DE",
+  "subdomains": {
+    "ota-sppp": {
+      "CNAME": "snekexpander.github.io"
+    }
+  }
 }
