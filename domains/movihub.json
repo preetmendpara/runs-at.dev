@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "12a314f2df33a08f.vercel-dns-017.com"
   },
-  "country": "IN",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=movihub.runs-at.dev,7587df6e9f6ec99ccbb3"
-      ]
-    }
-  }
+  "country": "IN"
 }
