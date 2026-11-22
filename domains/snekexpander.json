@@ -5,5 +5,10 @@
   },
   "claimedAt": "2026-11-22T17:16:21.367Z",
   "records": {},
-  "country": "DE"
+  "country": "DE",
+  "subdomains": {
+    "sppp": {
+      "CNAME": "snekexpander.github.io"
+    }
+  }
 }
