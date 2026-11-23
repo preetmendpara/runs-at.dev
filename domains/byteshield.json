@@ -10,12 +10,5 @@
   "country": "IN",
   "profile": {
     "name": "ShauryaWarrior1212"
-  },
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=byteshield.runs-at.dev,314e5b8ef3e8dc7fc060"
-      ]
-    }
   }
 }

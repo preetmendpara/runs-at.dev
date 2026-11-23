@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "49b2636bca5e27ad.vercel-dns-017.com"
   },
-  "country": "PE",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=naomisanchez.runs-at.dev,10e04899f63a439715f7"
-      ]
-    }
-  }
+  "country": "PE"
 }
