@@ -4,6 +4,8 @@
     "github": "hi45645"
   },
   "claimedAt": "2026-11-23T07:13:08.470Z",
-  "records": {},
+  "records": {
+    "CNAME": "3565e0ec556370d2.vercel-dns-017.com"
+  },
   "country": "IN"
 }
