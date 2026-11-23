@@ -4,6 +4,15 @@
     "github": "naomisanchez-coder"
   },
   "claimedAt": "2026-11-23T04:56:45.275Z",
-  "records": {},
-  "country": "PE"
+  "records": {
+    "CNAME": "49b2636bca5e27ad.vercel-dns-017.com"
+  },
+  "country": "PE",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=naomisanchez.runs-at.dev,10e04899f63a439715f7"
+      ]
+    }
+  }
 }
