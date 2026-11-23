@@ -5,5 +5,9 @@
   },
   "claimedAt": "2026-11-23T01:19:51.196Z",
   "records": {},
-  "country": "MX"
+  "country": "MX",
+  "profile": {
+    "name": "Jaime",
+    "bio": "No bio yet."
+  }
 }
