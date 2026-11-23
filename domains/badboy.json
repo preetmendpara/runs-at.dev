@@ -4,6 +4,8 @@
     "github": "bad-boy5"
   },
   "claimedAt": "2026-11-23T05:01:58.461Z",
-  "records": {},
+  "records": {
+    "CNAME": "bad-boy5.github.io"
+  },
   "country": "FR"
 }
