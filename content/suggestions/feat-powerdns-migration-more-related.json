@@ -1,0 +1,54 @@
+{
+  "status": "suggested",
+  "createdAt": "2026-11-23T18:06:23.868Z",
+  "title": "Feat/powerdns migration and 1 more related changes",
+  "summary": "Covers 2 merged pull requests (#55, #53): Feat/powerdns migration; Feat/powerdns migration.",
+  "why": "2 related pull requests landed as one effort; documenting them together gives readers the story instead of fragmenting it across release notes.",
+  "prs": [
+    {
+      "number": 55,
+      "title": "Feat/powerdns migration",
+      "url": "https://github.com/preetmendpara/runs-at.dev/pull/55"
+    },
+    {
+      "number": 53,
+      "title": "Feat/powerdns migration",
+      "url": "https://github.com/preetmendpara/runs-at.dev/pull/53"
+    }
+  ],
+  "category": "feature",
+  "tags": [
+    "Feature",
+    "feat"
+  ],
+  "outline": [
+    "What changed (one paragraph, plain language)",
+    "Why it matters for people with a name.runs-at.dev name",
+    "How it works (mention: .github/workflows/pdns-apex-mail.yml, infra/test/pdns-ci.sh, lib/dns/records.js, scripts/sync-dns.mjs)",
+    "How to use it (link the relevant guide or the manage page)",
+    "What is next"
+  ],
+  "keyPoints": [
+    "Feat/powerdns migration",
+    "Feat/powerdns migration"
+  ],
+  "links": [
+    {
+      "label": "PR #55: Feat/powerdns migration",
+      "url": "https://github.com/preetmendpara/runs-at.dev/pull/55"
+    },
+    {
+      "label": "PR #53: Feat/powerdns migration",
+      "url": "https://github.com/preetmendpara/runs-at.dev/pull/53"
+    }
+  ],
+  "seo": {
+    "title": "Feat/powerdns migration and 1 more related changes · runs-at",
+    "metaDescription": "Covers 2 merged pull requests (#55, #53): Feat/powerdns migration; Feat/powerdns migration."
+  },
+  "coveredPrs": [
+    55,
+    53
+  ],
+  "suggestedSlugBase": "feat-powerdns-migration-more-related"
+}
