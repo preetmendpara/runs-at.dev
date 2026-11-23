@@ -4,6 +4,8 @@
     "github": "jchavez-pixel"
   },
   "claimedAt": "2026-11-23T16:50:47.487Z",
-  "records": {},
+  "records": {
+    "CNAME": "jchavez-pixel.github.io"
+  },
   "country": "PE"
 }
