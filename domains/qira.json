@@ -4,6 +4,8 @@
     "github": "aboodalfshekat"
   },
   "claimedAt": "2026-11-24T13:38:07.721Z",
-  "records": {},
+  "records": {
+    "CNAME": "aboodalfshekat.github.io"
+  },
   "country": "JO"
 }
