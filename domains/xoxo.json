@@ -4,18 +4,9 @@
     "github": "otoojoshua247-sys"
   },
   "claimedAt": "2026-10-18T14:04:08.564Z",
-  "records": {
-    "CNAME": "ec6ebfee00518c45.vercel-dns-017.com"
-  },
+  "records": {},
   "country": "DE",
   "profile": {
     "name": "https://github.com/otoojoshua247-sys/x-x-_-"
-  },
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=xoxo.runs-at.dev,0e1c2eaf3eec12be9a6a"
-      ]
-    }
   }
 }
