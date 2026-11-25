@@ -14,7 +14,7 @@
   "subdomains": {
     "_vercel": {
       "TXT": [
-        "vc-domain-verify=multig99.runs-at.dev,88f0ba708591b7a85726"
+        "This domain is linked to another Vercel account. To use it with this project, add a TXT record at _vercel.runs-at.dev to verify ownership. You can remove it after verification completes."
       ]
     }
   }
