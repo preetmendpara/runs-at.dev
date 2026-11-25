@@ -10,12 +10,5 @@
   "country": "IN",
   "profile": {
     "name": "MeYashverma"
-  },
-  "subdomains": {
-    "_discord": {
-      "TXT": [
-        "dh=2956627d2f721bcde4961b5e5ae63897219d1543"
-      ]
-    }
   }
 }
