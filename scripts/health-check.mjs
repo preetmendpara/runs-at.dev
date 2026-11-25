@@ -5,7 +5,7 @@ import {
 } from '../lib/health.js';
 import { planDnsChanges, planZoneVerificationRecords } from '../lib/dns.js';
 import { Resolver } from 'node:dns/promises';
-import { checkNameservers } from '../lib/delegation.js';
+import { checkNameservers, planLameActions, lameTitle, lameIssueBody, LAME_LABEL, LAME_GRACE_DAYS } from '../lib/delegation.js';
 
 const DOMAIN = 'runs-at.dev';
 const TIMEOUT_MS = 10_000;
@@ -165,6 +165,17 @@ await closeRecoveredIssues(rows);
 // The other half. Without this the check knew a name was broken and never
 // told the one person who could fix it.
 await openStuckIssues(rows, claims);
+
+// Lame delegations: issue first, automatic hand-back after the grace period.
+// A hand-back is a commit made with this job's token, which does not trigger
+// sync-dns on its own, so reverted names join the repair job's list below.
+const reverted = await handleLameDelegations(delegated.map((c) => c.name), lame, claims);
+for (const name of reverted) drifted.add(name);
+if (drift.length === 0 && reverted.length > 0) {
+  console.error(`health: delegation removed from ${reverted.join(' ')}; handing them to the repair job`);
+  if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, `drifted=${reverted.sort().join(' ')}\n`, 'utf8');
+  process.exit(0);
+}
 
 // `stuck` and `down` are reported, never failed on. Both describe something
 // a third party has not done -- an owner who has not re-run their provider's
@@ -373,4 +384,75 @@ async function openStuckIssues(statusRows, allClaims) {
       console.error(`health: could not open an issue for ${name}: ${err.message}`);
     }
   }
+}
+
+async function handleLameDelegations(delegatedNames, lameList, allClaims) {
+  const token = process.env.GITHUB_TOKEN;
+  const repo = process.env.GITHUB_REPOSITORY;
+  if (!token || !repo) return [];
+  const api = (path, init = {}) =>
+    fetch(`https://api.github.com/repos/${repo}${path}`, {
+      ...init,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+      },
+    });
+
+  let issues;
+  try {
+    const res = await api(`/issues?state=open&labels=${LAME_LABEL}&per_page=100`);
+    if (!res.ok) throw new Error(`${res.status}`);
+    issues = (await res.json()).filter((i) => !i.pull_request);
+  } catch (err) {
+    console.error(`health: could not list ${LAME_LABEL} issues: ${err.message}`);
+    return [];
+  }
+
+  const detailOf = new Map(lameList.map((l) => [l.name, l.detail]));
+  const byName = new Map(allClaims.map((c) => [c.name, c]));
+  const plan = planLameActions({ lame: lameList.map((l) => l.name), delegated: delegatedNames, issues });
+  const reverted = [];
+
+  for (const name of plan.toOpen) {
+    const owner = byName.get(name)?.owner?.github;
+    const res = await api('/issues', { method: 'POST', body: JSON.stringify({ title: lameTitle(name), body: lameIssueBody(name, owner, detailOf.get(name) ?? ''), labels: [LAME_LABEL] }) }).catch(() => null);
+    console.log(res?.ok ? `opened lame-delegation issue for ${name}` : `health: could not open lame issue for ${name}`);
+  }
+
+  for (const { name, issue } of plan.toRevert) {
+    try {
+      const path = `/contents/domains/${name}.json`;
+      const cur = await api(path);
+      if (!cur.ok) throw new Error(`read ${cur.status}`);
+      const meta = await cur.json();
+      const record = JSON.parse(Buffer.from(meta.content, 'base64').toString('utf8'));
+      if (!record.nameservers?.length) continue;
+      delete record.nameservers;
+      delete record.ds;
+      const put = await api(path, {
+        method: 'PUT',
+        body: JSON.stringify({
+          message: `health: remove lame delegation from ${name} (not answering for ${LAME_GRACE_DAYS}+ days)`,
+          content: Buffer.from(`${JSON.stringify(record, null, 2)}\n`).toString('base64'),
+          sha: meta.sha,
+        }),
+      });
+      if (!put.ok) throw new Error(`write ${put.status}`);
+      await api(`/issues/${issue}/comments`, { method: 'POST', body: JSON.stringify({ body: `Still not answering after ${LAME_GRACE_DAYS} days, so the delegation was removed and \`${name}.runs-at.dev\` is back on runs-at.dev DNS. You can set your nameservers again from /manage once your provider answers for the name.` }) });
+      await api(`/issues/${issue}`, { method: 'PATCH', body: JSON.stringify({ state: 'closed', state_reason: 'completed' }) });
+      reverted.push(name);
+      console.log(`removed lame delegation from ${name}`);
+    } catch (err) {
+      console.error(`health: could not remove delegation from ${name}: ${err.message}`);
+    }
+  }
+
+  for (const { issue, recovered, name } of plan.toClose) {
+    await api(`/issues/${issue}/comments`, { method: 'POST', body: JSON.stringify({ body: recovered ? `\`${name}.runs-at.dev\`'s nameservers are answering again. Closing.` : `\`${name}.runs-at.dev\` is no longer delegated. Closing.` }) }).catch(() => null);
+    await api(`/issues/${issue}`, { method: 'PATCH', body: JSON.stringify({ state: 'closed', state_reason: 'completed' }) }).catch(() => null);
+  }
+  return reverted;
 }
