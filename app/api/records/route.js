@@ -5,6 +5,7 @@ import { getContentsMeta, putRecordUpdate } from '../../../lib/registry.js';
 import { validateName } from '../../../lib/name.js';
 import { normalizeNameserver } from '../../../lib/schema.js';
 import { mayDelegate, checkNameservers } from '../../../lib/delegation.js';
+import { checkDs } from '../../../lib/dnskey.js';
 
 const TOKEN = () => process.env.REGISTRY_TOKEN;
 
@@ -98,7 +99,8 @@ export async function POST(request) {
     if (ds.length === 0) delete head.ds;
     else head.ds = ds;
   }
-  if (head.nameservers && delegating) {
+  const dsChanged = JSON.stringify(head.ds ?? []) !== JSON.stringify(meta.data.ds ?? []);
+  if (head.nameservers && (delegating || dsChanged)) {
     const gate = mayDelegate(session);
     if (!gate.ok) return Response.json({ error: 'delegation_not_allowed', details: [gate.reason] }, { status: 403 });
     // Only an owner may get as far as probing servers on a name's behalf.
@@ -111,6 +113,15 @@ export async function POST(request) {
         details: probe.results.filter((r) => !r.ok).map((r) => `${r.host} ${r.detail}. Add ${name}.runs-at.dev as a zone there first.`),
         results: probe.results,
       }, { status: 400 });
+    }
+    // A DS that matches no key the owner's servers serve would make the name
+    // fail DNSSEC validation everywhere: check it against the real keys.
+    if (head.ds?.length) {
+      const server = probe.results.find((r) => r.ok && r.address)?.address;
+      const ds = server
+        ? await checkDs(`${name}.runs-at.dev`, head.ds, server)
+        : { ok: false, problems: ['could not reach your nameservers to check the DS'] };
+      if (!ds.ok) return Response.json({ error: 'nameservers_not_ready', details: ds.problems }, { status: 400 });
     }
   }
 

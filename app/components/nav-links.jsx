@@ -27,16 +27,21 @@ export default function NavLinks({ links }) {
   // holds every name they may have. Asked once per tab session; signed-out
   // visitors and any failure keep the claim button.
   const [claimed, setClaimed] = useState(false);
+  const [admin, setAdmin] = useState(false);
   useEffect(() => {
+    const apply = (me) => {
+      setClaimed(Boolean(me?.signedIn && me.names?.length && me.slotsFree === 0));
+      // Shown only to the admin account; /admin itself re-checks server-side.
+      setAdmin(Boolean(me?.signedIn && me.admin));
+    };
+    // Cached for one minute per tab: long enough to spare the registry on
+    // every page view, short enough that signing in or out shows promptly.
     let cached = null;
-    try { cached = sessionStorage.getItem("rad-me"); } catch {}
-    const apply = (me) => setClaimed(Boolean(me?.signedIn && me.names?.length && me.slotsFree === 0));
-    if (cached) { try { const me = JSON.parse(cached); if (me?.signedIn) { apply(me); return; } } catch {} }
+    try { cached = JSON.parse(sessionStorage.getItem("rad-me") ?? "null"); } catch {}
+    if (cached && Date.now() - cached.at < 60_000) { apply(cached.me); return; }
     fetch("/api/me", { credentials: "same-origin" })
       .then((r) => (r.ok ? r.json() : null))
-      // Only a signed-in answer is cached: a signed-out one would stick after
-      // the visitor signs in within the same tab.
-      .then((me) => { if (!me) return; apply(me); if (me.signedIn) { try { sessionStorage.setItem("rad-me", JSON.stringify(me)); } catch {} } })
+      .then((me) => { if (!me) return; apply(me); try { sessionStorage.setItem("rad-me", JSON.stringify({ at: Date.now(), me })); } catch {} })
       .catch(() => {});
   }, []);
   const claimHref = claimed ? "/manage" : "/#claim";
@@ -62,6 +67,19 @@ export default function NavLinks({ links }) {
             </a>
           );
         })}
+        {admin && (
+          <a
+            href="/admin"
+            aria-current={isActive(pathname, '/admin') ? 'page' : undefined}
+            className={`border px-2.5 py-1.5 font-(family-name:--font-mono) text-[12px] tracking-[0.08em] uppercase no-underline ${
+              isActive(pathname, '/admin')
+                ? 'border-(--color-ink) bg-(--color-ink) text-(--color-paper)'
+                : 'border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent) hover:text-(--color-paper)'
+            }`}
+          >
+            Admin
+          </a>
+        )}
       </nav>
 
       <div className="flex items-center gap-2 sm:gap-3">
@@ -109,6 +127,14 @@ export default function NavLinks({ links }) {
               </li>
             );
           })}
+          {admin && (
+            <li>
+              <a href="/admin" onClick={close} className="flex items-center justify-between px-4 py-3.5 font-(family-name:--font-mono) text-[13px] tracking-[0.08em] text-(--color-accent) uppercase no-underline hover:bg-(--color-card)">
+                Admin
+                <span aria-hidden="true">→</span>
+              </a>
+            </li>
+          )}
           <li className="p-4">
             <a href={claimHref} onClick={close} className="btn-pill w-full">
               {claimLabel}

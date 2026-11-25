@@ -28,6 +28,11 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
+    # contents: write only to hand a lame delegation back to runs-at.dev DNS
+    # after its grace period (scripts/health-check.mjs, handleLameDelegations).
+    permissions:
+      contents: write
+      issues: write
     outputs:
       drifted: ${{ steps.probe.outputs.drifted }}
     steps:
