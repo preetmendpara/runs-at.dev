@@ -3,6 +3,8 @@ import { validateEdit, isUnchanged } from '../../../lib/edit.js';
 import { createRateLimiter, rateLimitHeaders } from '../../../lib/throttle.js';
 import { getContentsMeta, putRecordUpdate } from '../../../lib/registry.js';
 import { validateName } from '../../../lib/name.js';
+import { normalizeNameserver } from '../../../lib/schema.js';
+import { mayDelegate, checkNameservers } from '../../../lib/delegation.js';
 
 const TOKEN = () => process.env.REGISTRY_TOKEN;
 
@@ -76,6 +78,40 @@ export async function POST(request) {
   if ('profile' in body) {
     if (body.profile === null) delete head.profile;
     else head.profile = body.profile;
+  }
+  // Custom nameservers: null or [] hands the name back to runs-at.dev DNS.
+  // Setting them is gated (lib/delegation.js) and, like everything else,
+  // validated by schema.js through validateEdit below.
+  let delegating = false;
+  if ('nameservers' in body) {
+    const ns = Array.isArray(body.nameservers) ? body.nameservers.map(normalizeNameserver).filter(Boolean) : [];
+    if (ns.length === 0) {
+      delete head.nameservers;
+      delete head.ds;
+    } else {
+      head.nameservers = ns;
+      delegating = JSON.stringify(ns) !== JSON.stringify(meta.data.nameservers ?? []);
+    }
+  }
+  if ('ds' in body && head.nameservers) {
+    const ds = Array.isArray(body.ds) ? body.ds.map((d) => String(d).trim().replace(/\s+/g, ' ')).filter(Boolean) : [];
+    if (ds.length === 0) delete head.ds;
+    else head.ds = ds;
+  }
+  if (head.nameservers && delegating) {
+    const gate = mayDelegate(session);
+    if (!gate.ok) return Response.json({ error: 'delegation_not_allowed', details: [gate.reason] }, { status: 403 });
+    // Only an owner may get as far as probing servers on a name's behalf.
+    const owns = validateEdit({ base: meta.data, head: meta.data, editor: session.login });
+    if (!owns.ok) return Response.json({ error: 'not_owner', details: owns.errors }, { status: 403 });
+    const probe = await checkNameservers(`${name}.runs-at.dev`, head.nameservers);
+    if (!probe.ok) {
+      return Response.json({
+        error: 'nameservers_not_ready',
+        details: probe.results.filter((r) => !r.ok).map((r) => `${r.host} ${r.detail}. Add ${name}.runs-at.dev as a zone there first.`),
+        results: probe.results,
+      }, { status: 400 });
+    }
   }
 
   // Nothing to do. Answering before the ownership check would leak whether a

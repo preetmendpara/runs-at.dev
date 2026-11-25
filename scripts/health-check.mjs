@@ -5,6 +5,7 @@ import {
 } from '../lib/health.js';
 import { planDnsChanges, planZoneVerificationRecords } from '../lib/dns.js';
 import { Resolver } from 'node:dns/promises';
+import { checkNameservers } from '../lib/delegation.js';
 
 const DOMAIN = 'runs-at.dev';
 const TIMEOUT_MS = 10_000;
@@ -77,7 +78,7 @@ const drifted = new Set(
 );
 
 const SEVERITY = {
-  'dns-missing': 0, stuck: 1, 'bad-target': 2, tls: 3, 'no-deployment': 4, 'http-error': 5, down: 6, ok: 7, redirect: 8, card: 9,
+  'dns-missing': 0, stuck: 1, 'bad-target': 2, tls: 3, 'no-deployment': 4, 'http-error': 5, down: 6, ok: 7, redirect: 8, card: 9, delegated: 10,
 };
 const rows = claims
   .map((claim) => ({
@@ -115,6 +116,21 @@ if (stuck.length > 0) {
     ...stuck.map((row) => `- ${row.name}`),
     '',
   );
+}
+
+// Delegated names: their DNS is the owner's, but a delegation to servers that
+// no longer answer leaves the name dark ("lame"). Listed so it can be acted on
+// (the owner told, or the delegation removed); never a nudge issue on its own.
+const delegated = claims.filter((claim) => claim.nameservers?.length);
+const lame = [];
+for (const claim of delegated) {
+  const probe = await checkNameservers(`${claim.name}.${DOMAIN}`, claim.nameservers).catch(() => ({ ok: false, results: [] }));
+  if (!probe.ok) lame.push({ name: claim.name, detail: probe.results.filter((r) => !r.ok).map((r) => `${r.host} ${r.detail}`).join('; ') || 'check failed' });
+}
+if (delegated.length > 0) {
+  lines.push(`## Delegated names: ${delegated.length}, not answering: ${lame.length}`, '');
+  for (const { name, detail } of lame) lines.push(`- ${name}: ${detail}`);
+  lines.push('');
 }
 
 const unpublished = rows.filter((row) => row.status === 'dns-missing');
@@ -199,7 +215,7 @@ console.log(`health: every declared record is live in DNS (${stuck.length} name(
 async function findDnsDrift(allClaims) {
   const expected = [
     ...allClaims.flatMap((claim) =>
-      planDnsChanges(claim).map((change) => ({ ...change, host: `${change.name}.${DOMAIN}` }))),
+      planDnsChanges(claim).filter((change) => change.type !== 'NS' && change.type !== 'DS').map((change) => ({ ...change, host: `${change.name}.${DOMAIN}` }))),
     ...planZoneVerificationRecords(allClaims).map((change) => ({ ...change, host: `${change.name}.${DOMAIN}` })),
   ];
 
