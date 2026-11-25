@@ -96,6 +96,9 @@ export default function ClaimForm({ signedIn }) {
     // A limit_reached rejection carries the name this account already holds,
     // so the message below can point at it instead of dead-ending.
     if (Array.isArray(body.owned) && body.owned.length) setOwnedName(body.owned[0]);
+    // The nav caches whether this account still has a free slot; a claim
+    // changes that, so the next page asks again.
+    if (res.ok) { try { sessionStorage.removeItem('rad-me'); } catch {} }
     setStatus(res.ok ? 'claimed' : body.error);
   }
 

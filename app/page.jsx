@@ -9,9 +9,7 @@ import { geoPlacement } from '../lib/geo-placement.js';
 import { getRegistrySnapshot } from '../lib/registry-cache.js';
 import countryCentroids from '../scripts/country-centroids.json';
 import { readSession, SESSION_COOKIE } from '../lib/session.js';
-import { getOwnerIndex } from '../lib/owners.js';
-import { getEntitlement, heldNames, totalAllowed } from '../lib/entitlements.js';
-import { getRecord } from '../lib/registry.js';
+import { ownedNamesFor } from '../lib/owned-names.js';
 import { REPO_URL } from '../lib/repo.js';
 
 const DESCRIPTION =
@@ -147,22 +145,14 @@ function recordKind(record) {
 // saw before.
 async function ownedName(session) {
   if (!session?.login) return null;
-  const token = process.env.REGISTRY_TOKEN;
-  const [index, entitlement] = await Promise.all([
-    getOwnerIndex(session.login, { token }).catch(() => null),
-    getEntitlement(session.login, { token }).catch(() => null),
-  ]);
-  const name = index?.names?.[0];
-  if (!name) return null;
-  // An owner with a free slot (granted by the maintainer) gets the claim form,
-  // so they can claim another name; the form fails soft to the truth anyway.
-  if (entitlement && heldNames(entitlement, index.names).length < totalAllowed(entitlement)) return null;
-  const record = await getRecord(name, { token }).catch(() => null);
-  // An index entry whose record cannot be read (a stale index after a swap,
-  // or a transient read failure) must not render as "your name is a bare
-  // card": fall back to the claim form, which answers with the truth.
-  if (!record) return null;
-  return { name, record };
+  // Every name the account owns -- claimed, swapped or granted by an admin --
+  // each verified against its own domain file (lib/owned-names.js).
+  const { names, records, slotsFree } = await ownedNamesFor(session.login, { token: process.env.REGISTRY_TOKEN })
+    .catch(() => ({ names: [], records: {}, slotsFree: 1 }));
+  // Nothing owned (or nothing readable), or a free slot left: the claim form,
+  // which fails soft to the truth anyway.
+  if (names.length === 0 || slotsFree > 0) return null;
+  return { names, records };
 }
 
 // Counts, map and recent list all come from the one shared registry snapshot
@@ -256,7 +246,7 @@ export default async function Home() {
           </div>
           <div className="flex justify-center border-2 border-(--line-strong) bg-(--color-card) px-4 py-10 sm:px-8 sm:py-14">
             {owned ? (
-              <OwnedName name={owned.name} record={owned.record} />
+              <OwnedName names={owned.names} records={owned.records} />
             ) : (
               <ClaimForm signedIn={Boolean(session)} />
             )}
