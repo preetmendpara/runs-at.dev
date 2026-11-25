@@ -4,6 +4,7 @@ import { getOwnerIndex } from '../../lib/owners.js';
 import { getRecord } from '../../lib/registry.js';
 import { getEntitlement, heldNames, slotSummary } from '../../lib/entitlements.js';
 import RecordForm from './record-form.jsx';
+import ApiZone from './api-zone.jsx';
 import { resolveManagedNames } from '../../lib/manage-select.js';
 import PageHeader from '../components/page-header.jsx';
 
@@ -99,6 +100,7 @@ export default async function Manage({ searchParams }) {
           {unreadable.map((name) => `domains/${name}.json`).join(', ')}
         </p>
       )}
+      <ApiZone login={session.login} />
       {/* The deploy-token panel (token-zone.jsx) is deliberately not rendered.
           Its endpoints work, but nothing in the request path ever serves an
           uploaded site: app/sites/[name]/page.jsx renders from the record
