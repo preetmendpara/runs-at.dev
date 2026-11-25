@@ -23,6 +23,23 @@ export default function NavLinks({ links }) {
 
   const close = () => setOpen(false);
 
+  // "Claim yours" turns into "Claimed" (linking to /manage) once the visitor
+  // holds every name they may have. Asked once per tab session; signed-out
+  // visitors and any failure keep the claim button.
+  const [claimed, setClaimed] = useState(false);
+  useEffect(() => {
+    let cached = null;
+    try { cached = sessionStorage.getItem("rad-me"); } catch {}
+    const apply = (me) => setClaimed(Boolean(me?.signedIn && me.names?.length && me.slotsFree === 0));
+    if (cached) { try { apply(JSON.parse(cached)); return; } catch {} }
+    fetch("/api/me", { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((me) => { if (!me) return; apply(me); try { sessionStorage.setItem("rad-me", JSON.stringify(me)); } catch {} })
+      .catch(() => {});
+  }, []);
+  const claimHref = claimed ? "/manage" : "/#claim";
+  const claimLabel = claimed ? "Claimed" : "Claim yours";
+
   return (
     <>
       <nav aria-label="Site" className="hidden items-center gap-1 sm:flex">
@@ -59,8 +76,8 @@ export default function NavLinks({ links }) {
         </button>
         {/* Below 360px the row cannot hold all three controls; the claim
             action stays one tap away inside the menu panel. */}
-        <a href="/#claim" className="btn-pill hidden whitespace-nowrap min-[360px]:inline-flex px-2.5 py-1.5 text-[11px] sm:px-4 sm:text-[12px]">
-          Claim yours
+        <a href={claimHref} className="btn-pill hidden whitespace-nowrap min-[360px]:inline-flex px-2.5 py-1.5 text-[11px] sm:px-4 sm:text-[12px]">
+          {claimLabel}
           <span aria-hidden="true" className="hidden sm:inline">↗</span>
         </a>
       </div>
@@ -91,8 +108,8 @@ export default function NavLinks({ links }) {
             );
           })}
           <li className="p-4">
-            <a href="/#claim" onClick={close} className="btn-pill w-full">
-              Claim yours
+            <a href={claimHref} onClick={close} className="btn-pill w-full">
+              {claimLabel}
               <span aria-hidden="true">↗</span>
             </a>
           </li>
