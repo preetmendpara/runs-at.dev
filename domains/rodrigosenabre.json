@@ -1,0 +1,17 @@
+{
+  "name": "rodrigosenabre",
+  "owner": {
+    "github": "rodrigosenabre"
+  },
+  "claimedAt": "2026-11-25T16:23:09Z",
+  "records": {
+    "CNAME": "0f5ae32f89e50206.vercel-dns-016.com"
+  },
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=rodrigosenabre.runs-at.dev,732e7614372387c1082f"
+      ]
+    }
+  }
+}
