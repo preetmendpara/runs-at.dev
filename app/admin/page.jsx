@@ -7,7 +7,7 @@ import AdminDashboard from './admin-dashboard.jsx';
 import PageHeader from '../components/page-header.jsx';
 
 export const metadata = {
-  title: 'Admin · runs-at.dev',
+  title: 'Admin',
   robots: { index: false },
 };
 
