@@ -32,7 +32,10 @@ BindsTo=wg-quick@wg0.service
 ListenStream=10.99.0.1:8081
 FreeBind=yes
 [Install]
-WantedBy=sockets.target
+# Started by (and with) the tunnel: under sockets.target the BindsTo
+# above stopped it whenever wg-quick restarted (an unattended upgrade, a
+# reboot) and nothing started it again, so CI lost the API for days.
+WantedBy=wg-quick@wg0.service
 UNIT
 sudo tee /etc/systemd/system/pdns-api-tunnel.service > /dev/null <<UNIT
 [Unit]
