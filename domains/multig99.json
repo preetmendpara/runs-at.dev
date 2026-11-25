@@ -10,5 +10,12 @@
   "profile": {
     "name": "https://github.com/otoojoshua247-sys/x-x-_-"
   },
-  "country": "DE"
+  "country": "DE",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=multig99.runs-at.dev,88f0ba708591b7a85726"
+      ]
+    }
+  }
 }
