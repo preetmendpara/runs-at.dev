@@ -4,6 +4,15 @@
     "github": "1995set-web"
   },
   "claimedAt": "2026-11-25T23:08:00.558Z",
-  "records": {},
-  "country": "BE"
+  "records": {
+    "CNAME": "8b36cfe1afa26af7.vercel-dns-017.com"
+  },
+  "country": "BE",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=torty-aminy.runs-at.dev,c64349a385ef91daa5c8"
+      ]
+    }
+  }
 }
