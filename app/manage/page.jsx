@@ -4,13 +4,12 @@ import { getOwnerIndex } from '../../lib/owners.js';
 import { getRecord } from '../../lib/registry.js';
 import { getEntitlement, heldNames, slotSummary } from '../../lib/entitlements.js';
 import RecordForm from './record-form.jsx';
-import BadgeZone from './badge-zone.jsx';
 import { resolveManagedNames } from '../../lib/manage-select.js';
 import PageHeader from '../components/page-header.jsx';
 
 export const metadata = {
   title: 'Manage your domains',
-  description: 'Point each of your runs-at.dev domains at your own hosting, or show a profile card.',
+  description: 'Manage DNS records, nameservers and redirects for each of your runs-at.dev names.',
   robots: { index: false },
 };
 
@@ -90,7 +89,6 @@ export default async function Manage({ searchParams }) {
         // name's card, under its form so the preview shows what was edited.
         <div key={current.name}>
           <RecordForm name={current.name} record={current.record} />
-          <BadgeZone name={current.name} />
         </div>
       )}
       {/* A name whose file cannot be read is listed here rather than hiding
@@ -116,39 +114,39 @@ export default async function Manage({ searchParams }) {
 // rides along, so there is no second sign-in.
 function Domains({ names, selected, slots }) {
   return (
-    <section className="border-2 border-(--line-strong) bg-(--color-card)">
-      <p className="surface-ink meta border-b-2 border-(--line-strong) px-4 py-2">Your domains</p>
-      <ul className="font-(family-name:--font-mono) text-sm">
+    <details className="border-2 border-(--line-strong) bg-(--color-card)" open={names.length > 1 && !selected}>
+      <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-3 px-4 py-3 font-(family-name:--font-mono) text-sm">
+        <span className="text-(--color-ink)">
+          {selected ? `${selected}.runs-at.dev` : "Choose a name"}
+          <span className="ml-3 text-xs text-(--color-muted)">{names.length} name{names.length === 1 ? "" : "s"}</span>
+        </span>
+        <span aria-hidden="true" className="text-(--color-muted)">switch ▾</span>
+      </summary>
+      <ul className="border-t-2 border-(--line-strong) font-(family-name:--font-mono) text-sm">
         {names.map((n) => (
-          <li key={n} className={`flex flex-wrap items-baseline gap-x-3 border-b border-(--line) px-4 py-3 last:border-b-0 ${n === selected ? 'bg-(--color-card)' : ''}`}>
-            <span aria-hidden="true" className={n === selected ? 'text-(--color-ink)' : 'text-(--color-muted)'}>
-              {n === selected ? '●' : '○'}
+          <li key={n} className="flex flex-wrap items-baseline justify-between gap-x-3 border-b border-(--line) px-4 py-3 last:border-b-0">
+            <span aria-current={n === selected ? "page" : undefined} className={n === selected ? "text-(--color-ink)" : "text-(--color-muted)"}>
+              {n === selected ? "● " : "○ "}{n}.runs-at.dev
             </span>
-            <span aria-current={n === selected ? "page" : undefined} className={n === selected ? "text-(--color-ink)" : "text-(--color-muted)"}>{n}.runs-at.dev</span>
             {n === selected ? (
               <span className="text-xs text-(--color-muted)">managing</span>
             ) : (
-              <a className="text-xs text-(--color-ink) underline" href={`/manage?name=${encodeURIComponent(n)}`}>
-                Manage
-              </a>
+              <a className="text-xs text-(--color-ink) underline" href={`/manage?name=${encodeURIComponent(n)}`}>Manage</a>
             )}
           </li>
         ))}
       </ul>
       {slots && (
         <p className="border-t-2 border-(--line-strong) px-4 py-3 text-sm text-(--color-muted)">
-          {slots.used} of {slots.total} domain{slots.total === 1 ? '' : 's'} used
+          {slots.used} of {slots.total} used
           {slots.available > 0 ? (
-            <>
-              {' · '}{slots.available} domain{slots.available === 1 ? '' : 's'} available{' · '}
-              <a className="text-(--color-ink) underline" href="/">Claim another domain</a>
-            </>
+            <>{" · "}<a className="text-(--color-ink) underline" href="/">Claim another domain</a></>
           ) : (
-            <>{' · '}You've used all your domain slots.</>
+            <>{" · "}You've used all your domain slots.</>
           )}
         </p>
       )}
-    </section>
+    </details>
   );
 }
 
@@ -156,8 +154,7 @@ function Shell({ children, login }) {
   return (
     <main className="mx-auto max-w-3xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
       <PageHeader label="manage" crumb="Manage" title="Your domains">
-        Changes save straight to the public registry, and DNS follows within a minute
-        or two. The panel under each name tells you whether it is working.
+        Records save to the public registry and go live in DNS within a minute or two.
       </PageHeader>
       {login && (
         <form action="/api/auth/signout" method="post" className="mt-6 font-(family-name:--font-mono) text-[13px] text-(--color-muted)">
