@@ -31,10 +31,12 @@ export default function NavLinks({ links }) {
     let cached = null;
     try { cached = sessionStorage.getItem("rad-me"); } catch {}
     const apply = (me) => setClaimed(Boolean(me?.signedIn && me.names?.length && me.slotsFree === 0));
-    if (cached) { try { apply(JSON.parse(cached)); return; } catch {} }
+    if (cached) { try { const me = JSON.parse(cached); if (me?.signedIn) { apply(me); return; } } catch {} }
     fetch("/api/me", { credentials: "same-origin" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((me) => { if (!me) return; apply(me); try { sessionStorage.setItem("rad-me", JSON.stringify(me)); } catch {} })
+      // Only a signed-in answer is cached: a signed-out one would stick after
+      // the visitor signs in within the same tab.
+      .then((me) => { if (!me) return; apply(me); if (me.signedIn) { try { sessionStorage.setItem("rad-me", JSON.stringify(me)); } catch {} } })
       .catch(() => {});
   }, []);
   const claimHref = claimed ? "/manage" : "/#claim";
