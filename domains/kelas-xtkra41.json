@@ -4,6 +4,15 @@
     "github": "Xiao-Ye153"
   },
   "claimedAt": "2026-11-25T12:11:41.870Z",
-  "records": {},
-  "country": "ID"
+  "records": {
+    "CNAME": "4e6a4de66ebd907c.vercel-dns-017.com"
+  },
+  "country": "ID",
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=kelas-xtkra41.runs-at.dev,b639d39b811c32ff00ac"
+      ]
+    }
+  }
 }
