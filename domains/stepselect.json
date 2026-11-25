@@ -4,6 +4,10 @@
     "github": "sajid-tp"
   },
   "claimedAt": "2026-11-25T15:14:08.711Z",
-  "records": {},
+  "records": {
+    "A": [
+      "16.179.255.89"
+    ]
+  },
   "country": "IN"
 }
