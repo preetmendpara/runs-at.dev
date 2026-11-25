@@ -4,13 +4,16 @@
     "github": "MeYashverma"
   },
   "claimedAt": "2026-11-25T20:54:12.055Z",
-  "records": {
-    "TXT": [
-      "dh=2956627d2f721bcde4961b5e5ae63897219d1543"
-    ]
-  },
+  "records": {},
   "country": "IN",
   "profile": {
     "name": "MeYashverma"
+  },
+  "subdomains": {
+    "_discord": {
+      "TXT": [
+        "dh=2956627d2f721bcde4961b5e5ae63897219d1543"
+      ]
+    }
   }
 }
