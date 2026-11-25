@@ -86,6 +86,11 @@ export default function RecordForm({ name, record }) {
   // itself and every subdomain under it. Seeded from the committed record and
   // folded back by rowsToRecords on save.
   const [dnsRows, setDnsRows] = useState(() => recordsToRows(record));
+  // Nameservers: "default" = runs-at.dev DNS (the records table below);
+  // "custom" = the name is delegated to the owner's own servers.
+  const [nsMode, setNsMode] = useState(() => (record.nameservers?.length ? 'custom' : 'default'));
+  const [nsList, setNsList] = useState(() => padNs(record.nameservers));
+  const [dsText, setDsText] = useState(() => (record.ds ?? []).join('\n'));
 
   function setLinkRow(i, patch) { setLinkRows((rows) => rows.map((r, j) => (j === i ? { ...r, ...patch } : r))); setStatus(null); }
   function removeLink(i) { setLinkRows((rows) => rows.filter((_, j) => j !== i)); setStatus(null); }
@@ -93,10 +98,23 @@ export default function RecordForm({ name, record }) {
   // One payload, whatever the owner touched: every DNS row, the redirect
   // (published as records.URL, served by the app), and the profile card.
   function payload() {
+    const profile = buildProfile({ name: displayName, bio, linkRows }) ?? null;
+    if (nsMode === 'custom') {
+      // A delegated name holds nothing else here: its DNS lives at its servers.
+      return {
+        records: {},
+        subdomains: {},
+        profile,
+        nameservers: nsList.map((h) => h.trim().toLowerCase().replace(/\.$/, '')).filter(Boolean),
+        ds: dsText.split('\n').map((l) => l.trim().replace(/\s+/g, ' ')).filter(Boolean),
+      };
+    }
     const target = url.trim();
     return {
       ...rowsToRecords(dnsRows, { keep: target ? { URL: target } : {} }),
-      profile: buildProfile({ name: displayName, bio, linkRows }) ?? null,
+      profile,
+      nameservers: [],
+      ds: [],
     };
   }
 
@@ -135,6 +153,8 @@ export default function RecordForm({ name, record }) {
     records: record.records ?? {},
     subdomains: record.subdomains ?? {},
     profile: record.profile ?? null,
+    nameservers: record.nameservers ?? [],
+    ds: record.ds ?? [],
   });
   const dirty = pending !== committed;
 
@@ -146,6 +166,9 @@ export default function RecordForm({ name, record }) {
     setDisplayName(record.profile?.name ?? "");
     setBio(record.profile?.bio ?? "");
     setLinkRows(profileToRows(record.profile));
+    setNsMode(record.nameservers?.length ? 'custom' : 'default');
+    setNsList(padNs(record.nameservers));
+    setDsText((record.ds ?? []).join('\n'));
   }
 
   const noRecords = dnsRows.length === 0 && !url.trim();
@@ -156,7 +179,19 @@ export default function RecordForm({ name, record }) {
     <form onSubmit={save} className="slit-frame rounded-lg">
       <NameHeader name={name} site={site} status={statusPill} justSaved={status === "saved"} />
 
-      <div className="px-6 py-6 sm:px-8">
+      <Nameservers
+        name={name}
+        mode={nsMode}
+        setMode={(m) => { setNsMode(m); setStatus(null); setErrors([]); }}
+        list={nsList}
+        setList={(l) => { setNsList(l); setStatus(null); }}
+        dsText={dsText}
+        setDsText={(t) => { setDsText(t); setStatus(null); }}
+        delegatedNow={Boolean(record.nameservers?.length)}
+      />
+
+      {nsMode === 'default' && (<>
+      <div className="slit-top px-6 py-6 sm:px-8">
         <RecordTable
           name={name}
           rows={dnsRows}
@@ -176,6 +211,8 @@ export default function RecordForm({ name, record }) {
           <input value={url} onChange={(e) => { setUrl(e.target.value); setStatus(null); }} placeholder="https://your-site.com" spellCheck={false} className={`mt-3 ${INPUT}`} />
         </label>
       </div>
+
+      </>)}
 
       <details className="slit-top px-6 py-5 sm:px-8">
         <summary className="cursor-pointer text-[14px] text-(--color-ink)">
@@ -227,6 +264,89 @@ export default function RecordForm({ name, record }) {
         <ReleaseZone name={name} />
       </details>
     </form>
+  );
+}
+
+// ── Nameservers ───────────────────────────────────────────
+// The registrar's nameserver box: runs-at.dev DNS (records managed on this
+// page) or the owner's own servers (Cloudflare, Route53, their own), with an
+// optional DS for DNSSEC. Switching to custom hands the whole name over.
+function padNs(list) {
+  const out = [...(list ?? [])];
+  while (out.length < 2) out.push('');
+  return out.slice(0, 4);
+}
+
+function Nameservers({ name, mode, setMode, list, setList, dsText, setDsText, delegatedNow }) {
+  return (
+    <div className="px-6 py-6 sm:px-8">
+      <p className="text-[14px] text-(--color-ink)">Nameservers</p>
+      <div className="mt-3 space-y-2 text-sm">
+        <label className="flex items-start gap-3">
+          <input type="radio" name="ns-mode" checked={mode === 'default'} onChange={() => setMode('default')} className="mt-1" />
+          <span>
+            <span className="text-(--color-ink)">runs-at.dev DNS</span>
+            <span className="block text-xs text-(--color-muted)">Manage records on this page. Includes the profile card and URL redirect.</span>
+          </span>
+        </label>
+        <label className="flex items-start gap-3">
+          <input type="radio" name="ns-mode" checked={mode === 'custom'} onChange={() => setMode('custom')} className="mt-1" />
+          <span>
+            <span className="text-(--color-ink)">Custom nameservers</span>
+            <span className="block text-xs text-(--color-muted)">Run DNS for {name}.runs-at.dev at Cloudflare, Route53, deSEC or your own servers.</span>
+          </span>
+        </label>
+      </div>
+
+      {mode === 'custom' && (
+        <div className="mt-5 space-y-3">
+          <p className="max-w-[560px] text-xs leading-relaxed text-(--color-muted)">
+            First add <span className="font-(family-name:--font-mono) text-(--color-ink)">{name}.runs-at.dev</span> as a zone at your DNS provider and copy the nameservers it gives you. They are checked before saving: each must already answer for this name.
+          </p>
+          {list.map((host, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="w-10 shrink-0 font-(family-name:--font-mono) text-xs text-(--color-muted)">NS{i + 1}</span>
+              <input
+                value={host}
+                onChange={(e) => setList(list.map((h, j) => (j === i ? e.target.value : h)))}
+                placeholder={i === 0 ? 'ns1.your-provider.com' : 'ns2.your-provider.com'}
+                aria-label={`Nameserver ${i + 1}`}
+                spellCheck={false}
+                autoCapitalize="off"
+                className={INPUT}
+              />
+              {list.length > 2 && (
+                <button type="button" onClick={() => setList(list.filter((_, j) => j !== i))} className="font-(family-name:--font-mono) text-xs text-(--color-muted) underline">remove</button>
+              )}
+            </div>
+          ))}
+          {list.length < 4 && (
+            <button type="button" onClick={() => setList([...list, ''])} className="btn-ghost px-3 py-1.5 text-xs">+ Add nameserver</button>
+          )}
+
+          <details className="mt-2">
+            <summary className="cursor-pointer text-xs text-(--color-ink)">DNSSEC (optional)</summary>
+            <p className="mt-2 max-w-[560px] text-xs leading-relaxed text-(--color-muted)">
+              Paste the DS record(s) your provider shows, one per line: key tag, algorithm, digest type, digest. Leave empty if DNSSEC is off there; a wrong DS makes the name unreachable for validating resolvers.
+            </p>
+            <textarea
+              value={dsText}
+              onChange={(e) => setDsText(e.target.value)}
+              rows={2}
+              placeholder="2371 13 2 1F987CC6583E92DF0890718C42…"
+              spellCheck={false}
+              className={`mt-2 ${INPUT} resize-y`}
+            />
+          </details>
+
+          <p className="slit-bar-l rounded-r-lg bg-(--color-card) px-3 py-2.5 pl-5 text-xs leading-relaxed text-(--color-flag)">
+            {delegatedNow
+              ? 'This name is delegated. Records, the profile card and the redirect are managed at your DNS provider.'
+              : 'Saving hands this name to your servers: records here, the profile card and the redirect stop applying.'}
+          </p>
+        </div>
+      )}
+    </div>
   );
 }
 

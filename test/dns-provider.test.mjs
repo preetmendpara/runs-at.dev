@@ -130,7 +130,13 @@ test('records: CAA and SRV validation', () => {
   assert.equal(validateZoneRecord(rec('_sip._tcp.x.runs-at.dev.', 'SRV', '10 5 5060 sip.example.com.')), null);
   assert.match(validateZoneRecord(rec('x.runs-at.dev.', 'SRV', '10 5 5060 sip.example.com.')), /_service\._proto/);
   assert.match(validateZoneRecord(rec('_sip._tcp.x.runs-at.dev.', 'SRV', '10 5 70000 sip.example.com.')), /bad SRV/);
-  assert.match(validateZoneRecord(rec('x.runs-at.dev.', 'NS', 'ns.evil.com.')), /unsupported type NS/);
+  // NS/DS are published only for claims that set `nameservers`, which
+  // schema.js gates; at this layer they must at least be well-formed. The apex
+  // NS stays protected by diff.isProtected.
+  assert.equal(validateZoneRecord(rec('x.runs-at.dev.', 'NS', 'ns1.example.com.')), null);
+  assert.match(validateZoneRecord(rec('x.runs-at.dev.', 'NS', 'not a host')), /bad NS/);
+  assert.match(validateZoneRecord(rec('x.runs-at.dev.', 'DS', '1 13 2 ab')), /bad DS/);
+  assert.match(validateZoneRecord(rec('x.runs-at.dev.', 'PTR', 'a.example.com.')), /unsupported type PTR/);
 });
 
 test('records: CNAME may not share a name, but a repeated identical CNAME is fine', () => {
