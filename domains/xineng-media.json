@@ -4,7 +4,9 @@
     "github": "KiaraHendricks"
   },
   "claimedAt": "2026-11-26T09:16:51.997Z",
-  "records": {},
+  "records": {
+    "CNAME": "xineng-media.runs-at.dev.pages.dnsoe4.com"
+  },
   "country": "SG",
   "subdomains": {
     "edgeonereclaim": {
