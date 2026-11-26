@@ -11,6 +11,9 @@
       "TXT": [
         "reclaim-jrcavtk1vm2tidmls8ehkya2tpasrfhr"
       ]
+    },
+    "_dnsauth": {
+      "CNAME": "xineng-media.runs-at.dev.eoacme0.com"
     }
   }
 }
