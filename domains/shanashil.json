@@ -4,6 +4,8 @@
     "github": "2iq2"
   },
   "claimedAt": "2026-11-26T21:57:10.444Z",
-  "records": {},
+  "records": {
+    "CNAME": "2iq2.github.io"
+  },
   "country": "IQ"
 }
