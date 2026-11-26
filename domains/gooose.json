@@ -7,5 +7,10 @@
   "records": {
     "CNAME": "li-bao.github.io"
   },
-  "country": "TW"
+  "country": "TW",
+  "subdomains": {
+    "ugwo6k4uhzeh": {
+      "CNAME": "gv-rfyxgtbiaw7aa2.dv.googlehosted.com"
+    }
+  }
 }
