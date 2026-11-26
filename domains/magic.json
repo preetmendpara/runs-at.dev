@@ -4,6 +4,8 @@
     "github": "adoniasnascimento93-blip"
   },
   "claimedAt": "2026-11-26T17:29:10.031Z",
-  "records": {},
+  "records": {
+    "CNAME": "adoniasnascimento93-blip.github.io"
+  },
   "country": "BR"
 }
