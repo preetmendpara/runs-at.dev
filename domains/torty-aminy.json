@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "8b36cfe1afa26af7.vercel-dns-017.com"
   },
-  "country": "BE",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=torty-aminy.runs-at.dev,c64349a385ef91daa5c8"
-      ]
-    }
-  }
+  "country": "BE"
 }

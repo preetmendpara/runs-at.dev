@@ -7,12 +7,5 @@
   "records": {
     "CNAME": "0f5ae32f89e50206.vercel-dns-016.com"
   },
-  "country": "AR",
-  "subdomains": {
-    "_vercel": {
-      "TXT": [
-        "vc-domain-verify=rodrigosenabre.runs-at.dev,732e7614372387c1082f"
-      ]
-    }
-  }
+  "country": "AR"
 }
