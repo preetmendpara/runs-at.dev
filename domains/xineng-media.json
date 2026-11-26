@@ -15,7 +15,9 @@
       ]
     },
     "_dnsauth": {
-      "CNAME": "xineng-media.runs-at.dev.eoacme0.com"
+      "TXT": [
+        "20261126104758fnx575m5txnftmxseuyfe0pyjjshlc2"
+      ]
     }
   }
 }
