@@ -4,9 +4,8 @@
     "github": "hausdesigns"
   },
   "claimedAt": "2026-11-27T08:55:10.100Z",
-  "records": {},
-  "country": "US",
-  "profile": {
-    "name": "Jordan"
-  }
+  "records": {
+    "CNAME": "hausdesigns.github.io"
+  },
+  "country": "US"
 }
