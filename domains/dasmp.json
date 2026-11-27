@@ -5,5 +5,10 @@
   },
   "claimedAt": "2026-11-27T09:51:25.851Z",
   "records": {},
-  "country": "LV"
+  "country": "LV",
+  "subdomains": {
+    "assets": {
+      "CNAME": "robertwillsmithxv-glitch.github.io"
+    }
+  }
 }
