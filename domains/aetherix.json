@@ -5,18 +5,18 @@
   },
   "claimedAt": "2026-11-07T08:29:27.596Z",
   "records": {
+    "TXT": [
+      "forward-email=nguyenhoanganh16032000@gmail.com"
+    ],
     "MX": [
       {
         "priority": 0,
         "value": "mx1.forwardemail.net"
       },
       {
-        "priority": 10,
+        "priority": 0,
         "value": "mx2.forwardemail.net"
       }
-    ],
-    "TXT": [
-      "forward-email=nguyenhoanganh16032000@gmail.com"
     ]
   },
   "country": "VN"
