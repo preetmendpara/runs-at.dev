@@ -7,5 +7,20 @@
   "records": {
     "CNAME": "sea-photo-app.github.io"
   },
-  "country": "NL"
+  "country": "NL",
+  "subdomains": {
+    "api": {
+      "CNAME": "custom-domains.chatgpt.site"
+    },
+    "_openai-site-verification.api": {
+      "TXT": [
+        "openai-site-verification=jk657-kzFYsIM7pHnqEAjtNAIV-YLO6xKIu_UfP9-Sw"
+      ]
+    },
+    "_cf-custom-hostname.api": {
+      "TXT": [
+        "d837711a-6515-4606-8e98-7491ade4e950"
+      ]
+    }
+  }
 }
