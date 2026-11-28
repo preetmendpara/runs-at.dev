@@ -7,5 +7,12 @@
   "records": {
     "URL": "https://muse.ai/s/modular-quantum-science-server-kxi6xlwa9xv4xs6/pbWePl4vJjqXT4JvcGDfJVK0efJF6qw3rJsLDDOFDgI"
   },
-  "country": "US"
+  "country": "US",
+  "subdomains": {
+    "modularquantumscienceserver": {
+      "AAAA": [
+        "2606:4700:3037::6815:7eb"
+      ]
+    }
+  }
 }
