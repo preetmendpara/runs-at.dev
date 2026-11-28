@@ -4,7 +4,9 @@
     "github": "amiraliahmed915-hub"
   },
   "claimedAt": "2026-11-28T11:43:05.962Z",
-  "records": {},
+  "records": {
+    "URL": "https://zayya.vercel.app"
+  },
   "country": "ET",
   "subdomains": {
     "_vercel": {
