@@ -13,6 +13,11 @@
       "TXT": [
         "vc-domain-verify=runs-at.dev,00e822b3cec1fab93adc"
       ]
+    },
+    "_google": {
+      "TXT": [
+        "google-site-verification=W5BWL9Mli_eYKpBk3EiwcA5OGdMaz6eNay0XD1urAZg"
+      ]
     }
   }
 }
