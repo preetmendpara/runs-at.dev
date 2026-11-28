@@ -1,0 +1,24 @@
+{
+  "name": "abiysetargew",
+  "owner": {
+    "github": "abiysetargew"
+  },
+  "claimedAt": "2026-11-10T07:08:59.894Z",
+  "records": {},
+  "country": "ET",
+  "profile": {
+    "name": "Abiy Setargew Kenaw",
+    "bio": "Full-stack product engineer and AI application builder.",
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/abiysetargew" },
+      { "label": "Portfolio", "url": "https://abiysetargew.runs-at.dev" }
+    ]
+  },
+  "subdomains": {
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=abiysetargew.runs-at.dev,7cf92c5a09fc1783bb8d"
+      ]
+    }
+  }
+}
