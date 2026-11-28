@@ -1,13 +1,6 @@
 import { sessionFromRequest } from '../../../lib/session.js';
-import { validateEdit, isUnchanged } from '../../../lib/edit.js';
 import { createRateLimiter, rateLimitHeaders } from '../../../lib/throttle.js';
-import { getContentsMeta, putRecordUpdate } from '../../../lib/registry.js';
-import { validateName } from '../../../lib/name.js';
-import { normalizeNameserver } from '../../../lib/schema.js';
-import { mayDelegate, checkNameservers } from '../../../lib/delegation.js';
-import { checkDs } from '../../../lib/dnskey.js';
-
-const TOKEN = () => process.env.REGISTRY_TOKEN;
+import { updateRecord } from '../../../lib/record-update.js';
 
 // Generous enough that editing a record, looking at it, and editing again
 // never trips it; tight enough that a leaned-on button cannot spend the
@@ -16,16 +9,9 @@ const WRITE_WINDOW_MS = 10 * 60 * 1000;
 const WRITE_MAX = 12;
 const takeWrite = createRateLimiter({ windowMs: WRITE_WINDOW_MS, max: WRITE_MAX });
 
-const BUSY_RESPONSE = () =>
-  Response.json({ error: 'busy', retryInMs: 4000 }, { status: 503, headers: { 'Retry-After': '4' } });
-
-// The second write path onto domains/<name>.json, alongside /api/claim and a
-// merged pull request. It commits straight to main for the same reason
-// claiming does: the record file is the registry, and making an owner fork a
-// repo to point their own name is the friction that leaves most claimed names
-// pointing nowhere. The commit is still a public diff in the log, and the
-// rules it must satisfy are the same ones CI applies to a pull request,
-// because both call validateEdit.
+// The browser write path onto domains/<name>.json. It commits straight to
+// main, as claiming does; the rules live in lib/record-update.js, shared with
+// the REST API, and validateEdit there is the same check CI applies to a PR.
 export async function POST(request) {
   const session = sessionFromRequest(request, process.env.SESSION_SECRET);
   if (!session?.login) {
@@ -33,14 +19,8 @@ export async function POST(request) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const name = typeof body.name === 'string' ? body.name.trim().toLowerCase() : '';
-  if (!validateName(name).ok) {
-    return Response.json({ error: 'invalid_name' }, { status: 400 });
-  }
 
-  // Ahead of the registry read, not just the write: both spend REGISTRY_TOKEN
-  // quota, which is the same pool /api/claim draws on. Rationing only the
-  // write would still let a loop starve claiming through reads alone.
+  // Ahead of the registry read: reads spend the same REGISTRY_TOKEN quota.
   const budget = takeWrite(session.login.toLowerCase());
   if (!budget.ok) {
     const seconds = Math.ceil(budget.retryAfterMs / 1000);
@@ -50,117 +30,7 @@ export async function POST(request) {
     );
   }
 
-  let meta;
-  try {
-    meta = await getContentsMeta(`domains/${name}.json`, { token: TOKEN() });
-  } catch {
-    // Fail closed, as /api/claim does: a read that could not run must not be
-    // treated as "no such record" or as permission to write.
-    return BUSY_RESPONSE();
-  }
-  if (!meta) {
-    return Response.json({ error: 'not_found' }, { status: 404 });
-  }
-
-  // Replace only what the request actually sent. A form that does not yet
-  // understand `subdomains` must not silently delete an owner's _atproto
-  // entry just by omitting it from the payload. `profile` follows the same
-  // contract, with `null` as the explicit "remove it" signal, because
-  // omitting the key and emptying the fields are different intents: the
-  // first is an older form, the second is an owner clearing their card.
-  const head = { ...meta.data };
-  if ('records' in body) head.records = body.records;
-  if ('subdomains' in body) {
-    const subs = body.subdomains;
-    const empty = subs === null || (typeof subs === 'object' && Object.keys(subs).length === 0);
-    if (empty) delete head.subdomains;
-    else head.subdomains = subs;
-  }
-  if ('profile' in body) {
-    if (body.profile === null) delete head.profile;
-    else head.profile = body.profile;
-  }
-  // Custom nameservers: null or [] hands the name back to runs-at.dev DNS.
-  // Setting them is gated (lib/delegation.js) and, like everything else,
-  // validated by schema.js through validateEdit below.
-  let delegating = false;
-  if ('nameservers' in body) {
-    const ns = Array.isArray(body.nameservers) ? body.nameservers.map(normalizeNameserver).filter(Boolean) : [];
-    if (ns.length === 0) {
-      delete head.nameservers;
-      delete head.ds;
-    } else {
-      head.nameservers = ns;
-      delegating = JSON.stringify(ns) !== JSON.stringify(meta.data.nameservers ?? []);
-    }
-  }
-  if ('ds' in body && head.nameservers) {
-    const ds = Array.isArray(body.ds) ? body.ds.map((d) => String(d).trim().replace(/\s+/g, ' ')).filter(Boolean) : [];
-    if (ds.length === 0) delete head.ds;
-    else head.ds = ds;
-  }
-  const dsChanged = JSON.stringify(head.ds ?? []) !== JSON.stringify(meta.data.ds ?? []);
-  if (head.nameservers && (delegating || dsChanged)) {
-    const gate = mayDelegate(session);
-    if (!gate.ok) return Response.json({ error: 'delegation_not_allowed', details: [gate.reason] }, { status: 403 });
-    // Only an owner may get as far as probing servers on a name's behalf.
-    const owns = validateEdit({ base: meta.data, head: meta.data, editor: session.login });
-    if (!owns.ok) return Response.json({ error: 'not_owner', details: owns.errors }, { status: 403 });
-    const probe = await checkNameservers(`${name}.runs-at.dev`, head.nameservers);
-    if (!probe.ok) {
-      return Response.json({
-        error: 'nameservers_not_ready',
-        details: probe.results.filter((r) => !r.ok).map((r) => `${r.host} ${r.detail}. Add ${name}.runs-at.dev as a zone there first.`),
-        results: probe.results,
-      }, { status: 400 });
-    }
-    // A DS that matches no key the owner's servers serve would make the name
-    // fail DNSSEC validation everywhere: check it against the real keys.
-    if (head.ds?.length) {
-      const server = probe.results.find((r) => r.ok && r.address)?.address;
-      const ds = server
-        ? await checkDs(`${name}.runs-at.dev`, head.ds, server)
-        : { ok: false, problems: ['could not reach your nameservers to check the DS'] };
-      if (!ds.ok) return Response.json({ error: 'nameservers_not_ready', details: ds.problems }, { status: 400 });
-    }
-  }
-
-  // Nothing to do. Answering before the ownership check would leak whether a
-  // record exists in the shape someone guessed, so this sits after the read
-  // but the ownership check below still runs first for a non-owner: a no-op
-  // submitted against someone else's record is refused, not reported as fine.
-  if (isUnchanged(meta.data, head)) {
-    const owns = validateEdit({ base: meta.data, head, editor: session.login });
-    if (!owns.ok) {
-      return Response.json({ error: 'not_owner', details: owns.errors }, { status: 403 });
-    }
-    return Response.json({ updated: name, unchanged: true, commit: null });
-  }
-
-  const decision = validateEdit({ base: meta.data, head, editor: session.login });
-  if (!decision.ok) {
-    // An ownership refusal is a 403; anything else is the payload's fault.
-    const forbidden = decision.errors.some((e) => e.startsWith('only the owner'));
-    return Response.json(
-      { error: forbidden ? 'not_owner' : 'invalid_record', details: decision.errors },
-      { status: forbidden ? 403 : 400 },
-    );
-  }
-
-  const result = await putRecordUpdate(head, {
-    token: TOKEN(),
-    sha: meta.sha,
-    editor: session.login,
-  });
-
-  if (result.ok) {
-    return Response.json({ updated: name, commit: result.commit ?? null });
-  }
-  if (result.reason === 'stale') {
-    // The record changed under this edit. Re-read and decide again rather
-    // than overwrite whatever landed in between.
-    return Response.json({ error: 'stale' }, { status: 409 });
-  }
-  if (result.reason === 'ratelimited') return BUSY_RESPONSE();
-  return Response.json({ error: 'server_error' }, { status: 500 });
+  const out = await updateRecord({ actor: session, name: body.name, body, token: process.env.REGISTRY_TOKEN });
+  const { record, ...rest } = out.body;
+  return Response.json(rest, { status: out.status, headers: out.headers });
 }
