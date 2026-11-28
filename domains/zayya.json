@@ -4,7 +4,11 @@
     "github": "amiraliahmed915-hub"
   },
   "claimedAt": "2026-11-28T11:43:05.962Z",
-  "records": {},
+  "records": {
+    "A": [
+      "216.198.79.1"
+    ]
+  },
   "country": "ET",
   "subdomains": {
     "www": {
