@@ -5,5 +5,10 @@
   },
   "claimedAt": "2026-11-28T11:43:05.962Z",
   "records": {},
-  "country": "ET"
+  "country": "ET",
+  "subdomains": {
+    "www": {
+      "CNAME": "718f8ebe08ca44e8.vercel-dns-017.com"
+    }
+  }
 }
