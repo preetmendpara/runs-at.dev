@@ -13,6 +13,14 @@
       "AAAA": [
         "2606:4700:3037::6815:7eb"
       ]
+    },
+    "app": {
+      "CNAME": "94285e9d17112fb3.vercel-dns-017.com"
+    },
+    "_vercel": {
+      "TXT": [
+        "vc-domain-verify=app.quantum-server.runs-at.dev,5efe93b1ac9208c7f7b6"
+      ]
     }
   }
 }
